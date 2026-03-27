@@ -1,8 +1,8 @@
-# MyCash 💰
+# MyCash
 
 Plataforma de gestão financeira pessoal com rastreamento automatizado de despesas, metas financeiras e assistente de IA para orientação financeira.
 
-## 🚀 Tecnologias Utilizadas
+## Tecnologias Utilizadas
 
 ### Frontend
 - **React 19** com TypeScript
@@ -21,7 +21,7 @@ Plataforma de gestão financeira pessoal com rastreamento automatizado de despes
 - **Google Generative AI (Gemini)** para o assistente financeiro
 - **ESLint + Prettier** para código limpo
 
-## 📁 Estrutura do Projeto
+## Estrutura do Projeto
 
 ```
 src/
@@ -35,7 +35,7 @@ supabase/
 └── ...
 ```
 
-## 🛠️ Configuração do Ambiente
+## Configuração do Ambiente
 
 1. **Clone o repositório:**
    ```bash
@@ -68,16 +68,16 @@ supabase/
    npm run dev
    ```
 
-## 🏗️ Status do Projeto
+## Status do Projeto
 
-- ✅ Setup inicial completo
-- ✅ Estrutura de pastas organizada
-- ✅ Dependências instaladas
-- ✅ Ambiente Supabase configurado
-- ✅ Edge Functions preparadas
-- 🔄 **Em andamento:** Modelagem do banco de dados e RLS
+- Setup inicial completo
+- Estrutura de pastas organizada
+- Dependências instaladas
+- Ambiente Supabase configurado
+- Edge Functions preparadas
+- **Em andamento:** Modelagem do banco de dados e RLS
 
-## 🎯 Próximos Passos
+## Próximos Passos
 
 - [ ] Modelagem do banco de dados
 - [ ] Configuração de Row Level Security (RLS)
@@ -86,10 +86,10 @@ supabase/
 - [ ] Sistema de metas financeiras
 - [ ] Assistente de IA integrado
 
-## 📝 Contribuição
+## Contribuição
 
 Sinta-se à vontade para abrir issues e pull requests para melhorar o projeto!
 
-## 📄 Licença
+## Licença
 
 Este projeto está sob licença MIT.
