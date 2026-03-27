@@ -1,5 +1,3 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # dependencies
 /node_modules
 /.pnp
@@ -15,18 +13,29 @@
 
 # production
 /build
+dist
+dist-ssr
 
 # misc
 .DS_Store
 *.pem
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
 # debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
 # local env files
+.env
 .env*.local
+*.local
 
 # vercel
 .vercel
@@ -35,6 +44,11 @@ yarn-error.log*
 .claude/
 .swarm/
 .claude-flow/
+
+# editor
+.vscode/*
+!.vscode/extensions.json
+.idea
 
 # typescript
 *.tsbuildinfo
