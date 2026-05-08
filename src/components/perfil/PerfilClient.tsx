@@ -119,9 +119,9 @@ export default function PerfilClient({
   }
 
   const statusColors: Record<string, string> = {
-    Ativo: 'bg-green-500/10 text-green-400 border-green-500/30',
-    Inativo: 'bg-gray-500/10 text-gray-400 border-gray-500/30',
-    Bloqueado: 'bg-red-500/10 text-red-400 border-red-500/30',
+    Ativo: 'bg-emerald-500/[0.08] text-emerald-400 border-emerald-500/30',
+    Inativo: 'bg-surface-3 text-zinc-400 border-edge-2',
+    Bloqueado: 'bg-rose-500/[0.08] text-rose-400 border-rose-500/30',
   }
 
   return (
@@ -129,7 +129,7 @@ export default function PerfilClient({
       {/* Header */}
       <div>
         <h2 className="text-2xl font-bold text-white sm:text-3xl">Meu Perfil</h2>
-        <p className="mt-1 text-sm text-gray-400">
+        <p className="mt-1 text-sm text-zinc-400">
           Gerencie suas informacoes pessoais e configuracoes.
         </p>
       </div>
@@ -138,11 +138,11 @@ export default function PerfilClient({
         {/* Left column: User info + Stats */}
         <div className="space-y-6">
           {/* Profile Card */}
-          <div className="relative overflow-hidden rounded-xl border border-gray-800 bg-gray-900 p-6">
-            <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-green-500 opacity-10 blur-3xl" />
+          <div className="card relative overflow-hidden rounded-2xl p-6">
+            <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-emerald-500 opacity-10 blur-3xl" />
             <div className="relative">
               {/* Avatar */}
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-green-500 to-emerald-600 text-3xl font-bold text-white">
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 text-3xl font-bold text-white ring-2 ring-edge-2">
                 {(usuario?.nome_completo ?? 'U').charAt(0).toUpperCase()}
               </div>
 
@@ -150,7 +150,7 @@ export default function PerfilClient({
                 {usuario?.nome_completo ?? 'Usuario'}
               </h3>
 
-              <div className="mt-2 flex items-center gap-2 text-sm text-gray-400">
+              <div className="mt-2 flex items-center gap-2 text-sm text-zinc-400">
                 <Mail className="h-4 w-4" />
                 {userEmail}
               </div>
@@ -161,7 +161,7 @@ export default function PerfilClient({
                   className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
                     plano === 'Premium'
                       ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
-                      : 'bg-gray-800 text-gray-300 border border-gray-700'
+                      : 'bg-surface-3 text-zinc-300 border border-edge-2'
                   }`}
                 >
                   {plano === 'Premium' ? (
@@ -180,7 +180,7 @@ export default function PerfilClient({
                 </span>
               </div>
 
-              <div className="mt-4 flex items-center gap-2 text-xs text-gray-500">
+              <div className="mt-4 flex items-center gap-2 text-xs text-zinc-500">
                 <Calendar className="h-3.5 w-3.5" />
                 Membro desde {dataCadastro}
               </div>
@@ -188,35 +188,35 @@ export default function PerfilClient({
           </div>
 
           {/* Stats Card */}
-          <div className="rounded-xl border border-gray-800 bg-gray-900 p-6">
-            <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">
+          <div className="card rounded-2xl p-6">
+            <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider">
               Estatisticas
             </h3>
             <div className="mt-4 space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500/10 text-blue-400">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
                     <CreditCard className="h-4 w-4" />
                   </div>
-                  <span className="text-sm text-gray-300">Contas</span>
+                  <span className="text-sm text-zinc-300">Contas</span>
                 </div>
                 <span className="text-lg font-bold text-white">{stats.totalContas}</span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-purple-500/10 text-purple-400">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-500/10 text-purple-400">
                     <ArrowRightLeft className="h-4 w-4" />
                   </div>
-                  <span className="text-sm text-gray-300">Transacoes</span>
+                  <span className="text-sm text-zinc-300">Transacoes</span>
                 </div>
                 <span className="text-lg font-bold text-white">{stats.totalTransacoes}</span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-500/10 text-green-400">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/[0.08] text-emerald-400">
                     <Target className="h-4 w-4" />
                   </div>
-                  <span className="text-sm text-gray-300">Metas</span>
+                  <span className="text-sm text-zinc-300">Metas</span>
                 </div>
                 <span className="text-lg font-bold text-white">{stats.totalMetas}</span>
               </div>
@@ -225,17 +225,17 @@ export default function PerfilClient({
 
           {/* Upgrade CTA (only for Free users) */}
           {plano === 'Free' && (
-            <div className="relative overflow-hidden rounded-xl border border-amber-500/30 bg-gradient-to-br from-amber-500/5 to-amber-600/10 p-6">
+            <div className="relative overflow-hidden rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/5 to-amber-600/10 p-6">
               <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-amber-500 opacity-10 blur-3xl" />
               <div className="relative">
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-5 w-5 text-amber-400" />
                   <h3 className="text-base font-bold text-white">Upgrade para Premium</h3>
                 </div>
-                <p className="mt-2 text-sm text-gray-400">
+                <p className="mt-2 text-sm text-zinc-400">
                   Desbloqueie relatorios avancados, metas ilimitadas e suporte prioritario.
                 </p>
-                <button className="mt-4 w-full rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:from-amber-400 hover:to-amber-500 hover:shadow-lg hover:shadow-amber-500/20">
+                <button className="mt-4 w-full rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:from-amber-400 hover:to-amber-500 hover:shadow-lg hover:shadow-amber-500/20">
                   Conhecer Plano Premium
                 </button>
               </div>
@@ -246,16 +246,16 @@ export default function PerfilClient({
         {/* Right column: Edit forms */}
         <div className="space-y-6 lg:col-span-2">
           {/* Edit Name */}
-          <div className="rounded-xl border border-gray-800 bg-gray-900 p-6">
+          <div className="card rounded-2xl p-6">
             <div className="flex items-center justify-between">
               <h3 className="flex items-center gap-2 text-base font-semibold text-white">
-                <User className="h-4 w-4 text-gray-500" />
+                <User className="h-4 w-4 text-zinc-500" />
                 Informacoes Pessoais
               </h3>
               {!editingName && (
                 <button
                   onClick={() => setEditingName(true)}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-gray-700 bg-gray-800 px-3 py-1.5 text-xs font-medium text-gray-300 transition-colors hover:bg-gray-700 hover:text-white"
+                  className="btn-ghost inline-flex items-center gap-1.5 text-xs"
                 >
                   <Pencil className="h-3.5 w-3.5" />
                   Editar
@@ -267,8 +267,8 @@ export default function PerfilClient({
               <div
                 className={`mt-4 flex items-center gap-2 rounded-lg border px-3 py-2 text-sm ${
                   nameMsg.type === 'success'
-                    ? 'border-green-500/30 bg-green-500/10 text-green-400'
-                    : 'border-red-500/30 bg-red-500/10 text-red-400'
+                    ? 'border-emerald-500/30 bg-emerald-500/[0.08] text-emerald-400'
+                    : 'border-rose-500/30 bg-rose-500/[0.08] text-rose-400'
                 }`}
               >
                 {nameMsg.type === 'success' ? (
@@ -282,7 +282,7 @@ export default function PerfilClient({
 
             <div className="mt-4 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-400">
+                <label className="block text-sm font-medium text-zinc-400">
                   Nome Completo
                 </label>
                 {editingName ? (
@@ -291,12 +291,12 @@ export default function PerfilClient({
                       type="text"
                       value={nome}
                       onChange={(e) => setNome(e.target.value)}
-                      className="flex-1 rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-sm text-white placeholder-gray-500 transition-colors focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                      className="input-field flex-1"
                     />
                     <button
                       onClick={handleSaveName}
                       disabled={savingName}
-                      className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-green-500 disabled:opacity-50"
+                      className="btn-primary inline-flex items-center gap-2 disabled:opacity-50"
                     >
                       {savingName && <Loader2 className="h-4 w-4 animate-spin" />}
                       Salvar
@@ -307,7 +307,7 @@ export default function PerfilClient({
                         setNome(usuario?.nome_completo ?? '')
                         setNameMsg(null)
                       }}
-                      className="rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm font-medium text-gray-300 transition-colors hover:bg-gray-700"
+                      className="btn-ghost"
                     >
                       Cancelar
                     </button>
@@ -320,17 +320,17 @@ export default function PerfilClient({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-400">Email</label>
+                <label className="block text-sm font-medium text-zinc-400">Email</label>
                 <p className="mt-1 text-sm text-white">{userEmail}</p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-400">Plano</label>
+                  <label className="block text-sm font-medium text-zinc-400">Plano</label>
                   <p className="mt-1 text-sm text-white">{plano}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-400">Status</label>
+                  <label className="block text-sm font-medium text-zinc-400">Status</label>
                   <p className="mt-1 text-sm text-white">{statusConta}</p>
                 </div>
               </div>
@@ -338,9 +338,9 @@ export default function PerfilClient({
           </div>
 
           {/* Change Password */}
-          <div className="rounded-xl border border-gray-800 bg-gray-900 p-6">
+          <div className="card rounded-2xl p-6">
             <h3 className="flex items-center gap-2 text-base font-semibold text-white">
-              <Lock className="h-4 w-4 text-gray-500" />
+              <Lock className="h-4 w-4 text-zinc-500" />
               Alterar Senha
             </h3>
 
@@ -348,8 +348,8 @@ export default function PerfilClient({
               <div
                 className={`mt-4 flex items-center gap-2 rounded-lg border px-3 py-2 text-sm ${
                   passwordMsg.type === 'success'
-                    ? 'border-green-500/30 bg-green-500/10 text-green-400'
-                    : 'border-red-500/30 bg-red-500/10 text-red-400'
+                    ? 'border-emerald-500/30 bg-emerald-500/[0.08] text-emerald-400'
+                    : 'border-rose-500/30 bg-rose-500/[0.08] text-rose-400'
                 }`}
               >
                 {passwordMsg.type === 'success' ? (
@@ -363,7 +363,7 @@ export default function PerfilClient({
 
             <form onSubmit={handleChangePassword} className="mt-4 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-400">
+                <label className="block text-sm font-medium text-zinc-400">
                   Senha Atual
                 </label>
                 <input
@@ -371,13 +371,13 @@ export default function PerfilClient({
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
                   placeholder="Digite sua senha atual"
-                  className="mt-1 w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-sm text-white placeholder-gray-500 transition-colors focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                  className="input-field mt-1 w-full"
                 />
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="block text-sm font-medium text-gray-400">
+                  <label className="block text-sm font-medium text-zinc-400">
                     Nova Senha
                   </label>
                   <input
@@ -385,11 +385,11 @@ export default function PerfilClient({
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="Minimo 6 caracteres"
-                    className="mt-1 w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-sm text-white placeholder-gray-500 transition-colors focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                    className="input-field mt-1 w-full"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-400">
+                  <label className="block text-sm font-medium text-zinc-400">
                     Confirmar Nova Senha
                   </label>
                   <input
@@ -397,7 +397,7 @@ export default function PerfilClient({
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Repita a nova senha"
-                    className="mt-1 w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-sm text-white placeholder-gray-500 transition-colors focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                    className="input-field mt-1 w-full"
                   />
                 </div>
               </div>
@@ -406,7 +406,7 @@ export default function PerfilClient({
                 <button
                   type="submit"
                   disabled={savingPassword}
-                  className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-green-500 disabled:opacity-50"
+                  className="btn-primary inline-flex items-center gap-2 disabled:opacity-50"
                 >
                   {savingPassword && <Loader2 className="h-4 w-4 animate-spin" />}
                   Alterar Senha
@@ -416,28 +416,28 @@ export default function PerfilClient({
           </div>
 
           {/* Security Info */}
-          <div className="rounded-xl border border-gray-800 bg-gray-900 p-6">
+          <div className="card rounded-2xl p-6">
             <h3 className="flex items-center gap-2 text-base font-semibold text-white">
-              <Shield className="h-4 w-4 text-gray-500" />
+              <Shield className="h-4 w-4 text-zinc-500" />
               Seguranca
             </h3>
             <div className="mt-4 space-y-3">
-              <div className="flex items-center justify-between rounded-lg border border-gray-800 bg-gray-800/40 px-4 py-3">
+              <div className="flex items-center justify-between rounded-xl border border-edge-1 bg-surface-3 px-4 py-3">
                 <div>
                   <p className="text-sm font-medium text-white">Autenticacao por Email</p>
-                  <p className="text-xs text-gray-500">Login via email e senha</p>
+                  <p className="text-xs text-zinc-500">Login via email e senha</p>
                 </div>
-                <span className="inline-flex items-center gap-1 rounded-full bg-green-500/10 px-2.5 py-1 text-xs font-medium text-green-400">
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/[0.08] px-2.5 py-1 text-xs font-medium text-emerald-400">
                   <CheckCircle className="h-3 w-3" />
                   Ativo
                 </span>
               </div>
-              <div className="flex items-center justify-between rounded-lg border border-gray-800 bg-gray-800/40 px-4 py-3">
+              <div className="flex items-center justify-between rounded-xl border border-edge-1 bg-surface-3 px-4 py-3">
                 <div>
                   <p className="text-sm font-medium text-white">Verificacao em 2 Etapas</p>
-                  <p className="text-xs text-gray-500">Camada extra de seguranca</p>
+                  <p className="text-xs text-zinc-500">Camada extra de seguranca</p>
                 </div>
-                <span className="inline-flex items-center rounded-full bg-gray-700 px-2.5 py-1 text-xs font-medium text-gray-400">
+                <span className="inline-flex items-center rounded-full bg-surface-4 px-2.5 py-1 text-xs font-medium text-zinc-400">
                   Em breve
                 </span>
               </div>

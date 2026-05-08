@@ -238,11 +238,11 @@ export default function TransacoesClient({ initialTransacoes, contas }: Props) {
   return (
     <>
       {/* Filter Bar */}
-      <div className="rounded-xl border border-gray-800 bg-gray-900 p-4">
+      <div className="card rounded-2xl p-4">
         <div className="flex flex-wrap items-center gap-3">
           {/* Search */}
           <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
             <input
               type="text"
               placeholder="Buscar por descricao..."
@@ -251,7 +251,7 @@ export default function TransacoesClient({ initialTransacoes, contas }: Props) {
                 setSearchQuery(e.target.value)
                 setCurrentPage(1)
               }}
-              className="w-full rounded-lg border border-gray-700 bg-gray-800 py-2 pl-10 pr-3 text-sm text-gray-100 placeholder-gray-500 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+              className="w-full rounded-lg border border-edge-2 bg-surface-3 py-2 pl-10 pr-3 text-sm text-zinc-100 placeholder-zinc-500 focus:border-emerald-500/20 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
             />
           </div>
 
@@ -262,7 +262,7 @@ export default function TransacoesClient({ initialTransacoes, contas }: Props) {
               setFilterTipo(e.target.value as 'All' | TipoTransacao)
               setCurrentPage(1)
             }}
-            className="rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-gray-100 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+            className="rounded-lg border border-edge-2 bg-surface-3 px-3 py-2 text-sm text-zinc-100 focus:border-emerald-500/20 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
           >
             <option value="All">Todos os Tipos</option>
             <option value="Entrada">Entrada</option>
@@ -276,7 +276,7 @@ export default function TransacoesClient({ initialTransacoes, contas }: Props) {
               setFilterCategoria(e.target.value)
               setCurrentPage(1)
             }}
-            className="rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-gray-100 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+            className="rounded-lg border border-edge-2 bg-surface-3 px-3 py-2 text-sm text-zinc-100 focus:border-emerald-500/20 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
           >
             <option value="All">Todas as Categorias</option>
             {allCategories.map((cat) => (
@@ -294,9 +294,9 @@ export default function TransacoesClient({ initialTransacoes, contas }: Props) {
               setFilterDateFrom(e.target.value)
               setCurrentPage(1)
             }}
-            className="rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-gray-100 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+            className="rounded-lg border border-edge-2 bg-surface-3 px-3 py-2 text-sm text-zinc-100 focus:border-emerald-500/20 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
           />
-          <span className="text-gray-500 text-sm">ate</span>
+          <span className="text-zinc-500 text-sm">ate</span>
           <input
             type="date"
             value={filterDateTo}
@@ -304,13 +304,13 @@ export default function TransacoesClient({ initialTransacoes, contas }: Props) {
               setFilterDateTo(e.target.value)
               setCurrentPage(1)
             }}
-            className="rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-gray-100 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+            className="rounded-lg border border-edge-2 bg-surface-3 px-3 py-2 text-sm text-zinc-100 focus:border-emerald-500/20 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
           />
 
           {hasActiveFilters && (
             <button
               onClick={resetFilters}
-              className="flex items-center gap-1.5 rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-gray-400 hover:text-white hover:border-gray-600 transition-colors"
+              className="flex items-center gap-1.5 rounded-lg border border-edge-2 bg-surface-3 px-3 py-2 text-sm text-zinc-400 hover:text-white hover:border-edge-3 transition-colors"
             >
               <Filter className="h-3.5 w-3.5" />
               Limpar
@@ -320,7 +320,7 @@ export default function TransacoesClient({ initialTransacoes, contas }: Props) {
           {/* New transaction button */}
           <button
             onClick={handleOpenCreate}
-            className="ml-auto flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-500 transition-colors"
+            className="btn-primary ml-auto flex items-center gap-2"
           >
             <Plus className="h-4 w-4" />
             Nova Transacao
@@ -329,17 +329,17 @@ export default function TransacoesClient({ initialTransacoes, contas }: Props) {
       </div>
 
       {/* Table */}
-      <div className="rounded-xl border border-gray-800 bg-gray-900 overflow-hidden">
+      <div className="card rounded-2xl overflow-hidden">
         {filteredData.length === 0 ? (
           /* Empty state */
           <div className="flex flex-col items-center justify-center py-16 px-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-800 mb-4">
-              <Inbox className="h-8 w-8 text-gray-600" />
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-surface-3 mb-4">
+              <Inbox className="h-8 w-8 text-zinc-600" />
             </div>
-            <p className="text-lg font-medium text-gray-300">
+            <p className="text-lg font-medium text-zinc-300">
               Nenhuma transacao encontrada
             </p>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-zinc-500">
               {hasActiveFilters
                 ? 'Tente ajustar os filtros ou limpar a busca.'
                 : 'Clique em "Nova Transacao" para adicionar a primeira.'}
@@ -347,7 +347,7 @@ export default function TransacoesClient({ initialTransacoes, contas }: Props) {
             {!hasActiveFilters && (
               <button
                 onClick={handleOpenCreate}
-                className="mt-4 flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-500 transition-colors"
+                className="btn-primary mt-4 flex items-center gap-2"
               >
                 <Plus className="h-4 w-4" />
                 Nova Transacao
@@ -360,8 +360,8 @@ export default function TransacoesClient({ initialTransacoes, contas }: Props) {
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-800 text-left">
-                    <th className="px-4 py-3 font-medium text-gray-400">
+                  <tr className="border-b border-edge-1 text-left">
+                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wider text-zinc-500">
                       <button
                         onClick={() => toggleSort('data_transacao')}
                         className="flex items-center gap-1 hover:text-white transition-colors"
@@ -370,10 +370,10 @@ export default function TransacoesClient({ initialTransacoes, contas }: Props) {
                         <ArrowUpDown className="h-3.5 w-3.5" />
                       </button>
                     </th>
-                    <th className="px-4 py-3 font-medium text-gray-400">Tipo</th>
-                    <th className="px-4 py-3 font-medium text-gray-400">Categoria</th>
-                    <th className="px-4 py-3 font-medium text-gray-400">Descricao</th>
-                    <th className="px-4 py-3 font-medium text-gray-400">
+                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wider text-zinc-500">Tipo</th>
+                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wider text-zinc-500">Categoria</th>
+                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wider text-zinc-500">Descricao</th>
+                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wider text-zinc-500">
                       <button
                         onClick={() => toggleSort('valor')}
                         className="flex items-center gap-1 hover:text-white transition-colors"
@@ -382,25 +382,25 @@ export default function TransacoesClient({ initialTransacoes, contas }: Props) {
                         <ArrowUpDown className="h-3.5 w-3.5" />
                       </button>
                     </th>
-                    <th className="px-4 py-3 font-medium text-gray-400">Conta</th>
-                    <th className="px-4 py-3 font-medium text-gray-400 text-right">Acoes</th>
+                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wider text-zinc-500">Conta</th>
+                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wider text-zinc-500 text-right">Acoes</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-800">
+                <tbody className="divide-y divide-edge-1">
                   {paginatedData.map((t) => (
                     <tr
                       key={t.id_transacao}
-                      className="hover:bg-gray-800/50 transition-colors"
+                      className="hover:bg-white/[0.02] transition-colors"
                     >
-                      <td className="px-4 py-3 text-gray-300 whitespace-nowrap">
+                      <td className="px-4 py-3 text-zinc-300 whitespace-nowrap">
                         {formatDate(t.data_transacao)}
                       </td>
                       <td className="px-4 py-3">
                         <span
                           className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${
                             t.tipo === 'Entrada'
-                              ? 'bg-green-500/10 text-green-400'
-                              : 'bg-red-500/10 text-red-400'
+                              ? 'bg-emerald-500/[0.08] text-emerald-400'
+                              : 'bg-rose-500/[0.08] text-rose-400'
                           }`}
                         >
                           {t.tipo === 'Entrada' ? (
@@ -411,33 +411,33 @@ export default function TransacoesClient({ initialTransacoes, contas }: Props) {
                           {t.tipo === 'Entrada' ? 'Entrada' : 'Saida'}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-gray-300">{t.categoria}</td>
-                      <td className="px-4 py-3 text-gray-100 max-w-[200px] truncate">
+                      <td className="px-4 py-3 text-zinc-300">{t.categoria}</td>
+                      <td className="px-4 py-3 text-zinc-100 max-w-[200px] truncate">
                         {t.descricao}
                       </td>
                       <td
-                        className={`px-4 py-3 font-semibold whitespace-nowrap ${
-                          t.tipo === 'Entrada' ? 'text-green-400' : 'text-red-400'
+                        className={`px-4 py-3 font-semibold font-mono-nums whitespace-nowrap ${
+                          t.tipo === 'Entrada' ? 'text-emerald-400' : 'text-rose-400'
                         }`}
                       >
                         {t.tipo === 'Entrada' ? '+' : '-'}
                         {formatCurrency(Math.abs(t.valor))}
                       </td>
-                      <td className="px-4 py-3 text-gray-400 text-xs">
+                      <td className="px-4 py-3 text-zinc-400 text-xs">
                         {contaLabelMap[t.id_conta] ?? '-'}
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-1">
                           <button
                             onClick={() => handleOpenEdit(t)}
-                            className="rounded-lg p-1.5 text-gray-500 hover:text-blue-400 hover:bg-gray-800 transition-colors"
+                            className="rounded-lg p-1.5 text-zinc-500 hover:text-blue-400 hover:bg-white/[0.04] transition-colors"
                             title="Editar"
                           >
                             <Pencil className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => setDeletingTransacao(t)}
-                            className="rounded-lg p-1.5 text-gray-500 hover:text-red-400 hover:bg-gray-800 transition-colors"
+                            className="rounded-lg p-1.5 text-zinc-500 hover:text-rose-400 hover:bg-white/[0.04] transition-colors"
                             title="Excluir"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -451,15 +451,15 @@ export default function TransacoesClient({ initialTransacoes, contas }: Props) {
             </div>
 
             {/* Mobile cards */}
-            <div className="md:hidden divide-y divide-gray-800">
+            <div className="md:hidden divide-y divide-edge-1">
               {paginatedData.map((t) => (
                 <div key={t.id_transacao} className="p-4 space-y-2">
                   <div className="flex items-center justify-between">
                     <span
                       className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${
                         t.tipo === 'Entrada'
-                          ? 'bg-green-500/10 text-green-400'
-                          : 'bg-red-500/10 text-red-400'
+                          ? 'bg-emerald-500/[0.08] text-emerald-400'
+                          : 'bg-rose-500/[0.08] text-rose-400'
                       }`}
                     >
                       {t.tipo === 'Entrada' ? (
@@ -470,29 +470,29 @@ export default function TransacoesClient({ initialTransacoes, contas }: Props) {
                       {t.tipo === 'Entrada' ? 'Entrada' : 'Saida'}
                     </span>
                     <span
-                      className={`font-semibold ${
-                        t.tipo === 'Entrada' ? 'text-green-400' : 'text-red-400'
+                      className={`font-semibold font-mono-nums ${
+                        t.tipo === 'Entrada' ? 'text-emerald-400' : 'text-rose-400'
                       }`}
                     >
                       {t.tipo === 'Entrada' ? '+' : '-'}
                       {formatCurrency(Math.abs(t.valor))}
                     </span>
                   </div>
-                  <p className="text-sm font-medium text-gray-100">{t.descricao}</p>
-                  <div className="flex items-center justify-between text-xs text-gray-500">
+                  <p className="text-sm font-medium text-zinc-100">{t.descricao}</p>
+                  <div className="flex items-center justify-between text-xs text-zinc-500">
                     <span>
                       {t.categoria} &middot; {formatDate(t.data_transacao)}
                     </span>
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => handleOpenEdit(t)}
-                        className="rounded-lg p-1.5 text-gray-500 hover:text-blue-400 transition-colors"
+                        className="rounded-lg p-1.5 text-zinc-500 hover:text-blue-400 transition-colors"
                       >
                         <Pencil className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() => setDeletingTransacao(t)}
-                        className="rounded-lg p-1.5 text-gray-500 hover:text-red-400 transition-colors"
+                        className="rounded-lg p-1.5 text-zinc-500 hover:text-rose-400 transition-colors"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -503,8 +503,8 @@ export default function TransacoesClient({ initialTransacoes, contas }: Props) {
             </div>
 
             {/* Pagination */}
-            <div className="flex items-center justify-between border-t border-gray-800 px-4 py-3">
-              <p className="text-xs text-gray-500">
+            <div className="flex items-center justify-between border-t border-edge-1 px-4 py-3">
+              <p className="text-xs text-zinc-500">
                 Mostrando {(safeCurrentPage - 1) * ITEMS_PER_PAGE + 1} a{' '}
                 {Math.min(safeCurrentPage * ITEMS_PER_PAGE, filteredData.length)} de{' '}
                 {filteredData.length} transacoes
@@ -513,7 +513,7 @@ export default function TransacoesClient({ initialTransacoes, contas }: Props) {
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={safeCurrentPage === 1}
-                  className="rounded-lg p-1.5 text-gray-500 hover:text-white hover:bg-gray-800 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="rounded-lg p-1.5 text-zinc-500 hover:text-white hover:bg-white/[0.04] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
@@ -527,14 +527,14 @@ export default function TransacoesClient({ initialTransacoes, contas }: Props) {
                   .map((page, idx, arr) => (
                     <span key={page}>
                       {idx > 0 && arr[idx - 1] !== page - 1 && (
-                        <span className="px-1 text-gray-600">...</span>
+                        <span className="px-1 text-zinc-600">...</span>
                       )}
                       <button
                         onClick={() => setCurrentPage(page)}
                         className={`min-w-[32px] rounded-lg px-2 py-1 text-sm transition-colors ${
                           page === safeCurrentPage
-                            ? 'bg-green-600 text-white'
-                            : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                            ? 'bg-emerald-500 text-white'
+                            : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
                         }`}
                       >
                         {page}
@@ -544,7 +544,7 @@ export default function TransacoesClient({ initialTransacoes, contas }: Props) {
                 <button
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={safeCurrentPage === totalPages}
-                  className="rounded-lg p-1.5 text-gray-500 hover:text-white hover:bg-gray-800 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="rounded-lg p-1.5 text-zinc-500 hover:text-white hover:bg-white/[0.04] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </button>

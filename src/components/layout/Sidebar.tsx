@@ -12,18 +12,17 @@ import {
   BellRing,
   User,
   LogOut,
-  DollarSign,
   X,
   Menu,
 } from 'lucide-react'
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/transacoes', label: 'Transações', icon: ArrowLeftRight },
+  { href: '/transacoes', label: 'Transacoes', icon: ArrowLeftRight },
   { href: '/contas', label: 'Contas', icon: Wallet },
   { href: '/metas', label: 'Metas', icon: Target },
   { href: '/lembretes', label: 'Lembretes', icon: Bell },
-  { href: '/notificacoes', label: 'Notificações', icon: BellRing },
+  { href: '/notificacoes', label: 'Notificacoes', icon: BellRing },
   { href: '/perfil', label: 'Perfil', icon: User },
 ]
 
@@ -41,19 +40,17 @@ export default function Sidebar({ onLogout }: SidebarProps) {
   }
 
   const sidebarContent = (
-    <div className="flex h-full flex-col bg-gray-900 border-r border-gray-800">
+    <div className="flex h-full flex-col bg-surface-1">
       {/* Logo */}
-      <div className="flex h-16 items-center gap-2.5 px-6 border-b border-gray-800">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-500/10">
-          <DollarSign className="h-5 w-5 text-green-500" />
-        </div>
-        <span className="text-xl font-bold text-white tracking-tight">
-          MyCash
+      <div className="flex h-14 items-center gap-2.5 px-5 border-b border-edge-1">
+        <span className="text-lg font-bold tracking-tight">
+          <span className="text-white">My</span>
+          <span className="bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">Cash</span>
         </span>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto">
+      <nav className="flex-1 space-y-0.5 px-3 py-3 overflow-y-auto">
         {navItems.map((item) => {
           const Icon = item.icon
           const active = isActive(item.href)
@@ -63,19 +60,17 @@ export default function Sidebar({ onLogout }: SidebarProps) {
               href={item.href}
               onClick={() => setMobileOpen(false)}
               className={`
-                group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150
-                ${
-                  active
-                    ? 'bg-green-500/10 text-green-500'
-                    : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                group relative flex items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-medium transition-all duration-150
+                ${active
+                  ? 'bg-white/[0.06] text-white'
+                  : 'text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-300'
                 }
               `}
             >
-              <Icon
-                className={`h-5 w-5 flex-shrink-0 transition-colors ${
-                  active ? 'text-green-500' : 'text-gray-500 group-hover:text-gray-300'
-                }`}
-              />
+              {active && (
+                <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[2px] rounded-full bg-emerald-500" />
+              )}
+              <Icon className={`h-[18px] w-[18px] flex-shrink-0 stroke-[1.5] ${active ? 'text-emerald-400' : ''}`} />
               {item.label}
             </Link>
           )
@@ -83,12 +78,12 @@ export default function Sidebar({ onLogout }: SidebarProps) {
       </nav>
 
       {/* Logout */}
-      <div className="border-t border-gray-800 p-3">
+      <div className="border-t border-edge-1 p-3">
         <button
           onClick={onLogout}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-400 transition-all duration-150 hover:bg-gray-800 hover:text-red-400"
+          className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-medium text-zinc-500 transition-all duration-150 hover:bg-white/[0.04] hover:text-zinc-300"
         >
-          <LogOut className="h-5 w-5 flex-shrink-0" />
+          <LogOut className="h-[18px] w-[18px] flex-shrink-0 stroke-[1.5]" />
           Sair
         </button>
       </div>
@@ -100,7 +95,7 @@ export default function Sidebar({ onLogout }: SidebarProps) {
       {/* Mobile toggle */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="fixed left-4 top-4 z-40 rounded-lg bg-gray-900 p-2 text-gray-400 shadow-lg lg:hidden hover:text-white border border-gray-800"
+        className="fixed left-4 top-4 z-40 rounded-xl bg-surface-2 p-2 text-zinc-400 lg:hidden hover:text-white border border-edge-2"
         aria-label="Abrir menu"
       >
         <Menu className="h-5 w-5" />
@@ -109,7 +104,7 @@ export default function Sidebar({ onLogout }: SidebarProps) {
       {/* Mobile overlay */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden animate-fade-in"
           onClick={() => setMobileOpen(false)}
         />
       )}
@@ -117,22 +112,22 @@ export default function Sidebar({ onLogout }: SidebarProps) {
       {/* Mobile drawer */}
       <aside
         className={`
-          fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out lg:hidden
+          fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-out lg:hidden
           ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
       >
         <button
           onClick={() => setMobileOpen(false)}
-          className="absolute right-3 top-4 rounded-lg p-1.5 text-gray-400 hover:text-white"
+          className="absolute right-3 top-3.5 rounded-lg p-1.5 text-zinc-500 hover:text-white"
           aria-label="Fechar menu"
         >
-          <X className="h-5 w-5" />
+          <X className="h-4 w-4" />
         </button>
         {sidebarContent}
       </aside>
 
       {/* Desktop sidebar */}
-      <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 lg:block lg:w-64">
+      <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 lg:block lg:w-60 lg:border-r lg:border-edge-1">
         {sidebarContent}
       </aside>
     </>

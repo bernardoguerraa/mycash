@@ -164,17 +164,17 @@ export default function TransacaoModal({ contas, transacao, onClose, onSaved }: 
     <div
       ref={overlayRef}
       onClick={handleOverlayClick}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4"
     >
-      <div className="w-full max-w-lg rounded-xl border border-gray-800 bg-gray-900 shadow-2xl">
+      <div className="card animate-scale-in w-full max-w-lg rounded-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-800 px-6 py-4">
+        <div className="flex items-center justify-between border-b border-edge-1 px-6 py-4">
           <h3 className="text-lg font-semibold text-white">
             {isEditing ? 'Editar Transacao' : 'Nova Transacao'}
           </h3>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-gray-500 hover:text-white hover:bg-gray-800 transition-colors"
+            className="rounded-lg p-1.5 text-zinc-500 hover:text-white hover:bg-white/[0.04] transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
@@ -183,20 +183,20 @@ export default function TransacaoModal({ contas, transacao, onClose, onSaved }: 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4 px-6 py-5">
           {errors.form && (
-            <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm text-red-400">
+            <div className="rounded-lg border border-rose-500/30 bg-rose-500/[0.08] px-4 py-2 text-sm text-rose-400">
               {errors.form}
             </div>
           )}
 
           {/* Conta */}
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-gray-300">
+            <label className="mb-1.5 block text-sm font-medium text-zinc-300">
               Conta
             </label>
             <select
               value={idConta}
               onChange={(e) => setIdConta(Number(e.target.value))}
-              className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-gray-100 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+              className="input-field w-full"
             >
               {contas.map((c) => (
                 <option key={c.id_conta} value={c.id_conta}>
@@ -205,13 +205,13 @@ export default function TransacaoModal({ contas, transacao, onClose, onSaved }: 
               ))}
             </select>
             {errors.conta && (
-              <p className="mt-1 text-xs text-red-400">{errors.conta}</p>
+              <p className="mt-1 text-xs text-rose-400">{errors.conta}</p>
             )}
           </div>
 
           {/* Tipo */}
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-gray-300">
+            <label className="mb-1.5 block text-sm font-medium text-zinc-300">
               Tipo
             </label>
             <div className="flex gap-3">
@@ -221,9 +221,9 @@ export default function TransacaoModal({ contas, transacao, onClose, onSaved }: 
                   className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors ${
                     tipo === t
                       ? t === 'Entrada'
-                        ? 'border-green-500 bg-green-500/10 text-green-400'
-                        : 'border-red-500 bg-red-500/10 text-red-400'
-                      : 'border-gray-700 bg-gray-800 text-gray-400 hover:border-gray-600'
+                        ? 'border-emerald-500 bg-emerald-500/[0.08] text-emerald-400'
+                        : 'border-rose-500 bg-rose-500/[0.08] text-rose-400'
+                      : 'border-edge-2 bg-surface-3 text-zinc-400 hover:border-edge-3'
                   }`}
                 >
                   <input
@@ -242,7 +242,7 @@ export default function TransacaoModal({ contas, transacao, onClose, onSaved }: 
 
           {/* Categoria */}
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-gray-300">
+            <label className="mb-1.5 block text-sm font-medium text-zinc-300">
               Categoria
             </label>
             <select
@@ -255,7 +255,7 @@ export default function TransacaoModal({ contas, transacao, onClose, onSaved }: 
                   setCategoria(e.target.value)
                 }
               }}
-              className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-gray-100 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+              className="input-field w-full"
             >
               {CATEGORIAS.map((cat) => (
                 <option key={cat} value={cat}>
@@ -270,17 +270,17 @@ export default function TransacaoModal({ contas, transacao, onClose, onSaved }: 
                 value={customCategoria}
                 onChange={(e) => setCustomCategoria(e.target.value)}
                 placeholder="Nome da categoria"
-                className="mt-2 w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                className="input-field mt-2 w-full"
               />
             )}
             {errors.categoria && (
-              <p className="mt-1 text-xs text-red-400">{errors.categoria}</p>
+              <p className="mt-1 text-xs text-rose-400">{errors.categoria}</p>
             )}
           </div>
 
           {/* Descricao */}
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-gray-300">
+            <label className="mb-1.5 block text-sm font-medium text-zinc-300">
               Descricao
             </label>
             <input
@@ -288,17 +288,17 @@ export default function TransacaoModal({ contas, transacao, onClose, onSaved }: 
               value={descricao}
               onChange={(e) => setDescricao(e.target.value)}
               placeholder="Ex: Supermercado, Salario mensal..."
-              className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+              className="input-field w-full"
             />
             {errors.descricao && (
-              <p className="mt-1 text-xs text-red-400">{errors.descricao}</p>
+              <p className="mt-1 text-xs text-rose-400">{errors.descricao}</p>
             )}
           </div>
 
           {/* Valor + Data row */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-300">
+              <label className="mb-1.5 block text-sm font-medium text-zinc-300">
                 Valor (R$)
               </label>
               <input
@@ -311,24 +311,24 @@ export default function TransacaoModal({ contas, transacao, onClose, onSaved }: 
                   setValorStr(v)
                 }}
                 placeholder="0,00"
-                className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                className="input-field w-full font-mono-nums"
               />
               {errors.valor && (
-                <p className="mt-1 text-xs text-red-400">{errors.valor}</p>
+                <p className="mt-1 text-xs text-rose-400">{errors.valor}</p>
               )}
             </div>
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-300">
+              <label className="mb-1.5 block text-sm font-medium text-zinc-300">
                 Data
               </label>
               <input
                 type="date"
                 value={dataTransacao}
                 onChange={(e) => setDataTransacao(e.target.value)}
-                className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-gray-100 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                className="input-field w-full"
               />
               {errors.data && (
-                <p className="mt-1 text-xs text-red-400">{errors.data}</p>
+                <p className="mt-1 text-xs text-rose-400">{errors.data}</p>
               )}
             </div>
           </div>
@@ -338,14 +338,14 @@ export default function TransacaoModal({ contas, transacao, onClose, onSaved }: 
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-sm font-medium text-gray-300 hover:text-white hover:border-gray-600 transition-colors"
+              className="btn-ghost"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {submitting
                 ? 'Salvando...'

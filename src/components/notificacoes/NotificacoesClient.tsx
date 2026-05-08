@@ -32,8 +32,8 @@ const tipoIcons: Record<TipoNotificacao, React.ReactNode> = {
 const tipoColors: Record<TipoNotificacao, string> = {
   Sistema: 'bg-blue-500/10 text-blue-400',
   Meta: 'bg-purple-500/10 text-purple-400',
-  Lembrete: 'bg-yellow-500/10 text-yellow-400',
-  Alerta: 'bg-red-500/10 text-red-400',
+  Lembrete: 'bg-amber-500/[0.08] text-amber-400',
+  Alerta: 'bg-rose-500/[0.08] text-rose-400',
 }
 
 function formatTimeAgo(dateStr: string): string {
@@ -111,10 +111,10 @@ export default function NotificacoesClient({
           <h2 className="text-2xl font-bold text-white sm:text-3xl">
             Notificacoes
           </h2>
-          <p className="mt-1 text-sm text-gray-400">
+          <p className="mt-1 text-sm text-zinc-400">
             Acompanhe seus alertas e atualizacoes.
             {unreadCount > 0 && (
-              <span className="ml-2 inline-flex items-center rounded-full bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-400">
+              <span className="ml-2 inline-flex items-center rounded-full bg-emerald-500/[0.08] px-2 py-0.5 text-xs font-medium text-emerald-400">
                 {unreadCount} nao {unreadCount === 1 ? 'lida' : 'lidas'}
               </span>
             )}
@@ -124,7 +124,7 @@ export default function NotificacoesClient({
           <button
             onClick={handleMarkAllAsRead}
             disabled={markingAll}
-            className="inline-flex items-center gap-2 rounded-lg border border-gray-700 px-4 py-2.5 text-sm font-medium text-gray-300 transition-colors hover:bg-gray-800 hover:text-white disabled:opacity-50"
+            className="btn-ghost inline-flex items-center gap-2 disabled:opacity-50"
           >
             <CheckCheck className="h-4 w-4" />
             {markingAll ? 'Marcando...' : 'Marcar todas como lidas'}
@@ -133,28 +133,28 @@ export default function NotificacoesClient({
       </div>
 
       {/* Filter tabs */}
-      <div className="flex gap-1 rounded-lg bg-gray-900 p-1 border border-gray-800 w-fit">
+      <div className="flex gap-1 rounded-xl bg-surface-2 p-1 border border-edge-1 w-fit">
         <button
           onClick={() => setFilter('todas')}
-          className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
+          className={`rounded-lg px-4 py-1.5 text-sm font-medium transition-colors ${
             filter === 'todas'
-              ? 'bg-gray-800 text-white'
-              : 'text-gray-400 hover:text-white'
+              ? 'bg-surface-4 text-white'
+              : 'text-zinc-400 hover:text-white'
           }`}
         >
           Todas
         </button>
         <button
           onClick={() => setFilter('nao_lidas')}
-          className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
+          className={`rounded-lg px-4 py-1.5 text-sm font-medium transition-colors ${
             filter === 'nao_lidas'
-              ? 'bg-gray-800 text-white'
-              : 'text-gray-400 hover:text-white'
+              ? 'bg-surface-4 text-white'
+              : 'text-zinc-400 hover:text-white'
           }`}
         >
           Nao lidas
           {unreadCount > 0 && (
-            <span className="ml-1.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-green-600 text-xs text-white">
+            <span className="ml-1.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-xs text-white">
               {unreadCount}
             </span>
           )}
@@ -163,14 +163,14 @@ export default function NotificacoesClient({
 
       {/* Notifications list */}
       {filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-700 bg-gray-900/50 py-16">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-800">
-            <Inbox className="h-8 w-8 text-gray-500" />
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-edge-2 bg-surface-2 py-16">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-surface-3">
+            <Inbox className="h-8 w-8 text-zinc-500" />
           </div>
           <h3 className="mt-4 text-lg font-semibold text-white">
             Nenhuma notificacao
           </h3>
-          <p className="mt-2 text-sm text-gray-400">
+          <p className="mt-2 text-sm text-zinc-400">
             {filter === 'nao_lidas'
               ? 'Todas as notificacoes foram lidas.'
               : 'Voce ainda nao recebeu notificacoes.'}
@@ -181,16 +181,16 @@ export default function NotificacoesClient({
           {filtered.map((notificacao) => (
             <div
               key={notificacao.id_notificacao}
-              className={`group relative overflow-hidden rounded-xl border bg-gray-900 p-4 transition-all duration-200 hover:shadow-lg hover:shadow-black/20 ${
+              className={`group relative overflow-hidden rounded-xl p-4 transition-all duration-200 ${
                 !notificacao.lida
-                  ? 'border-l-4 border-l-green-500 border-t-gray-800 border-r-gray-800 border-b-gray-800'
-                  : 'border-gray-800'
+                  ? 'bg-emerald-500/[0.03] border-l-2 border-l-emerald-500 border-t border-r border-b border-edge-1'
+                  : 'bg-surface-2 border border-edge-1 hover:bg-surface-3'
               }`}
             >
               <div className="flex items-start gap-4">
                 {/* Icon */}
                 <div
-                  className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg ${
+                  className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl ${
                     tipoColors[notificacao.tipo]
                   }`}
                 >
@@ -205,13 +205,13 @@ export default function NotificacoesClient({
                         className={`text-sm ${
                           !notificacao.lida
                             ? 'font-semibold text-white'
-                            : 'font-normal text-gray-300'
+                            : 'font-normal text-zinc-300'
                         }`}
                       >
                         {notificacao.mensagem}
                       </p>
                       <div className="mt-1 flex items-center gap-2">
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-zinc-500">
                           {formatTimeAgo(notificacao.data_notificacao)}
                         </span>
                         <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium ${
@@ -227,7 +227,7 @@ export default function NotificacoesClient({
                       <button
                         onClick={() => handleMarkAsRead(notificacao.id_notificacao)}
                         disabled={markingId === notificacao.id_notificacao}
-                        className="flex-shrink-0 rounded-md px-2.5 py-1 text-xs font-medium text-green-400 transition-colors hover:bg-green-500/10 disabled:opacity-50"
+                        className="flex-shrink-0 rounded-md px-2.5 py-1 text-xs font-medium text-emerald-400 transition-colors hover:bg-emerald-500/[0.08] disabled:opacity-50"
                       >
                         {markingId === notificacao.id_notificacao
                           ? 'Marcando...'
@@ -239,7 +239,7 @@ export default function NotificacoesClient({
 
                 {/* Unread indicator dot */}
                 {!notificacao.lida && (
-                  <div className="absolute right-4 top-4 h-2 w-2 rounded-full bg-green-500" />
+                  <div className="absolute right-4 top-4 h-2 w-2 rounded-full bg-emerald-500" />
                 )}
               </div>
             </div>

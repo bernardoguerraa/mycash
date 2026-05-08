@@ -21,13 +21,15 @@ export default function DashboardShell({ userName, children }: DashboardShellPro
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
+    <div className="min-h-screen bg-surface-0 text-white">
       <Sidebar onLogout={handleLogout} />
-
-      {/* Main content area */}
-      <div className="lg:pl-64">
-        <Header title="Dashboard" userName={userName} unreadCount={3} />
-        <main className="p-4 sm:p-6 lg:p-8">{children}</main>
+      <div className="lg:pl-60">
+        <Header userName={userName} unreadCount={3} />
+        <main className="p-4 sm:p-6 lg:p-8">
+          <div className="animate-fade-in">
+            {children}
+          </div>
+        </main>
       </div>
     </div>
   )

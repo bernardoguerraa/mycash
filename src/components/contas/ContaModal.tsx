@@ -145,16 +145,16 @@ export default function ContaModal({ conta, onClose, onSaved }: ContaModalProps)
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/70 backdrop-blur-md"
         onClick={onClose}
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-md rounded-xl border border-gray-800 bg-gray-900 p-6 shadow-2xl">
+      <div className="card animate-scale-in relative w-full max-w-md rounded-2xl p-6">
         {/* Close */}
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 rounded-md p-1 text-gray-400 transition-colors hover:text-white"
+          className="absolute right-4 top-4 rounded-md p-1 text-zinc-400 transition-colors hover:text-white hover:bg-white/[0.04]"
         >
           <X className="h-5 w-5" />
         </button>
@@ -162,14 +162,14 @@ export default function ContaModal({ conta, onClose, onSaved }: ContaModalProps)
         <h2 className="text-lg font-bold text-white">
           {isEditing ? 'Editar Conta' : 'Nova Conta Bancaria'}
         </h2>
-        <p className="mt-1 text-sm text-gray-400">
+        <p className="mt-1 text-sm text-zinc-400">
           {isEditing
             ? 'Atualize as informacoes da conta.'
             : 'Preencha os dados da nova conta.'}
         </p>
 
         {error && (
-          <div className="mt-4 flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-400">
+          <div className="mt-4 flex items-center gap-2 rounded-lg border border-rose-500/30 bg-rose-500/[0.08] px-3 py-2 text-sm text-rose-400">
             <AlertCircle className="h-4 w-4 flex-shrink-0" />
             {error}
           </div>
@@ -178,7 +178,7 @@ export default function ContaModal({ conta, onClose, onSaved }: ContaModalProps)
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           {/* Instituicao */}
           <div>
-            <label className="block text-sm font-medium text-gray-300">
+            <label className="block text-sm font-medium text-zinc-300">
               Instituicao
             </label>
             <input
@@ -186,13 +186,13 @@ export default function ContaModal({ conta, onClose, onSaved }: ContaModalProps)
               value={instituicao}
               onChange={(e) => setInstituicao(e.target.value)}
               placeholder="Ex: Nubank, Itau, Bradesco"
-              className="mt-1 w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-sm text-white placeholder-gray-500 transition-colors focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+              className="input-field mt-1 w-full"
             />
           </div>
 
           {/* Numero da conta */}
           <div>
-            <label className="block text-sm font-medium text-gray-300">
+            <label className="block text-sm font-medium text-zinc-300">
               Numero da Conta
             </label>
             <input
@@ -200,19 +200,19 @@ export default function ContaModal({ conta, onClose, onSaved }: ContaModalProps)
               value={numeroConta}
               onChange={(e) => setNumeroConta(e.target.value)}
               placeholder="Ex: 12345-6"
-              className="mt-1 w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-sm text-white placeholder-gray-500 transition-colors focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+              className="input-field mt-1 w-full"
             />
           </div>
 
           {/* Tipo de conta */}
           <div>
-            <label className="block text-sm font-medium text-gray-300">
+            <label className="block text-sm font-medium text-zinc-300">
               Tipo de Conta
             </label>
             <select
               value={tipoConta}
               onChange={(e) => setTipoConta(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-sm text-white transition-colors focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+              className="input-field mt-1 w-full"
             >
               {TIPOS_CONTA.map((tipo) => (
                 <option key={tipo} value={tipo}>
@@ -224,11 +224,11 @@ export default function ContaModal({ conta, onClose, onSaved }: ContaModalProps)
 
           {/* Saldo atual */}
           <div>
-            <label className="block text-sm font-medium text-gray-300">
+            <label className="block text-sm font-medium text-zinc-300">
               Saldo Atual (R$)
             </label>
             <div className="relative mt-1">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-zinc-500">
                 R$
               </span>
               <input
@@ -236,7 +236,7 @@ export default function ContaModal({ conta, onClose, onSaved }: ContaModalProps)
                 value={saldoAtual}
                 onChange={(e) => handleSaldoChange(e.target.value)}
                 placeholder="0,00"
-                className="w-full rounded-lg border border-gray-700 bg-gray-800 py-2.5 pl-10 pr-3 text-sm text-white placeholder-gray-500 transition-colors focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                className="input-field w-full py-2.5 pl-10 pr-3 font-mono-nums"
               />
             </div>
           </div>
@@ -246,14 +246,14 @@ export default function ContaModal({ conta, onClose, onSaved }: ContaModalProps)
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm font-medium text-gray-300 transition-colors hover:bg-gray-700 hover:text-white"
+              className="btn-ghost flex-1"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-green-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-green-500 disabled:opacity-50"
+              className="btn-primary flex flex-1 items-center justify-center gap-2 disabled:opacity-50"
             >
               {saving && <Loader2 className="h-4 w-4 animate-spin" />}
               {isEditing ? 'Salvar' : 'Criar Conta'}

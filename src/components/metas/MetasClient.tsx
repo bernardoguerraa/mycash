@@ -53,20 +53,20 @@ function getStatusConfig(status: StatusMeta) {
     case 'EmAndamento':
       return {
         label: 'Em Andamento',
-        color: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
-        dot: 'bg-yellow-400',
+        color: 'bg-amber-500/[0.08] text-amber-400 border-amber-500/20',
+        dot: 'bg-amber-400',
       }
     case 'Concluida':
       return {
         label: 'Concluida',
-        color: 'bg-green-500/10 text-green-400 border-green-500/20',
-        dot: 'bg-green-400',
+        color: 'bg-emerald-500/[0.08] text-emerald-400 border-emerald-500/20',
+        dot: 'bg-emerald-400',
       }
     case 'Cancelada':
       return {
         label: 'Cancelada',
-        color: 'bg-red-500/10 text-red-400 border-red-500/20',
-        dot: 'bg-red-400',
+        color: 'bg-rose-500/[0.08] text-rose-400 border-rose-500/20',
+        dot: 'bg-rose-400',
       }
   }
 }
@@ -117,15 +117,15 @@ export default function MetasClient({ metas, idUsuario }: MetasClientProps) {
       label: 'Em Andamento',
       value: String(stats.emAndamento),
       icon: <Flame className="h-5 w-5" />,
-      accent: 'bg-yellow-500/10 text-yellow-400',
-      glow: 'bg-yellow-500',
+      accent: 'bg-amber-500/[0.08] text-amber-400',
+      glow: 'bg-amber-500',
     },
     {
       label: 'Concluidas',
       value: String(stats.concluidas),
       icon: <CheckCircle2 className="h-5 w-5" />,
-      accent: 'bg-green-500/10 text-green-400',
-      glow: 'bg-green-500',
+      accent: 'bg-emerald-500/[0.08] text-emerald-400',
+      glow: 'bg-emerald-500',
     },
     {
       label: 'Total Investido',
@@ -151,13 +151,13 @@ export default function MetasClient({ metas, idUsuario }: MetasClientProps) {
           <h2 className="text-2xl font-bold text-white sm:text-3xl">
             Metas Financeiras
           </h2>
-          <p className="mt-1 text-sm text-gray-400">
+          <p className="mt-1 text-sm text-zinc-400">
             Acompanhe e gerencie seus objetivos financeiros.
           </p>
         </div>
         <button
           onClick={() => setMetaModal({ open: true })}
-          className="inline-flex items-center gap-2 rounded-lg bg-green-500 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-green-500/20 transition-all duration-200 hover:bg-green-400 hover:shadow-green-500/30 active:scale-[0.98]"
+          className="btn-primary inline-flex items-center gap-2"
         >
           <Plus className="h-4 w-4" />
           Nova Meta
@@ -169,23 +169,23 @@ export default function MetasClient({ metas, idUsuario }: MetasClientProps) {
         {statCards.map((stat) => (
           <div
             key={stat.label}
-            className="group relative overflow-hidden rounded-xl border border-gray-800 bg-gray-900 p-5 transition-all duration-200 hover:border-gray-700 hover:shadow-lg hover:shadow-black/20"
+            className="card group relative overflow-hidden rounded-2xl p-5 transition-all duration-200 hover:border-edge-2"
           >
             <div
               className={`absolute -right-6 -top-6 h-24 w-24 rounded-full blur-3xl opacity-20 ${stat.glow}`}
             />
             <div className="relative">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-400">
+                <span className="text-sm font-medium text-zinc-400">
                   {stat.label}
                 </span>
                 <div
-                  className={`flex h-9 w-9 items-center justify-center rounded-lg ${stat.accent}`}
+                  className={`flex h-9 w-9 items-center justify-center rounded-xl ${stat.accent}`}
                 >
                   {stat.icon}
                 </div>
               </div>
-              <p className="mt-3 text-2xl font-bold text-white">{stat.value}</p>
+              <p className="mt-3 text-2xl font-bold text-white font-mono-nums">{stat.value}</p>
             </div>
           </div>
         ))}
@@ -193,16 +193,16 @@ export default function MetasClient({ metas, idUsuario }: MetasClientProps) {
 
       {/* Filter */}
       <div className="flex items-center gap-2">
-        <Filter className="h-4 w-4 text-gray-500" />
-        <div className="flex gap-1.5 rounded-lg bg-gray-900 border border-gray-800 p-1">
+        <Filter className="h-4 w-4 text-zinc-500" />
+        <div className="flex gap-1.5 rounded-xl bg-surface-2 border border-edge-1 p-1">
           {filterOptions.map((opt) => (
             <button
               key={opt.value}
               onClick={() => setStatusFilter(opt.value)}
-              className={`rounded-md px-3 py-1.5 text-xs font-medium transition-all duration-150 ${
+              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-150 ${
                 statusFilter === opt.value
-                  ? 'bg-gray-700 text-white shadow-sm'
-                  : 'text-gray-400 hover:text-gray-300'
+                  ? 'bg-surface-4 text-white shadow-sm'
+                  : 'text-zinc-400 hover:text-zinc-300'
               }`}
             >
               {opt.label}
@@ -213,22 +213,22 @@ export default function MetasClient({ metas, idUsuario }: MetasClientProps) {
 
       {/* Grid */}
       {filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-700 bg-gray-900/50 py-20">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-500/10 mb-4">
-            <PiggyBank className="h-8 w-8 text-green-500" />
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-edge-2 bg-surface-2 py-20">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/[0.08] mb-4">
+            <PiggyBank className="h-8 w-8 text-emerald-500" />
           </div>
           <h3 className="text-lg font-semibold text-white">
             {statusFilter === 'Todas'
               ? 'Nenhuma meta cadastrada'
               : `Nenhuma meta ${filterOptions.find((f) => f.value === statusFilter)?.label.toLowerCase()}`}
           </h3>
-          <p className="mt-2 max-w-sm text-center text-sm text-gray-400">
+          <p className="mt-2 max-w-sm text-center text-sm text-zinc-400">
             Comece definindo suas metas financeiras. Cada pequeno passo te aproxima da sua liberdade financeira.
           </p>
           {statusFilter === 'Todas' && (
             <button
               onClick={() => setMetaModal({ open: true })}
-              className="mt-6 inline-flex items-center gap-2 rounded-lg bg-green-500 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-green-400"
+              className="btn-primary mt-6 inline-flex items-center gap-2"
             >
               <Plus className="h-4 w-4" />
               Criar Primeira Meta
@@ -249,18 +249,18 @@ export default function MetasClient({ metas, idUsuario }: MetasClientProps) {
             return (
               <div
                 key={meta.id_meta}
-                className="group relative overflow-hidden rounded-xl border border-gray-800 bg-gray-900 p-5 transition-all duration-200 hover:border-gray-700 hover:shadow-lg hover:shadow-black/20"
+                className="card card-hover group relative overflow-hidden rounded-2xl p-5"
               >
                 {/* Status badge */}
                 <div className="flex items-center justify-between mb-4">
                   <span
-                    className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${statusCfg.color}`}
+                    className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${statusCfg.color}`}
                   >
                     <span className={`h-1.5 w-1.5 rounded-full ${statusCfg.dot}`} />
                     {statusCfg.label}
                   </span>
                   {isOverdue && (
-                    <span className="text-xs font-medium text-red-400">
+                    <span className="text-xs font-medium text-rose-400">
                       Atrasada
                     </span>
                   )}
@@ -274,36 +274,28 @@ export default function MetasClient({ metas, idUsuario }: MetasClientProps) {
                 {/* Progress */}
                 <div className="mt-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-300">
+                    <span className="text-sm font-medium font-mono-nums text-zinc-300">
                       {formatCurrency(meta.valor_atual)}
                     </span>
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm font-mono-nums text-zinc-500">
                       {formatCurrency(meta.valor_objetivo)}
                     </span>
                   </div>
-                  <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-gray-800">
+                  <div className="relative h-2 w-full overflow-hidden rounded-full bg-surface-4">
                     <div
-                      className={`absolute inset-y-0 left-0 rounded-full transition-all duration-500 ${
-                        progress >= 100
-                          ? 'bg-green-500'
-                          : progress >= 70
-                            ? 'bg-green-500'
-                            : progress >= 40
-                              ? 'bg-yellow-500'
-                              : 'bg-orange-500'
-                      }`}
+                      className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-emerald-600 to-emerald-400 transition-all duration-500"
                       style={{ width: `${progress}%` }}
                     />
                   </div>
                   <div className="mt-1.5 text-right">
-                    <span className="text-xs font-semibold text-gray-400">
+                    <span className="text-xs font-semibold text-zinc-400">
                       {progress.toFixed(1)}%
                     </span>
                   </div>
                 </div>
 
                 {/* Dates */}
-                <div className="mt-4 flex items-center gap-4 text-xs text-gray-500">
+                <div className="mt-4 flex items-center gap-4 text-xs text-zinc-500">
                   <span className="flex items-center gap-1">
                     <Calendar className="h-3.5 w-3.5" />
                     {formatDate(meta.data_inicio)} &rarr; {formatDate(meta.data_limite)}
@@ -312,38 +304,38 @@ export default function MetasClient({ metas, idUsuario }: MetasClientProps) {
 
                 {/* Days remaining */}
                 <div className="mt-2 flex items-center gap-1 text-xs">
-                  <Clock className="h-3.5 w-3.5 text-gray-500" />
+                  <Clock className="h-3.5 w-3.5 text-zinc-500" />
                   {meta.status === 'Concluida' ? (
-                    <span className="text-green-400 font-medium">Meta concluida</span>
+                    <span className="text-emerald-400 font-medium">Meta concluida</span>
                   ) : meta.status === 'Cancelada' ? (
-                    <span className="text-red-400 font-medium">Meta cancelada</span>
+                    <span className="text-rose-400 font-medium">Meta cancelada</span>
                   ) : daysRemaining > 0 ? (
                     <span
                       className={`font-medium ${
                         daysRemaining <= 7
-                          ? 'text-red-400'
+                          ? 'text-rose-400'
                           : daysRemaining <= 30
-                            ? 'text-yellow-400'
-                            : 'text-gray-400'
+                            ? 'text-amber-400'
+                            : 'text-zinc-400'
                       }`}
                     >
                       {daysRemaining} {daysRemaining === 1 ? 'dia restante' : 'dias restantes'}
                     </span>
                   ) : daysRemaining === 0 ? (
-                    <span className="text-yellow-400 font-medium">Vence hoje</span>
+                    <span className="text-amber-400 font-medium">Vence hoje</span>
                   ) : (
-                    <span className="text-red-400 font-medium">
+                    <span className="text-rose-400 font-medium">
                       Vencida ha {Math.abs(daysRemaining)} dias
                     </span>
                   )}
                 </div>
 
                 {/* Actions */}
-                <div className="mt-5 flex items-center gap-2 border-t border-gray-800 pt-4">
+                <div className="mt-5 flex items-center gap-2 border-t border-edge-1 pt-4">
                   {meta.status === 'EmAndamento' && (
                     <button
                       onClick={() => setAddValorModal({ open: true, meta })}
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-green-500/10 px-3 py-2 text-xs font-medium text-green-400 transition-all hover:bg-green-500/20"
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500/[0.08] px-3 py-2 text-xs font-medium text-emerald-400 transition-all hover:bg-emerald-500/[0.15]"
                     >
                       <PiggyBank className="h-3.5 w-3.5" />
                       Adicionar Valor
@@ -351,7 +343,7 @@ export default function MetasClient({ metas, idUsuario }: MetasClientProps) {
                   )}
                   <button
                     onClick={() => setMetaModal({ open: true, meta })}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-gray-800 px-3 py-2 text-xs font-medium text-gray-300 transition-all hover:bg-gray-700 hover:text-white"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-surface-3 px-3 py-2 text-xs font-medium text-zinc-300 transition-all hover:bg-surface-4 hover:text-white"
                   >
                     <Pencil className="h-3.5 w-3.5" />
                     Editar
@@ -359,7 +351,7 @@ export default function MetasClient({ metas, idUsuario }: MetasClientProps) {
                   <button
                     onClick={() => handleDelete(meta.id_meta)}
                     disabled={deleting === meta.id_meta}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-gray-800 px-3 py-2 text-xs font-medium text-red-400 transition-all hover:bg-red-500/10 disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-surface-3 px-3 py-2 text-xs font-medium text-rose-400 transition-all hover:bg-rose-500/[0.08] disabled:opacity-50"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                     {deleting === meta.id_meta ? 'Excluindo...' : 'Excluir'}

@@ -101,12 +101,12 @@ export default function LembreteModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/70 backdrop-blur-md"
         onClick={onClose}
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-md rounded-xl border border-gray-800 bg-gray-900 p-6 shadow-2xl">
+      <div className="card animate-scale-in relative w-full max-w-md rounded-2xl p-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-white">
@@ -114,7 +114,7 @@ export default function LembreteModal({
           </h3>
           <button
             onClick={onClose}
-            className="rounded-md p-1.5 text-gray-400 transition-colors hover:bg-gray-800 hover:text-white"
+            className="rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-white/[0.04] hover:text-white"
           >
             <X className="h-5 w-5" />
           </button>
@@ -124,7 +124,7 @@ export default function LembreteModal({
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           {/* Descricao */}
           <div>
-            <label className="block text-sm font-medium text-gray-300">
+            <label className="block text-sm font-medium text-zinc-300">
               Descricao
             </label>
             <input
@@ -132,40 +132,40 @@ export default function LembreteModal({
               value={descricao}
               onChange={(e) => setDescricao(e.target.value)}
               placeholder="Ex: Aluguel, Fatura cartao..."
-              className={`mt-1 w-full rounded-lg border bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 ${
+              className={`mt-1 w-full rounded-lg border bg-surface-3 px-3 py-2 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 ${
                 errors.descricao
-                  ? 'border-red-500 focus:ring-red-500'
-                  : 'border-gray-700 focus:border-green-500 focus:ring-green-500'
+                  ? 'border-rose-500 focus:ring-rose-500/20'
+                  : 'border-edge-2 focus:border-emerald-500/20 focus:ring-emerald-500/20'
               }`}
             />
             {errors.descricao && (
-              <p className="mt-1 text-xs text-red-400">{errors.descricao}</p>
+              <p className="mt-1 text-xs text-rose-400">{errors.descricao}</p>
             )}
           </div>
 
           {/* Data Vencimento */}
           <div>
-            <label className="block text-sm font-medium text-gray-300">
+            <label className="block text-sm font-medium text-zinc-300">
               Data de Vencimento
             </label>
             <input
               type="date"
               value={dataVencimento}
               onChange={(e) => setDataVencimento(e.target.value)}
-              className={`mt-1 w-full rounded-lg border bg-gray-800 px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 ${
+              className={`mt-1 w-full rounded-lg border bg-surface-3 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 [color-scheme:dark] ${
                 errors.dataVencimento
-                  ? 'border-red-500 focus:ring-red-500'
-                  : 'border-gray-700 focus:border-green-500 focus:ring-green-500'
+                  ? 'border-rose-500 focus:ring-rose-500/20'
+                  : 'border-edge-2 focus:border-emerald-500/20 focus:ring-emerald-500/20'
               }`}
             />
             {errors.dataVencimento && (
-              <p className="mt-1 text-xs text-red-400">{errors.dataVencimento}</p>
+              <p className="mt-1 text-xs text-rose-400">{errors.dataVencimento}</p>
             )}
           </div>
 
           {/* Valor Previsto */}
           <div>
-            <label className="block text-sm font-medium text-gray-300">
+            <label className="block text-sm font-medium text-zinc-300">
               Valor Previsto (R$)
             </label>
             <input
@@ -175,20 +175,20 @@ export default function LembreteModal({
               value={valorPrevisto}
               onChange={(e) => setValorPrevisto(e.target.value)}
               placeholder="0,00"
-              className={`mt-1 w-full rounded-lg border bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 ${
+              className={`mt-1 w-full rounded-lg border bg-surface-3 px-3 py-2 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 font-mono-nums ${
                 errors.valorPrevisto
-                  ? 'border-red-500 focus:ring-red-500'
-                  : 'border-gray-700 focus:border-green-500 focus:ring-green-500'
+                  ? 'border-rose-500 focus:ring-rose-500/20'
+                  : 'border-edge-2 focus:border-emerald-500/20 focus:ring-emerald-500/20'
               }`}
             />
             {errors.valorPrevisto && (
-              <p className="mt-1 text-xs text-red-400">{errors.valorPrevisto}</p>
+              <p className="mt-1 text-xs text-rose-400">{errors.valorPrevisto}</p>
             )}
           </div>
 
           {/* Tipo */}
           <div>
-            <label className="block text-sm font-medium text-gray-300">Tipo</label>
+            <label className="block text-sm font-medium text-zinc-300">Tipo</label>
             <div className="mt-2 flex gap-4">
               <label className="flex cursor-pointer items-center gap-2">
                 <input
@@ -197,9 +197,9 @@ export default function LembreteModal({
                   value="ContaPagar"
                   checked={tipo === 'ContaPagar'}
                   onChange={() => setTipo('ContaPagar')}
-                  className="h-4 w-4 border-gray-600 bg-gray-800 text-red-500 focus:ring-red-500 focus:ring-offset-gray-900"
+                  className="h-4 w-4 border-edge-2 bg-surface-3 text-rose-500 focus:ring-rose-500/20 focus:ring-offset-surface-2"
                 />
-                <span className="text-sm text-red-400">Conta a Pagar</span>
+                <span className="text-sm text-rose-400">Conta a Pagar</span>
               </label>
               <label className="flex cursor-pointer items-center gap-2">
                 <input
@@ -208,9 +208,9 @@ export default function LembreteModal({
                   value="ContaReceber"
                   checked={tipo === 'ContaReceber'}
                   onChange={() => setTipo('ContaReceber')}
-                  className="h-4 w-4 border-gray-600 bg-gray-800 text-green-500 focus:ring-green-500 focus:ring-offset-gray-900"
+                  className="h-4 w-4 border-edge-2 bg-surface-3 text-emerald-500 focus:ring-emerald-500/20 focus:ring-offset-surface-2"
                 />
-                <span className="text-sm text-green-400">Conta a Receber</span>
+                <span className="text-sm text-emerald-400">Conta a Receber</span>
               </label>
             </div>
           </div>
@@ -222,9 +222,9 @@ export default function LembreteModal({
               id="ativo"
               checked={ativo}
               onChange={(e) => setAtivo(e.target.checked)}
-              className="h-4 w-4 rounded border-gray-600 bg-gray-800 text-green-500 focus:ring-green-500 focus:ring-offset-gray-900"
+              className="h-4 w-4 rounded border-edge-2 bg-surface-3 text-emerald-500 focus:ring-emerald-500/20 focus:ring-offset-surface-2"
             />
-            <label htmlFor="ativo" className="text-sm text-gray-300">
+            <label htmlFor="ativo" className="text-sm text-zinc-300">
               Lembrete ativo
             </label>
           </div>
@@ -234,14 +234,14 @@ export default function LembreteModal({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-gray-700 px-4 py-2 text-sm font-medium text-gray-300 transition-colors hover:bg-gray-800"
+              className="btn-ghost"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-500 disabled:opacity-50"
+              className="btn-primary disabled:opacity-50"
             >
               {saving ? 'Salvando...' : isEditing ? 'Salvar' : 'Criar'}
             </button>

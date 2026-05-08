@@ -60,24 +60,24 @@ function getStatusGroup(dataVencimento: string): StatusGroup {
 const groupConfig: Record<StatusGroup, { label: string; color: string; borderColor: string; bgColor: string; icon: React.ReactNode }> = {
   vencidos: {
     label: 'Vencidos',
-    color: 'text-red-400',
-    borderColor: 'border-red-500/30',
-    bgColor: 'bg-red-500/5',
-    icon: <AlertTriangle className="h-5 w-5 text-red-400" />,
+    color: 'text-rose-400',
+    borderColor: 'border-rose-500/30',
+    bgColor: 'bg-rose-500/[0.05]',
+    icon: <AlertTriangle className="h-5 w-5 text-rose-400" />,
   },
   proximos: {
     label: 'Proximos (7 dias)',
-    color: 'text-yellow-400',
-    borderColor: 'border-yellow-500/30',
-    bgColor: 'bg-yellow-500/5',
-    icon: <Clock className="h-5 w-5 text-yellow-400" />,
+    color: 'text-amber-400',
+    borderColor: 'border-amber-500/30',
+    bgColor: 'bg-amber-500/[0.05]',
+    icon: <Clock className="h-5 w-5 text-amber-400" />,
   },
   futuros: {
     label: 'Futuros',
-    color: 'text-green-400',
-    borderColor: 'border-green-500/30',
-    bgColor: 'bg-green-500/5',
-    icon: <CalendarCheck className="h-5 w-5 text-green-400" />,
+    color: 'text-emerald-400',
+    borderColor: 'border-emerald-500/30',
+    bgColor: 'bg-emerald-500/[0.05]',
+    icon: <CalendarCheck className="h-5 w-5 text-emerald-400" />,
   },
 }
 
@@ -194,13 +194,13 @@ export default function LembretesClient({ lembretes: initialLembretes, idUsuario
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-2xl font-bold text-white sm:text-3xl">Lembretes</h2>
-          <p className="mt-1 text-sm text-gray-400">
+          <p className="mt-1 text-sm text-zinc-400">
             Gerencie seus lembretes de contas a pagar e receber.
           </p>
         </div>
         <button
           onClick={handleNew}
-          className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-950"
+          className="btn-primary inline-flex items-center gap-2 focus:ring-2 focus:ring-emerald-500/20 focus:ring-offset-2 focus:ring-offset-surface-0"
         >
           <Plus className="h-4 w-4" />
           Novo Lembrete
@@ -209,43 +209,43 @@ export default function LembretesClient({ lembretes: initialLembretes, idUsuario
 
       {/* Summary Cards */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <div className="relative overflow-hidden rounded-xl border border-gray-800 bg-gray-900 p-5">
-          <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-red-500 opacity-10 blur-3xl" />
+        <div className="card relative overflow-hidden rounded-2xl p-5">
+          <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-rose-500 opacity-10 blur-3xl" />
           <div className="relative flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-500/10 text-red-500">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-500/[0.08] text-rose-500">
               <ArrowUpRight className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-xs font-medium text-gray-400">Total a Pagar</p>
-              <p className="text-xl font-bold text-red-400">
+              <p className="text-xs font-medium text-zinc-400">Total a Pagar</p>
+              <p className="text-xl font-bold font-mono-nums text-rose-400">
                 {formatCurrency(summary.totalPagar)}
               </p>
             </div>
           </div>
         </div>
-        <div className="relative overflow-hidden rounded-xl border border-gray-800 bg-gray-900 p-5">
-          <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-green-500 opacity-10 blur-3xl" />
+        <div className="card relative overflow-hidden rounded-2xl p-5">
+          <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-emerald-500 opacity-10 blur-3xl" />
           <div className="relative flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-500/10 text-green-500">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/[0.08] text-emerald-500">
               <ArrowDownLeft className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-xs font-medium text-gray-400">Total a Receber</p>
-              <p className="text-xl font-bold text-green-400">
+              <p className="text-xs font-medium text-zinc-400">Total a Receber</p>
+              <p className="text-xl font-bold font-mono-nums text-emerald-400">
                 {formatCurrency(summary.totalReceber)}
               </p>
             </div>
           </div>
         </div>
-        <div className="relative overflow-hidden rounded-xl border border-gray-800 bg-gray-900 p-5">
-          <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-yellow-500 opacity-10 blur-3xl" />
+        <div className="card relative overflow-hidden rounded-2xl p-5">
+          <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-amber-500 opacity-10 blur-3xl" />
           <div className="relative flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-yellow-500/10 text-yellow-500">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500">
               <AlertTriangle className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-xs font-medium text-gray-400">Vencidos</p>
-              <p className="text-xl font-bold text-yellow-400">
+              <p className="text-xs font-medium text-zinc-400">Vencidos</p>
+              <p className="text-xl font-bold text-amber-400">
                 {summary.vencidosCount}
               </p>
             </div>
@@ -255,14 +255,14 @@ export default function LembretesClient({ lembretes: initialLembretes, idUsuario
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-2 text-sm text-gray-400">
+        <div className="flex items-center gap-2 text-sm text-zinc-400">
           <Filter className="h-4 w-4" />
           <span>Filtrar:</span>
         </div>
         <select
           value={filterTipo}
           onChange={(e) => setFilterTipo(e.target.value as FilterTipo)}
-          className="rounded-lg border border-gray-700 bg-gray-800 px-3 py-1.5 text-sm text-white focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+          className="rounded-lg border border-edge-2 bg-surface-3 px-3 py-1.5 text-sm text-white focus:border-emerald-500/20 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
         >
           <option value="todos">Todos os tipos</option>
           <option value="ContaPagar">Conta a Pagar</option>
@@ -271,7 +271,7 @@ export default function LembretesClient({ lembretes: initialLembretes, idUsuario
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value as FilterStatus)}
-          className="rounded-lg border border-gray-700 bg-gray-800 px-3 py-1.5 text-sm text-white focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+          className="rounded-lg border border-edge-2 bg-surface-3 px-3 py-1.5 text-sm text-white focus:border-emerald-500/20 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
         >
           <option value="todos">Todos os status</option>
           <option value="ativo">Ativos</option>
@@ -281,19 +281,19 @@ export default function LembretesClient({ lembretes: initialLembretes, idUsuario
 
       {/* Grouped Lembretes */}
       {filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-700 bg-gray-900/50 py-16">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-800">
-            <Bell className="h-8 w-8 text-gray-500" />
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-edge-2 bg-surface-2 py-16">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-surface-3">
+            <Bell className="h-8 w-8 text-zinc-500" />
           </div>
           <h3 className="mt-4 text-lg font-semibold text-white">
             Nenhum lembrete encontrado
           </h3>
-          <p className="mt-2 text-sm text-gray-400">
+          <p className="mt-2 text-sm text-zinc-400">
             Adicione seu primeiro lembrete para acompanhar seus pagamentos.
           </p>
           <button
             onClick={handleNew}
-            className="mt-6 inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-green-500"
+            className="btn-primary mt-6 inline-flex items-center gap-2"
           >
             <Plus className="h-4 w-4" />
             Adicionar Lembrete
@@ -312,7 +312,7 @@ export default function LembretesClient({ lembretes: initialLembretes, idUsuario
                   <h3 className={`text-sm font-semibold ${config.color}`}>
                     {config.label}
                   </h3>
-                  <span className="rounded-full bg-gray-800 px-2 py-0.5 text-xs text-gray-400">
+                  <span className="rounded-full bg-surface-3 px-2 py-0.5 text-xs text-zinc-400">
                     {items.length}
                   </span>
                 </div>
@@ -320,16 +320,16 @@ export default function LembretesClient({ lembretes: initialLembretes, idUsuario
                   {items.map((lembrete) => (
                     <div
                       key={lembrete.id_lembrete}
-                      className={`group relative overflow-hidden rounded-xl border bg-gray-900 p-5 transition-all duration-200 hover:shadow-lg hover:shadow-black/20 ${
-                        config.borderColor
-                      } ${!lembrete.ativo ? 'opacity-50' : ''}`}
+                      className={`group relative overflow-hidden rounded-xl bg-surface-3 p-5 transition-all duration-200 hover:bg-surface-4 ${
+                        !lembrete.ativo ? 'opacity-50' : ''
+                      }`}
                     >
                       <div className={`absolute inset-y-0 left-0 w-1 ${
                         groupKey === 'vencidos'
-                          ? 'bg-red-500'
+                          ? 'bg-rose-500'
                           : groupKey === 'proximos'
-                            ? 'bg-yellow-500'
-                            : 'bg-green-500'
+                            ? 'bg-amber-500'
+                            : 'bg-emerald-500'
                       }`} />
 
                       <div className="relative pl-2">
@@ -338,8 +338,8 @@ export default function LembretesClient({ lembretes: initialLembretes, idUsuario
                           <span
                             className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${
                               lembrete.tipo === 'ContaPagar'
-                                ? 'bg-red-500/10 text-red-400'
-                                : 'bg-green-500/10 text-green-400'
+                                ? 'bg-rose-500/[0.08] text-rose-400'
+                                : 'bg-emerald-500/[0.08] text-emerald-400'
                             }`}
                           >
                             {lembrete.tipo === 'ContaPagar' ? (
@@ -352,7 +352,7 @@ export default function LembretesClient({ lembretes: initialLembretes, idUsuario
                           <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                             <button
                               onClick={() => handleEdit(lembrete)}
-                              className="rounded-md p-1.5 text-gray-400 transition-colors hover:bg-gray-800 hover:text-white"
+                              className="rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-white/[0.04] hover:text-white"
                               title="Editar"
                             >
                               <Pencil className="h-3.5 w-3.5" />
@@ -360,7 +360,7 @@ export default function LembretesClient({ lembretes: initialLembretes, idUsuario
                             <button
                               onClick={() => handleDelete(lembrete.id_lembrete)}
                               disabled={deleting === lembrete.id_lembrete}
-                              className="rounded-md p-1.5 text-gray-400 transition-colors hover:bg-red-500/10 hover:text-red-400 disabled:opacity-50"
+                              className="rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-rose-500/[0.08] hover:text-rose-400 disabled:opacity-50"
                               title="Excluir"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
@@ -376,36 +376,36 @@ export default function LembretesClient({ lembretes: initialLembretes, idUsuario
                         {/* Date + Value */}
                         <div className="mt-3 flex items-end justify-between">
                           <div>
-                            <p className="text-xs text-gray-500">Vencimento</p>
+                            <p className="text-xs text-zinc-500">Vencimento</p>
                             <p className={`text-sm font-medium ${
                               groupKey === 'vencidos'
-                                ? 'text-red-400'
+                                ? 'text-rose-400'
                                 : groupKey === 'proximos'
-                                  ? 'text-yellow-400'
-                                  : 'text-gray-300'
+                                  ? 'text-amber-400'
+                                  : 'text-zinc-300'
                             }`}>
                               {formatDate(lembrete.data_vencimento)}
                             </p>
                           </div>
-                          <p className={`text-lg font-bold ${
+                          <p className={`text-lg font-bold font-mono-nums ${
                             lembrete.tipo === 'ContaPagar'
-                              ? 'text-red-400'
-                              : 'text-green-400'
+                              ? 'text-rose-400'
+                              : 'text-emerald-400'
                           }`}>
                             {formatCurrency(lembrete.valor_previsto)}
                           </p>
                         </div>
 
                         {/* Ativo toggle */}
-                        <div className="mt-3 flex items-center justify-between border-t border-gray-800 pt-3">
-                          <span className="text-xs text-gray-500">
+                        <div className="mt-3 flex items-center justify-between border-t border-edge-1 pt-3">
+                          <span className="text-xs text-zinc-500">
                             {lembrete.ativo ? 'Ativo' : 'Inativo'}
                           </span>
                           <button
                             onClick={() => handleToggleAtivo(lembrete)}
                             disabled={toggling === lembrete.id_lembrete}
                             className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors disabled:opacity-50 ${
-                              lembrete.ativo ? 'bg-green-600' : 'bg-gray-700'
+                              lembrete.ativo ? 'bg-emerald-500' : 'bg-surface-4'
                             }`}
                           >
                             <span
