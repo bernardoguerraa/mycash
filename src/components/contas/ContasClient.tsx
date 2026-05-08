@@ -15,6 +15,7 @@ import {
 import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/types/database'
 import ContaModal from './ContaModal'
+import PluggyConnectButton from './PluggyConnectButton'
 
 type ContaBancaria = Database['public']['Tables']['contas_bancarias']['Row']
 
@@ -95,34 +96,37 @@ export default function ContasClient({ contas: initialContas }: ContasClientProp
           <h2 className="text-2xl font-bold text-white sm:text-3xl">
             Contas Bancarias
           </h2>
-          <p className="mt-1 text-sm text-gray-400">
+          <p className="mt-1 text-sm text-zinc-400">
             Gerencie suas contas e acompanhe seus saldos.
           </p>
         </div>
-        <button
-          onClick={handleNew}
-          className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-950"
-        >
-          <Plus className="h-4 w-4" />
-          Nova Conta
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <PluggyConnectButton onConnected={() => window.location.reload()} />
+          <button
+            onClick={handleNew}
+            className="btn-secondary inline-flex items-center gap-2 focus:ring-2 focus:ring-emerald-500/20 focus:ring-offset-2 focus:ring-offset-surface-0"
+          >
+            <Plus className="h-4 w-4" />
+            Manual
+          </button>
+        </div>
       </div>
 
       {/* Total Balance Card */}
-      <div className="relative overflow-hidden rounded-xl border border-gray-800 bg-gray-900 p-6">
-        <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-green-500 opacity-10 blur-3xl" />
+      <div className="card relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500/[0.08] to-teal-500/[0.04] p-6">
+        <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-emerald-500 opacity-10 blur-3xl" />
         <div className="relative flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-500/10 text-green-500">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/[0.08] text-emerald-500">
             <Wallet className="h-6 w-6" />
           </div>
           <div>
-            <p className="text-sm font-medium text-gray-400">Saldo Total</p>
-            <p className={`text-3xl font-bold ${totalBalance >= 0 ? 'text-white' : 'text-red-400'}`}>
+            <p className="text-sm font-medium text-zinc-400">Saldo Total</p>
+            <p className={`text-3xl font-bold font-mono-nums ${totalBalance >= 0 ? 'text-white' : 'text-rose-400'}`}>
               {formatCurrency(totalBalance)}
             </p>
           </div>
           <div className="ml-auto text-right">
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-zinc-500">
               {contas.length} {contas.length === 1 ? 'conta' : 'contas'}
             </p>
           </div>
@@ -131,19 +135,19 @@ export default function ContasClient({ contas: initialContas }: ContasClientProp
 
       {/* Contas Grid */}
       {contas.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-700 bg-gray-900/50 py-16">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-800">
-            <Landmark className="h-8 w-8 text-gray-500" />
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-edge-2 bg-surface-2 py-16">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-surface-3">
+            <Landmark className="h-8 w-8 text-zinc-500" />
           </div>
           <h3 className="mt-4 text-lg font-semibold text-white">
             Nenhuma conta cadastrada
           </h3>
-          <p className="mt-2 text-sm text-gray-400">
+          <p className="mt-2 text-sm text-zinc-400">
             Adicione sua primeira conta bancaria para comecar.
           </p>
           <button
             onClick={handleNew}
-            className="mt-6 inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-green-500"
+            className="btn-primary mt-6 inline-flex items-center gap-2"
           >
             <Plus className="h-4 w-4" />
             Adicionar Conta
@@ -154,21 +158,21 @@ export default function ContasClient({ contas: initialContas }: ContasClientProp
           {contas.map((conta) => (
             <div
               key={conta.id_conta}
-              className="group relative overflow-hidden rounded-xl border border-gray-800 bg-gray-900 p-5 transition-all duration-200 hover:border-gray-700 hover:shadow-lg hover:shadow-black/20"
+              className="card card-hover group relative overflow-hidden rounded-2xl p-5"
             >
               {/* Glow */}
-              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-green-500 opacity-0 blur-3xl transition-opacity group-hover:opacity-10" />
+              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-emerald-500 opacity-0 blur-3xl transition-opacity group-hover:opacity-10" />
 
               <div className="relative">
                 {/* Top row: icon + actions */}
                 <div className="flex items-start justify-between">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-green-500/10 text-green-500">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-500/[0.08] text-emerald-500">
                     {getContaIcon(conta.tipo_conta)}
                   </div>
                   <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                     <button
                       onClick={() => handleEdit(conta)}
-                      className="rounded-md p-1.5 text-gray-400 transition-colors hover:bg-gray-800 hover:text-white"
+                      className="rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-white/[0.04] hover:text-white"
                       title="Editar"
                     >
                       <Pencil className="h-4 w-4" />
@@ -176,7 +180,7 @@ export default function ContasClient({ contas: initialContas }: ContasClientProp
                     <button
                       onClick={() => handleDelete(conta.id_conta)}
                       disabled={deleting === conta.id_conta}
-                      className="rounded-md p-1.5 text-gray-400 transition-colors hover:bg-red-500/10 hover:text-red-400 disabled:opacity-50"
+                      className="rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-rose-500/[0.08] hover:text-rose-400 disabled:opacity-50"
                       title="Excluir"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -189,7 +193,7 @@ export default function ContasClient({ contas: initialContas }: ContasClientProp
                   <h3 className="text-base font-semibold text-white">
                     {conta.instituicao}
                   </h3>
-                  <p className="mt-0.5 text-xs text-gray-500">
+                  <p className="mt-0.5 text-xs text-zinc-500">
                     {conta.tipo_conta} &middot; {conta.numero_conta}
                   </p>
                 </div>
@@ -197,17 +201,17 @@ export default function ContasClient({ contas: initialContas }: ContasClientProp
                 {/* Balance */}
                 <div className="mt-4 flex items-end justify-between">
                   <div>
-                    <p className="text-xs font-medium text-gray-500">Saldo</p>
+                    <p className="text-xs font-medium text-zinc-500">Saldo</p>
                     <p
-                      className={`text-xl font-bold ${
-                        conta.saldo_atual >= 0 ? 'text-white' : 'text-red-400'
+                      className={`text-xl font-bold font-mono-nums ${
+                        conta.saldo_atual >= 0 ? 'text-white' : 'text-rose-400'
                       }`}
                     >
                       {formatCurrency(conta.saldo_atual)}
                     </p>
                   </div>
                   {conta.ultima_sync && (
-                    <p className="text-[10px] text-gray-600">
+                    <p className="text-[10px] text-zinc-600">
                       Sync:{' '}
                       {new Date(conta.ultima_sync).toLocaleDateString('pt-BR')}
                     </p>

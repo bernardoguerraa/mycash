@@ -47,6 +47,11 @@ export interface Database {
           tipo_conta: string;
           saldo_atual: number;
           ultima_sync: string;
+          pluggy_item_id: string | null;
+          pluggy_account_id: string | null;
+          pluggy_status: string | null;
+          pluggy_last_error: string | null;
+          origem: 'manual' | 'pluggy';
         };
         Insert: {
           id_conta?: number;
@@ -56,6 +61,11 @@ export interface Database {
           tipo_conta: string;
           saldo_atual?: number;
           ultima_sync?: string;
+          pluggy_item_id?: string | null;
+          pluggy_account_id?: string | null;
+          pluggy_status?: string | null;
+          pluggy_last_error?: string | null;
+          origem?: 'manual' | 'pluggy';
         };
         Update: {
           id_conta?: number;
@@ -65,6 +75,11 @@ export interface Database {
           tipo_conta?: string;
           saldo_atual?: number;
           ultima_sync?: string;
+          pluggy_item_id?: string | null;
+          pluggy_account_id?: string | null;
+          pluggy_status?: string | null;
+          pluggy_last_error?: string | null;
+          origem?: 'manual' | 'pluggy';
         };
         Relationships: [
           {
@@ -85,6 +100,9 @@ export interface Database {
           categoria: string;
           descricao: string;
           valor: number;
+          pluggy_tx_id: string | null;
+          origem: 'manual' | 'pluggy';
+          raw_data: Record<string, unknown> | null;
         };
         Insert: {
           id_transacao?: number;
@@ -94,6 +112,9 @@ export interface Database {
           categoria: string;
           descricao: string;
           valor: number;
+          pluggy_tx_id?: string | null;
+          origem?: 'manual' | 'pluggy';
+          raw_data?: Record<string, unknown> | null;
         };
         Update: {
           id_transacao?: number;
@@ -103,6 +124,9 @@ export interface Database {
           categoria?: string;
           descricao?: string;
           valor?: number;
+          pluggy_tx_id?: string | null;
+          origem?: 'manual' | 'pluggy';
+          raw_data?: Record<string, unknown> | null;
         };
         Relationships: [
           {
@@ -192,6 +216,87 @@ export interface Database {
             referencedColumns: ['id_usuario'];
           }
         ];
+      };
+      pluggy_connections: {
+        Row: {
+          id: number;
+          id_usuario: number;
+          pluggy_item_id: string;
+          connector_id: number | null;
+          institution_name: string | null;
+          status: string | null;
+          execution_status: string | null;
+          last_updated_at: string | null;
+          error_code: string | null;
+          error_message: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: number;
+          id_usuario: number;
+          pluggy_item_id: string;
+          connector_id?: number | null;
+          institution_name?: string | null;
+          status?: string | null;
+          execution_status?: string | null;
+          last_updated_at?: string | null;
+          error_code?: string | null;
+          error_message?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: number;
+          id_usuario?: number;
+          pluggy_item_id?: string;
+          connector_id?: number | null;
+          institution_name?: string | null;
+          status?: string | null;
+          execution_status?: string | null;
+          last_updated_at?: string | null;
+          error_code?: string | null;
+          error_message?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      pluggy_webhook_events: {
+        Row: {
+          id: number;
+          event_id: string | null;
+          event_type: string;
+          pluggy_item_id: string | null;
+          payload: Record<string, unknown>;
+          processed: boolean;
+          processed_at: string | null;
+          error: string | null;
+          received_at: string;
+        };
+        Insert: {
+          id?: number;
+          event_id?: string | null;
+          event_type: string;
+          pluggy_item_id?: string | null;
+          payload: Record<string, unknown>;
+          processed?: boolean;
+          processed_at?: string | null;
+          error?: string | null;
+          received_at?: string;
+        };
+        Update: {
+          id?: number;
+          event_id?: string | null;
+          event_type?: string;
+          pluggy_item_id?: string | null;
+          payload?: Record<string, unknown>;
+          processed?: boolean;
+          processed_at?: string | null;
+          error?: string | null;
+          received_at?: string;
+        };
+        Relationships: [];
       };
       notificacoes: {
         Row: {
