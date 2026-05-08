@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import DashboardShell from '@/components/layout/DashboardShell'
 
-export default async function DashboardLayout({
+export default async function DashboardGroupLayout({
   children,
 }: {
   children: React.ReactNode
