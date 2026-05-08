@@ -40,7 +40,7 @@ lerna-debug.log*
 # vercel
 .vercel
 
-# claude/swarm
+# local tooling
 .claude/
 .swarm/
 .claude-flow/
