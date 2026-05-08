@@ -44,6 +44,9 @@ lerna-debug.log*
 .claude/
 .swarm/
 .claude-flow/
+CLAUDE.md
+.mcp.json
+EstruturaDoProjeto/
 
 # editor
 .vscode/*
