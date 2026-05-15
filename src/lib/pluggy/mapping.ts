@@ -1,5 +1,13 @@
 import type { Account, Transaction } from 'pluggy-sdk'
 
+// Campos retornados pela Pluggy mas ausentes do tipo público `Account`
+interface PluggyAccountExtra {
+  subtype?: string
+  number?: string | number
+  bankData?: { transferNumber?: string | number }
+}
+type AccountWithExtras = Account & PluggyAccountExtra
+
 // Pluggy account.subtype → nosso tipo_conta
 const ACCOUNT_TYPE_MAP: Record<string, string> = {
   CHECKING_ACCOUNT: 'Corrente',
@@ -10,15 +18,16 @@ const ACCOUNT_TYPE_MAP: Record<string, string> = {
 }
 
 export function mapAccountType(acc: Account): string {
-  const sub = (acc as any).subtype as string | undefined
+  const sub = (acc as AccountWithExtras).subtype
   if (sub && ACCOUNT_TYPE_MAP[sub]) return ACCOUNT_TYPE_MAP[sub]
   return acc.type === 'CREDIT' ? 'Cartao de Credito' : 'Corrente'
 }
 
 export function mapAccountNumber(acc: Account): string {
-  const bank = (acc as any).bankData
+  const extra = acc as AccountWithExtras
+  const bank = extra.bankData
   if (bank?.transferNumber) return String(bank.transferNumber)
-  if ((acc as any).number) return String((acc as any).number)
+  if (extra.number) return String(extra.number)
   return acc.id.slice(0, 8)
 }
 

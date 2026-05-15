@@ -33,10 +33,11 @@ export async function POST(
   const db = createServiceClient()
 
   try {
-    const result = await syncPluggyItem(db as any, conn.pluggy_item_id, conn.id_usuario)
+    const result = await syncPluggyItem(db, conn.pluggy_item_id, conn.id_usuario)
     return NextResponse.json({ ok: true, ...result })
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('sync error', err)
-    return NextResponse.json({ error: String(err?.message || err) }, { status: 500 })
+    const message = err instanceof Error ? err.message : String(err)
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

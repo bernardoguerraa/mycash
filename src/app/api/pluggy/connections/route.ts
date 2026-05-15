@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
   const { data: userRow } = await supabase
     .from('usuarios')
     .select('id_usuario')
-    .eq('auth_user_id' as any, user.id)
+    .eq('auth_user_id' as never, user.id)
     .maybeSingle()
 
   if (!userRow) {
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     { onConflict: 'pluggy_item_id' }
   )
 
-  const result = await syncPluggyItem(db as any, itemId, userRow.id_usuario)
+  const result = await syncPluggyItem(db, itemId, userRow.id_usuario)
 
   return NextResponse.json({ ok: true, ...result })
 }
