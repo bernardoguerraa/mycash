@@ -3,9 +3,20 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link2, Loader2 } from 'lucide-react'
 
+interface PluggyConnectOptions {
+  connectToken: string
+  includeSandbox?: boolean
+  onSuccess?: (data: { item: { id: string } }) => void | Promise<void>
+  onError?: (err: unknown) => void
+}
+interface PluggyConnectInstance {
+  init: () => void
+}
+type PluggyConnectCtor = new (opts: PluggyConnectOptions) => PluggyConnectInstance
+
 declare global {
   interface Window {
-    PluggyConnect?: any
+    PluggyConnect?: PluggyConnectCtor
   }
 }
 
@@ -59,7 +70,7 @@ export default function PluggyConnectButton({
           })
           onConnected()
         },
-        onError: (err: any) => {
+        onError: (err: unknown) => {
           console.error('Pluggy error', err)
         },
       })

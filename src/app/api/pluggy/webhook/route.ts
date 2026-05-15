@@ -5,6 +5,15 @@ import { syncPluggyItem } from '@/lib/pluggy/sync'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
+interface PluggyWebhookEvent {
+  id?: string
+  eventId?: string
+  event?: string
+  itemId?: string
+  data?: { itemId?: string; code?: string; message?: string }
+  [key: string]: unknown
+}
+
 /**
  * Webhook Pluggy.
  * Eventos relevantes:
@@ -17,9 +26,9 @@ export const dynamic = 'force-dynamic'
  */
 export async function POST(req: NextRequest) {
   const raw = await req.text()
-  let event: any
+  let event: PluggyWebhookEvent
   try {
-    event = JSON.parse(raw)
+    event = JSON.parse(raw) as PluggyWebhookEvent
   } catch {
     return NextResponse.json({ error: 'invalid json' }, { status: 400 })
   }
@@ -70,7 +79,7 @@ export async function POST(req: NextRequest) {
 
         if (!conn) break
 
-        await syncPluggyItem(db as any, itemId, conn.id_usuario)
+        await syncPluggyItem(db, itemId, conn.id_usuario)
         break
       }
 
@@ -109,12 +118,13 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ ok: true })
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('webhook error', err)
+    const message = err instanceof Error ? err.message : String(err)
     if (wh) {
       await db
         .from('pluggy_webhook_events')
-        .update({ error: String(err?.message || err) })
+        .update({ error: message })
         .eq('id', wh.id)
     }
     return NextResponse.json({ error: 'processing failed' }, { status: 500 })

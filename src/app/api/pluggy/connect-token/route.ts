@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
   const tokenResp = await pluggy.createConnectToken(itemId, {
     clientUserId: user.id,
     webhookUrl,
-  } as any)
+  } as Parameters<typeof pluggy.createConnectToken>[1])
 
   return NextResponse.json({ accessToken: tokenResp.accessToken })
 }

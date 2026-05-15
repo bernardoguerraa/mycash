@@ -96,7 +96,7 @@ export async function syncPluggyItem(
           valor: Math.abs(tx.amount),
           pluggy_tx_id: tx.id,
           origem: 'pluggy' as const,
-          raw_data: tx as any,
+          raw_data: tx as unknown as Record<string, unknown>,
         }
 
         const { data: inserted, error: txErr } = await db
