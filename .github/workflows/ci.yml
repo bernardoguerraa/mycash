@@ -25,3 +25,6 @@ jobs:
 
       - name: Run TypeScript typecheck
         run: npx tsc --noEmit
+
+      - name: Run ESLint (espelha o lint que o Vercel executa no build)
+        run: npm run lint
