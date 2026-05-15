@@ -58,7 +58,7 @@ function getStatusConfig(status: StatusMeta) {
       }
     case 'Concluida':
       return {
-        label: 'Concluida',
+        label: 'Concluída',
         color: 'bg-emerald-500/[0.08] text-emerald-400 border-emerald-500/20',
         dot: 'bg-emerald-400',
       }
@@ -121,7 +121,7 @@ export default function MetasClient({ metas, idUsuario }: MetasClientProps) {
       glow: 'bg-amber-500',
     },
     {
-      label: 'Concluidas',
+      label: 'Concluídas',
       value: String(stats.concluidas),
       icon: <CheckCircle2 className="h-5 w-5" />,
       accent: 'bg-emerald-500/[0.08] text-emerald-400',
@@ -139,7 +139,7 @@ export default function MetasClient({ metas, idUsuario }: MetasClientProps) {
   const filterOptions: { label: string; value: StatusMeta | 'Todas' }[] = [
     { label: 'Todas', value: 'Todas' },
     { label: 'Em Andamento', value: 'EmAndamento' },
-    { label: 'Concluidas', value: 'Concluida' },
+    { label: 'Concluídas', value: 'Concluida' },
     { label: 'Canceladas', value: 'Cancelada' },
   ]
 
@@ -306,7 +306,7 @@ export default function MetasClient({ metas, idUsuario }: MetasClientProps) {
                 <div className="mt-2 flex items-center gap-1 text-xs">
                   <Clock className="h-3.5 w-3.5 text-zinc-500" />
                   {meta.status === 'Concluida' ? (
-                    <span className="text-emerald-400 font-medium">Meta concluida</span>
+                    <span className="text-emerald-400 font-medium">Meta concluída</span>
                   ) : meta.status === 'Cancelada' ? (
                     <span className="text-rose-400 font-medium">Meta cancelada</span>
                   ) : daysRemaining > 0 ? (
@@ -325,7 +325,7 @@ export default function MetasClient({ metas, idUsuario }: MetasClientProps) {
                     <span className="text-amber-400 font-medium">Vence hoje</span>
                   ) : (
                     <span className="text-rose-400 font-medium">
-                      Vencida ha {Math.abs(daysRemaining)} dias
+                      Vencida há {Math.abs(daysRemaining)} dias
                     </span>
                   )}
                 </div>

@@ -6,11 +6,11 @@ import { Bell } from 'lucide-react'
 
 const pageTitles: Record<string, string> = {
   '/dashboard': 'Dashboard',
-  '/transacoes': 'Transacoes',
+  '/transacoes': 'Transações',
   '/contas': 'Contas',
   '/metas': 'Metas',
   '/lembretes': 'Lembretes',
-  '/notificacoes': 'Notificacoes',
+  '/notificacoes': 'Notificações',
   '/perfil': 'Perfil',
 }
 

@@ -103,7 +103,7 @@ export default function TransacaoModal({ contas, transacao, onClose, onSaved }: 
     }
 
     if (!descricao.trim()) {
-      newErrors.descricao = 'Informe a descricao.'
+      newErrors.descricao = 'Informe a descrição.'
     }
 
     const valor = parseFloat(valorStr.replace(',', '.'))
@@ -170,7 +170,7 @@ export default function TransacaoModal({ contas, transacao, onClose, onSaved }: 
         {/* Header */}
         <div className="flex items-center justify-between border-b border-edge-1 px-6 py-4">
           <h3 className="text-lg font-semibold text-white">
-            {isEditing ? 'Editar Transacao' : 'Nova Transacao'}
+            {isEditing ? 'Editar Transação' : 'Nova Transação'}
           </h3>
           <button
             onClick={onClose}
@@ -234,7 +234,7 @@ export default function TransacaoModal({ contas, transacao, onClose, onSaved }: 
                     onChange={() => setTipo(t)}
                     className="sr-only"
                   />
-                  {t === 'Entrada' ? 'Entrada' : 'Saida'}
+                  {t === 'Entrada' ? 'Entrada' : 'Saída'}
                 </label>
               ))}
             </div>
@@ -281,13 +281,13 @@ export default function TransacaoModal({ contas, transacao, onClose, onSaved }: 
           {/* Descricao */}
           <div>
             <label className="mb-1.5 block text-sm font-medium text-zinc-300">
-              Descricao
+              Descrição
             </label>
             <input
               type="text"
               value={descricao}
               onChange={(e) => setDescricao(e.target.value)}
-              placeholder="Ex: Supermercado, Salario mensal..."
+              placeholder="Ex: Supermercado, Salário mensal..."
               className="input-field w-full"
             />
             {errors.descricao && (
@@ -350,8 +350,8 @@ export default function TransacaoModal({ contas, transacao, onClose, onSaved }: 
               {submitting
                 ? 'Salvando...'
                 : isEditing
-                  ? 'Salvar Alteracoes'
-                  : 'Criar Transacao'}
+                  ? 'Salvar Alterações'
+                  : 'Criar Transação'}
             </button>
           </div>
         </form>

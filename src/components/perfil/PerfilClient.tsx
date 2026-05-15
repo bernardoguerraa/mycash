@@ -62,7 +62,7 @@ export default function PerfilClient({
 
   async function handleSaveName() {
     if (!nome.trim()) {
-      setNameMsg({ type: 'error', text: 'O nome nao pode estar vazio.' })
+      setNameMsg({ type: 'error', text: 'O nome não pode estar vazio.' })
       return
     }
     if (!usuario) return
@@ -97,7 +97,7 @@ export default function PerfilClient({
       return
     }
     if (newPassword !== confirmPassword) {
-      setPasswordMsg({ type: 'error', text: 'As senhas nao coincidem.' })
+      setPasswordMsg({ type: 'error', text: 'As senhas não coincidem.' })
       return
     }
 
@@ -130,7 +130,7 @@ export default function PerfilClient({
       <div>
         <h2 className="text-2xl font-bold text-white sm:text-3xl">Meu Perfil</h2>
         <p className="mt-1 text-sm text-zinc-400">
-          Gerencie suas informacoes pessoais e configuracoes.
+          Gerencie suas informações pessoais e configurações.
         </p>
       </div>
 
@@ -147,7 +147,7 @@ export default function PerfilClient({
               </div>
 
               <h3 className="mt-4 text-xl font-bold text-white">
-                {usuario?.nome_completo ?? 'Usuario'}
+                {usuario?.nome_completo ?? 'Usuário'}
               </h3>
 
               <div className="mt-2 flex items-center gap-2 text-sm text-zinc-400">
@@ -190,7 +190,7 @@ export default function PerfilClient({
           {/* Stats Card */}
           <div className="card rounded-2xl p-6">
             <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider">
-              Estatisticas
+              Estatísticas
             </h3>
             <div className="mt-4 space-y-4">
               <div className="flex items-center justify-between">
@@ -207,7 +207,7 @@ export default function PerfilClient({
                   <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-500/10 text-purple-400">
                     <ArrowRightLeft className="h-4 w-4" />
                   </div>
-                  <span className="text-sm text-zinc-300">Transacoes</span>
+                  <span className="text-sm text-zinc-300">Transações</span>
                 </div>
                 <span className="text-lg font-bold text-white">{stats.totalTransacoes}</span>
               </div>
@@ -233,7 +233,7 @@ export default function PerfilClient({
                   <h3 className="text-base font-bold text-white">Upgrade para Premium</h3>
                 </div>
                 <p className="mt-2 text-sm text-zinc-400">
-                  Desbloqueie relatorios avancados, metas ilimitadas e suporte prioritario.
+                  Desbloqueie relatórios avançados, metas ilimitadas e suporte prioritário.
                 </p>
                 <button className="mt-4 w-full rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:from-amber-400 hover:to-amber-500 hover:shadow-lg hover:shadow-amber-500/20">
                   Conhecer Plano Premium
@@ -250,7 +250,7 @@ export default function PerfilClient({
             <div className="flex items-center justify-between">
               <h3 className="flex items-center gap-2 text-base font-semibold text-white">
                 <User className="h-4 w-4 text-zinc-500" />
-                Informacoes Pessoais
+                Informações Pessoais
               </h3>
               {!editingName && (
                 <button
@@ -384,7 +384,7 @@ export default function PerfilClient({
                     type="password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Minimo 6 caracteres"
+                    placeholder="Mínimo 6 caracteres"
                     className="input-field mt-1 w-full"
                   />
                 </div>
@@ -419,12 +419,12 @@ export default function PerfilClient({
           <div className="card rounded-2xl p-6">
             <h3 className="flex items-center gap-2 text-base font-semibold text-white">
               <Shield className="h-4 w-4 text-zinc-500" />
-              Seguranca
+              Segurança
             </h3>
             <div className="mt-4 space-y-3">
               <div className="flex items-center justify-between rounded-xl border border-edge-1 bg-surface-3 px-4 py-3">
                 <div>
-                  <p className="text-sm font-medium text-white">Autenticacao por Email</p>
+                  <p className="text-sm font-medium text-white">Autenticação por Email</p>
                   <p className="text-xs text-zinc-500">Login via email e senha</p>
                 </div>
                 <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/[0.08] px-2.5 py-1 text-xs font-medium text-emerald-400">
@@ -434,8 +434,8 @@ export default function PerfilClient({
               </div>
               <div className="flex items-center justify-between rounded-xl border border-edge-1 bg-surface-3 px-4 py-3">
                 <div>
-                  <p className="text-sm font-medium text-white">Verificacao em 2 Etapas</p>
-                  <p className="text-xs text-zinc-500">Camada extra de seguranca</p>
+                  <p className="text-sm font-medium text-white">Verificação em 2 Etapas</p>
+                  <p className="text-xs text-zinc-500">Camada extra de segurança</p>
                 </div>
                 <span className="inline-flex items-center rounded-full bg-surface-4 px-2.5 py-1 text-xs font-medium text-zinc-400">
                   Em breve

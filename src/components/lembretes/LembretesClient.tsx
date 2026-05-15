@@ -66,7 +66,7 @@ const groupConfig: Record<StatusGroup, { label: string; color: string; borderCol
     icon: <AlertTriangle className="h-5 w-5 text-rose-400" />,
   },
   proximos: {
-    label: 'Proximos (7 dias)',
+    label: 'Próximos (7 dias)',
     color: 'text-amber-400',
     borderColor: 'border-amber-500/30',
     bgColor: 'bg-amber-500/[0.05]',

@@ -20,7 +20,7 @@ export default function RegistroPage() {
     setError(null)
 
     if (password !== confirmPassword) {
-      setError('As senhas nao coincidem.')
+      setError('As senhas não coincidem.')
       return
     }
 
@@ -138,7 +138,7 @@ export default function RegistroPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              placeholder="Minimo 6 caracteres"
+              placeholder="Mínimo 6 caracteres"
               className="input-field py-3"
             />
           </div>
@@ -171,7 +171,7 @@ export default function RegistroPage() {
         </form>
 
         <p className="mt-6 text-center text-sm text-zinc-500">
-          Ja tem uma conta?{' '}
+          Já tem uma conta?{' '}
           <Link href="/login" className="text-emerald-400 hover:text-emerald-300 font-medium transition-colors">
             Entrar
           </Link>

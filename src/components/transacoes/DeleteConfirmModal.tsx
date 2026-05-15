@@ -40,7 +40,7 @@ export default function DeleteConfirmModal({ descricao, onConfirm, onCancel }: P
       <div className="card animate-scale-in w-full max-w-sm rounded-2xl">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-edge-1 px-6 py-4">
-          <h3 className="text-lg font-semibold text-white">Confirmar Exclusao</h3>
+          <h3 className="text-lg font-semibold text-white">Confirmar Exclusão</h3>
           <button
             onClick={onCancel}
             className="rounded-lg p-1.5 text-zinc-500 hover:text-white hover:bg-white/[0.04] transition-colors"
@@ -57,11 +57,11 @@ export default function DeleteConfirmModal({ descricao, onConfirm, onCancel }: P
             </div>
             <div>
               <p className="text-sm text-zinc-300">
-                Tem certeza que deseja excluir a transacao{' '}
+                Tem certeza que deseja excluir a transação{' '}
                 <span className="font-medium text-white">&ldquo;{descricao}&rdquo;</span>?
               </p>
               <p className="mt-1 text-xs text-zinc-500">
-                Esta acao nao pode ser desfeita.
+                Esta ação não pode ser desfeita.
               </p>
             </div>
           </div>

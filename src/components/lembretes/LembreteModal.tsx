@@ -38,10 +38,10 @@ export default function LembreteModal({
     const newErrors: Record<string, string> = {}
 
     if (!descricao.trim()) {
-      newErrors.descricao = 'Descricao e obrigatoria'
+      newErrors.descricao = 'Descrição é obrigatória'
     }
     if (!dataVencimento) {
-      newErrors.dataVencimento = 'Data de vencimento e obrigatoria'
+      newErrors.dataVencimento = 'Data de vencimento é obrigatória'
     }
     const parsedValor = parseFloat(valorPrevisto)
     if (!valorPrevisto || isNaN(parsedValor) || parsedValor <= 0) {
@@ -125,13 +125,13 @@ export default function LembreteModal({
           {/* Descricao */}
           <div>
             <label className="block text-sm font-medium text-zinc-300">
-              Descricao
+              Descrição
             </label>
             <input
               type="text"
               value={descricao}
               onChange={(e) => setDescricao(e.target.value)}
-              placeholder="Ex: Aluguel, Fatura cartao..."
+              placeholder="Ex: Aluguel, Fatura cartão..."
               className={`mt-1 w-full rounded-lg border bg-surface-3 px-3 py-2 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 ${
                 errors.descricao
                   ? 'border-rose-500 focus:ring-rose-500/20'

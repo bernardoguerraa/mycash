@@ -23,7 +23,7 @@ export default function ResetPasswordPage() {
     setError(null)
 
     if (password !== confirmPassword) {
-      setError('As senhas nao coincidem.')
+      setError('As senhas não coincidem.')
       return
     }
 
@@ -90,7 +90,7 @@ export default function ResetPasswordPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                placeholder="Minimo 6 caracteres"
+                placeholder="Mínimo 6 caracteres"
                 className="input-field py-3"
               />
             </div>

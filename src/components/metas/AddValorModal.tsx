@@ -197,7 +197,7 @@ export default function AddValorModal({
               </div>
               {willComplete && (
                 <div className="mt-1 rounded-lg bg-emerald-500/[0.08] px-3 py-2 text-center text-xs font-semibold text-emerald-400">
-                  Meta sera concluida automaticamente!
+                  Meta será concluída automaticamente!
                 </div>
               )}
             </div>

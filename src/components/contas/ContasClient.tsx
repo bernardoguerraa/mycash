@@ -36,8 +36,19 @@ const tipoIcons: Record<string, React.ReactNode> = {
   'Carteira Digital': <Smartphone className="h-6 w-6" />,
 }
 
+const tipoLabels: Record<string, string> = {
+  Corrente: 'Corrente',
+  Poupanca: 'Poupança',
+  Investimento: 'Investimento',
+  'Carteira Digital': 'Carteira Digital',
+}
+
 function getContaIcon(tipo: string) {
   return tipoIcons[tipo] ?? <CreditCard className="h-6 w-6" />
+}
+
+function getTipoLabel(tipo: string) {
+  return tipoLabels[tipo] ?? tipo
 }
 
 export default function ContasClient({ contas: initialContas }: ContasClientProps) {
@@ -94,7 +105,7 @@ export default function ContasClient({ contas: initialContas }: ContasClientProp
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-2xl font-bold text-white sm:text-3xl">
-            Contas Bancarias
+            Contas Bancárias
           </h2>
           <p className="mt-1 text-sm text-zinc-400">
             Gerencie suas contas e acompanhe seus saldos.
@@ -143,7 +154,7 @@ export default function ContasClient({ contas: initialContas }: ContasClientProp
             Nenhuma conta cadastrada
           </h3>
           <p className="mt-2 text-sm text-zinc-400">
-            Adicione sua primeira conta bancaria para comecar.
+            Adicione sua primeira conta bancária para começar.
           </p>
           <button
             onClick={handleNew}
@@ -194,7 +205,7 @@ export default function ContasClient({ contas: initialContas }: ContasClientProp
                     {conta.instituicao}
                   </h3>
                   <p className="mt-0.5 text-xs text-zinc-500">
-                    {conta.tipo_conta} &middot; {conta.numero_conta}
+                    {getTipoLabel(conta.tipo_conta)} &middot; {conta.numero_conta}
                   </p>
                 </div>
 

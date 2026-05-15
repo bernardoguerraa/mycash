@@ -39,7 +39,7 @@ export default async function DashboardPage() {
     user?.user_metadata?.full_name ||
     user?.user_metadata?.name ||
     user?.email?.split('@')[0] ||
-    'Usuario'
+    'Usuário'
 
   // Fetch account balances from contas_bancarias
   const { data: accounts } = await supabase
@@ -140,14 +140,14 @@ export default async function DashboardPage() {
       icon: <Wallet className="h-5 w-5" />,
     },
     {
-      label: 'Receitas do Mes',
+      label: 'Receitas do Mês',
       value: formatCurrency(monthIncome),
       change: '+12%',
       trend: 'up',
       icon: <TrendingUp className="h-5 w-5" />,
     },
     {
-      label: 'Despesas do Mes',
+      label: 'Despesas do Mês',
       value: formatCurrency(monthExpenses),
       change: '-8%',
       trend: 'down',
@@ -197,7 +197,7 @@ export default async function DashboardPage() {
           {getGreeting()}, {displayName}
         </h2>
         <p className="mt-1 text-sm text-zinc-500">
-          Aqui esta o resumo das suas financas.
+          Aqui está o resumo das suas finanças.
         </p>
       </div>
 
@@ -227,7 +227,7 @@ export default async function DashboardPage() {
             </p>
             {stat.change && (
               <p className={`mt-1 text-xs font-medium ${TREND_CHANGE_COLOR[stat.trend]}`}>
-                {stat.change} em relacao ao mes anterior
+                {stat.change} em relação ao mês anterior
               </p>
             )}
           </div>
@@ -240,7 +240,7 @@ export default async function DashboardPage() {
         <div className="card p-6 lg:col-span-2">
           <div className="mb-5 flex items-center justify-between">
             <h3 className="text-sm font-semibold text-white">
-              Visao Geral Mensal
+              Visão Geral Mensal
             </h3>
             <div className="flex gap-4 text-xs text-zinc-500">
               <span className="flex items-center gap-1.5">
@@ -260,7 +260,7 @@ export default async function DashboardPage() {
         <div className="card p-6">
           <h3 className="mb-4 flex items-center gap-2 text-sm font-semibold text-white">
             <Clock className="h-4 w-4 text-zinc-500" />
-            Proximos Lembretes
+            Próximos Lembretes
           </h3>
           {reminders.length === 0 ? (
             <p className="text-sm text-zinc-500">Nenhum lembrete pendente.</p>
@@ -299,7 +299,7 @@ export default async function DashboardPage() {
       <div className="card p-6">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-white">
-            Transacoes Recentes
+            Transações Recentes
           </h3>
           <Link
             href="/transacoes"
@@ -310,7 +310,7 @@ export default async function DashboardPage() {
           </Link>
         </div>
         {transactions.length === 0 ? (
-          <p className="text-sm text-zinc-500">Nenhuma transacao encontrada.</p>
+          <p className="text-sm text-zinc-500">Nenhuma transação encontrada.</p>
         ) : (
           <div className="divide-y divide-white/[0.04]">
             {transactions.map((t) => (

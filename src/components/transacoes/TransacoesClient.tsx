@@ -245,7 +245,7 @@ export default function TransacoesClient({ initialTransacoes, contas }: Props) {
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
             <input
               type="text"
-              placeholder="Buscar por descricao..."
+              placeholder="Buscar por descrição..."
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value)
@@ -266,7 +266,7 @@ export default function TransacoesClient({ initialTransacoes, contas }: Props) {
           >
             <option value="All">Todos os Tipos</option>
             <option value="Entrada">Entrada</option>
-            <option value="Saida">Saida</option>
+            <option value="Saida">Saída</option>
           </select>
 
           {/* Categoria filter */}
@@ -296,7 +296,7 @@ export default function TransacoesClient({ initialTransacoes, contas }: Props) {
             }}
             className="rounded-lg border border-edge-2 bg-surface-3 px-3 py-2 text-sm text-zinc-100 focus:border-emerald-500/20 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
           />
-          <span className="text-zinc-500 text-sm">ate</span>
+          <span className="text-zinc-500 text-sm">até</span>
           <input
             type="date"
             value={filterDateTo}
@@ -323,7 +323,7 @@ export default function TransacoesClient({ initialTransacoes, contas }: Props) {
             className="btn-primary ml-auto flex items-center gap-2"
           >
             <Plus className="h-4 w-4" />
-            Nova Transacao
+            Nova Transação
           </button>
         </div>
       </div>
@@ -337,12 +337,12 @@ export default function TransacoesClient({ initialTransacoes, contas }: Props) {
               <Inbox className="h-8 w-8 text-zinc-600" />
             </div>
             <p className="text-lg font-medium text-zinc-300">
-              Nenhuma transacao encontrada
+              Nenhuma transação encontrada
             </p>
             <p className="mt-1 text-sm text-zinc-500">
               {hasActiveFilters
                 ? 'Tente ajustar os filtros ou limpar a busca.'
-                : 'Clique em "Nova Transacao" para adicionar a primeira.'}
+                : 'Clique em "Nova Transação" para adicionar a primeira.'}
             </p>
             {!hasActiveFilters && (
               <button
@@ -350,7 +350,7 @@ export default function TransacoesClient({ initialTransacoes, contas }: Props) {
                 className="btn-primary mt-4 flex items-center gap-2"
               >
                 <Plus className="h-4 w-4" />
-                Nova Transacao
+                Nova Transação
               </button>
             )}
           </div>
@@ -372,7 +372,7 @@ export default function TransacoesClient({ initialTransacoes, contas }: Props) {
                     </th>
                     <th className="px-4 py-3 text-xs font-medium uppercase tracking-wider text-zinc-500">Tipo</th>
                     <th className="px-4 py-3 text-xs font-medium uppercase tracking-wider text-zinc-500">Categoria</th>
-                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wider text-zinc-500">Descricao</th>
+                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wider text-zinc-500">Descrição</th>
                     <th className="px-4 py-3 text-xs font-medium uppercase tracking-wider text-zinc-500">
                       <button
                         onClick={() => toggleSort('valor')}
@@ -383,7 +383,7 @@ export default function TransacoesClient({ initialTransacoes, contas }: Props) {
                       </button>
                     </th>
                     <th className="px-4 py-3 text-xs font-medium uppercase tracking-wider text-zinc-500">Conta</th>
-                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wider text-zinc-500 text-right">Acoes</th>
+                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wider text-zinc-500 text-right">Ações</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-edge-1">
@@ -408,7 +408,7 @@ export default function TransacoesClient({ initialTransacoes, contas }: Props) {
                           ) : (
                             <ArrowUpRight className="h-3 w-3" />
                           )}
-                          {t.tipo === 'Entrada' ? 'Entrada' : 'Saida'}
+                          {t.tipo === 'Entrada' ? 'Entrada' : 'Saída'}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-zinc-300">{t.categoria}</td>
@@ -467,7 +467,7 @@ export default function TransacoesClient({ initialTransacoes, contas }: Props) {
                       ) : (
                         <ArrowUpRight className="h-3 w-3" />
                       )}
-                      {t.tipo === 'Entrada' ? 'Entrada' : 'Saida'}
+                      {t.tipo === 'Entrada' ? 'Entrada' : 'Saída'}
                     </span>
                     <span
                       className={`font-semibold font-mono-nums ${
@@ -507,7 +507,7 @@ export default function TransacoesClient({ initialTransacoes, contas }: Props) {
               <p className="text-xs text-zinc-500">
                 Mostrando {(safeCurrentPage - 1) * ITEMS_PER_PAGE + 1} a{' '}
                 {Math.min(safeCurrentPage * ITEMS_PER_PAGE, filteredData.length)} de{' '}
-                {filteredData.length} transacoes
+                {filteredData.length} transações
               </p>
               <div className="flex items-center gap-1">
                 <button

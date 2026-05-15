@@ -48,7 +48,7 @@ export default function LoginPage() {
           <span className="bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">Cash</span>
         </h1>
         <p className="mt-2 text-sm text-zinc-500">
-          Gerencie suas financas com inteligencia
+          Gerencie suas finanças com inteligência
         </p>
       </div>
 
@@ -115,7 +115,7 @@ export default function LoginPage() {
         </form>
 
         <p className="mt-6 text-center text-sm text-zinc-500">
-          Nao tem uma conta?{' '}
+          Não tem uma conta?{' '}
           <Link href="/registro" className="text-emerald-400 hover:text-emerald-300 font-medium transition-colors">
             Criar conta
           </Link>

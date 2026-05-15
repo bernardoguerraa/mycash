@@ -45,7 +45,7 @@ export default function RecuperarSenhaPage() {
           <span className="bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">Cash</span>
         </h1>
         <p className="mt-2 text-sm text-zinc-500">
-          Recupere o acesso a sua conta
+          Recupere o acesso à sua conta
         </p>
       </div>
 
@@ -92,7 +92,7 @@ export default function RecuperarSenhaPage() {
                   Enviando...
                 </span>
               ) : (
-                'Enviar link de recuperacao'
+                'Enviar link de recuperação'
               )}
             </button>
           </form>

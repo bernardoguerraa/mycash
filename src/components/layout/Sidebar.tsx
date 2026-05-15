@@ -18,11 +18,11 @@ import {
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/transacoes', label: 'Transacoes', icon: ArrowLeftRight },
+  { href: '/transacoes', label: 'Transações', icon: ArrowLeftRight },
   { href: '/contas', label: 'Contas', icon: Wallet },
   { href: '/metas', label: 'Metas', icon: Target },
   { href: '/lembretes', label: 'Lembretes', icon: Bell },
-  { href: '/notificacoes', label: 'Notificacoes', icon: BellRing },
+  { href: '/notificacoes', label: 'Notificações', icon: BellRing },
   { href: '/perfil', label: 'Perfil', icon: User },
 ]
 

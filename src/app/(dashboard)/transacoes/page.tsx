@@ -52,10 +52,10 @@ export default async function TransacoesPage() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-white sm:text-3xl">
-          Transacoes
+          Transações
         </h2>
         <p className="mt-1 text-sm text-gray-400">
-          Gerencie todas as suas transacoes financeiras.
+          Gerencie todas as suas transações financeiras.
         </p>
       </div>
 

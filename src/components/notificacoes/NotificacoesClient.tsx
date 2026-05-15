@@ -109,13 +109,13 @@ export default function NotificacoesClient({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-2xl font-bold text-white sm:text-3xl">
-            Notificacoes
+            Notificações
           </h2>
           <p className="mt-1 text-sm text-zinc-400">
-            Acompanhe seus alertas e atualizacoes.
+            Acompanhe seus alertas e atualizações.
             {unreadCount > 0 && (
               <span className="ml-2 inline-flex items-center rounded-full bg-emerald-500/[0.08] px-2 py-0.5 text-xs font-medium text-emerald-400">
-                {unreadCount} nao {unreadCount === 1 ? 'lida' : 'lidas'}
+                {unreadCount} não {unreadCount === 1 ? 'lida' : 'lidas'}
               </span>
             )}
           </p>
@@ -152,7 +152,7 @@ export default function NotificacoesClient({
               : 'text-zinc-400 hover:text-white'
           }`}
         >
-          Nao lidas
+          Não lidas
           {unreadCount > 0 && (
             <span className="ml-1.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-xs text-white">
               {unreadCount}
@@ -168,12 +168,12 @@ export default function NotificacoesClient({
             <Inbox className="h-8 w-8 text-zinc-500" />
           </div>
           <h3 className="mt-4 text-lg font-semibold text-white">
-            Nenhuma notificacao
+            Nenhuma notificação
           </h3>
           <p className="mt-2 text-sm text-zinc-400">
             {filter === 'nao_lidas'
-              ? 'Todas as notificacoes foram lidas.'
-              : 'Voce ainda nao recebeu notificacoes.'}
+              ? 'Todas as notificações foram lidas.'
+              : 'Você ainda não recebeu notificações.'}
           </p>
         </div>
       ) : (

@@ -72,7 +72,7 @@ export default function MetaModal({
     const newErrors: Record<string, string> = {}
 
     if (!titulo.trim()) {
-      newErrors.titulo = 'Titulo e obrigatorio'
+      newErrors.titulo = 'Título é obrigatório'
     }
 
     const objetivo = parseCurrencyInput(valorObjetivo)
@@ -81,15 +81,15 @@ export default function MetaModal({
     }
 
     if (!dataInicio) {
-      newErrors.dataInicio = 'Data de inicio e obrigatoria'
+      newErrors.dataInicio = 'Data de início é obrigatória'
     }
 
     if (!dataLimite) {
-      newErrors.dataLimite = 'Data limite e obrigatoria'
+      newErrors.dataLimite = 'Data limite é obrigatória'
     }
 
     if (dataInicio && dataLimite && new Date(dataLimite) <= new Date(dataInicio)) {
-      newErrors.dataLimite = 'Data limite deve ser posterior a data de inicio'
+      newErrors.dataLimite = 'Data limite deve ser posterior à data de início'
     }
 
     setErrors(newErrors)
@@ -128,7 +128,7 @@ export default function MetaModal({
 
   const statusOptions: { value: StatusMeta; label: string }[] = [
     { value: 'EmAndamento', label: 'Em Andamento' },
-    { value: 'Concluida', label: 'Concluida' },
+    { value: 'Concluida', label: 'Concluída' },
     { value: 'Cancelada', label: 'Cancelada' },
   ]
 
@@ -165,13 +165,13 @@ export default function MetaModal({
           {/* Titulo */}
           <div>
             <label className="mb-1.5 block text-sm font-medium text-zinc-300">
-              Titulo
+              Título
             </label>
             <input
               type="text"
               value={titulo}
               onChange={(e) => setTitulo(e.target.value)}
-              placeholder="Ex: Reserva de emergencia"
+              placeholder="Ex: Reserva de emergência"
               className={`w-full rounded-lg border bg-surface-3 px-3.5 py-2.5 text-sm text-white placeholder-zinc-500 outline-none transition-colors focus:ring-2 focus:ring-emerald-500/20 ${
                 errors.titulo ? 'border-rose-500' : 'border-edge-2 focus:border-emerald-500/20'
               }`}
@@ -222,7 +222,7 @@ export default function MetaModal({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="mb-1.5 block text-sm font-medium text-zinc-300">
-                Data de Inicio
+                Data de Início
               </label>
               <input
                 type="date"

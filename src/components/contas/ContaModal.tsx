@@ -13,12 +13,17 @@ interface ContaModalProps {
   onSaved: (conta: ContaBancaria) => void
 }
 
-const TIPOS_CONTA = ['Corrente', 'Poupanca', 'Investimento', 'Carteira Digital']
+const TIPOS_CONTA: { value: string; label: string }[] = [
+  { value: 'Corrente', label: 'Corrente' },
+  { value: 'Poupanca', label: 'Poupança' },
+  { value: 'Investimento', label: 'Investimento' },
+  { value: 'Carteira Digital', label: 'Carteira Digital' },
+]
 
 export default function ContaModal({ conta, onClose, onSaved }: ContaModalProps) {
   const [instituicao, setInstituicao] = useState(conta?.instituicao ?? '')
   const [numeroConta, setNumeroConta] = useState(conta?.numero_conta ?? '')
-  const [tipoConta, setTipoConta] = useState(conta?.tipo_conta ?? TIPOS_CONTA[0])
+  const [tipoConta, setTipoConta] = useState(conta?.tipo_conta ?? TIPOS_CONTA[0].value)
   const [saldoAtual, setSaldoAtual] = useState(
     conta ? formatInputCurrency(conta.saldo_atual) : ''
   )
@@ -59,8 +64,8 @@ export default function ContaModal({ conta, onClose, onSaved }: ContaModalProps)
   }
 
   function validate(): string | null {
-    if (!instituicao.trim()) return 'Informe a instituicao.'
-    if (!numeroConta.trim()) return 'Informe o numero da conta.'
+    if (!instituicao.trim()) return 'Informe a instituição.'
+    if (!numeroConta.trim()) return 'Informe o número da conta.'
     if (!tipoConta) return 'Selecione o tipo da conta.'
     if (!saldoAtual.trim()) return 'Informe o saldo atual.'
     return null
@@ -106,7 +111,7 @@ export default function ContaModal({ conta, onClose, onSaved }: ContaModalProps)
       } = await supabase.auth.getUser()
 
       if (!user) {
-        setError('Sessao expirada. Faca login novamente.')
+        setError('Sessão expirada. Faça login novamente.')
         setSaving(false)
         return
       }
@@ -119,7 +124,7 @@ export default function ContaModal({ conta, onClose, onSaved }: ContaModalProps)
         .single()
 
       if (!usuario) {
-        setError('Usuario nao encontrado.')
+        setError('Usuário não encontrado.')
         setSaving(false)
         return
       }
@@ -160,11 +165,11 @@ export default function ContaModal({ conta, onClose, onSaved }: ContaModalProps)
         </button>
 
         <h2 className="text-lg font-bold text-white">
-          {isEditing ? 'Editar Conta' : 'Nova Conta Bancaria'}
+          {isEditing ? 'Editar Conta' : 'Nova Conta Bancária'}
         </h2>
         <p className="mt-1 text-sm text-zinc-400">
           {isEditing
-            ? 'Atualize as informacoes da conta.'
+            ? 'Atualize as informações da conta.'
             : 'Preencha os dados da nova conta.'}
         </p>
 
@@ -179,13 +184,13 @@ export default function ContaModal({ conta, onClose, onSaved }: ContaModalProps)
           {/* Instituicao */}
           <div>
             <label className="block text-sm font-medium text-zinc-300">
-              Instituicao
+              Instituição
             </label>
             <input
               type="text"
               value={instituicao}
               onChange={(e) => setInstituicao(e.target.value)}
-              placeholder="Ex: Nubank, Itau, Bradesco"
+              placeholder="Ex: Nubank, Itaú, Bradesco"
               className="input-field mt-1 w-full"
             />
           </div>
@@ -193,7 +198,7 @@ export default function ContaModal({ conta, onClose, onSaved }: ContaModalProps)
           {/* Numero da conta */}
           <div>
             <label className="block text-sm font-medium text-zinc-300">
-              Numero da Conta
+              Número da Conta
             </label>
             <input
               type="text"
@@ -215,8 +220,8 @@ export default function ContaModal({ conta, onClose, onSaved }: ContaModalProps)
               className="input-field mt-1 w-full"
             >
               {TIPOS_CONTA.map((tipo) => (
-                <option key={tipo} value={tipo}>
-                  {tipo}
+                <option key={tipo.value} value={tipo.value}>
+                  {tipo.label}
                 </option>
               ))}
             </select>
