@@ -15,6 +15,7 @@ import {
   X,
   Menu,
 } from 'lucide-react'
+import ThemeToggle from '@/components/theme/ThemeToggle'
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -77,8 +78,9 @@ export default function Sidebar({ onLogout }: SidebarProps) {
         })}
       </nav>
 
-      {/* Logout */}
-      <div className="border-t border-edge-1 p-3">
+      {/* Theme toggle + Logout */}
+      <div className="border-t border-edge-1 p-3 space-y-0.5">
+        <ThemeToggle />
         <button
           onClick={onLogout}
           className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-medium text-zinc-500 transition-all duration-150 hover:bg-white/[0.04] hover:text-zinc-300"

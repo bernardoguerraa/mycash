@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  darkMode: 'class',
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -10,17 +11,17 @@ const config: Config = {
     extend: {
       colors: {
         surface: {
-          0: '#09090b',
-          1: '#0c0d10',
-          2: '#111318',
-          3: '#16181d',
-          4: '#1c1f26',
+          0: 'rgb(var(--surface-0) / <alpha-value>)',
+          1: 'rgb(var(--surface-1) / <alpha-value>)',
+          2: 'rgb(var(--surface-2) / <alpha-value>)',
+          3: 'rgb(var(--surface-3) / <alpha-value>)',
+          4: 'rgb(var(--surface-4) / <alpha-value>)',
         },
         edge: {
-          1: 'rgba(255,255,255,0.06)',
-          2: 'rgba(255,255,255,0.09)',
-          3: 'rgba(255,255,255,0.12)',
-          4: 'rgba(255,255,255,0.18)',
+          1: 'var(--edge-1)',
+          2: 'var(--edge-2)',
+          3: 'var(--edge-3)',
+          4: 'var(--edge-4)',
         },
         accent: {
           DEFAULT: '#10b981',
