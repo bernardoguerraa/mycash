@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
   const { data: userRow } = await supabase
     .from('usuarios')
     .select('id_usuario')
-    .eq('auth_user_id' as never, user.id)
+    .eq('auth_user_id', user.id)
     .maybeSingle()
 
   if (!userRow) {

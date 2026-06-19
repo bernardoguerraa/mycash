@@ -11,6 +11,7 @@ export interface Database {
       usuarios: {
         Row: {
           id_usuario: number;
+          auth_user_id: string | null;
           nome_completo: string;
           email: string;
           senha_hash: string;
@@ -20,6 +21,7 @@ export interface Database {
         };
         Insert: {
           id_usuario?: number;
+          auth_user_id?: string | null;
           nome_completo: string;
           email: string;
           senha_hash: string;
@@ -29,6 +31,7 @@ export interface Database {
         };
         Update: {
           id_usuario?: number;
+          auth_user_id?: string | null;
           nome_completo?: string;
           email?: string;
           senha_hash?: string;

@@ -59,21 +59,9 @@ export default function RegistroPage() {
         return
       }
 
-      // Sessao ativa (auto-confirm ligado): cria o perfil e segue para o dashboard
-      if (data.user) {
-        const { error: insertError } = await supabase
-          .from('usuarios')
-          .insert({
-            nome_completo: nomeCompleto,
-            email,
-            senha_hash: 'managed_by_supabase_auth',
-          })
-
-        if (insertError) {
-          console.error('Error inserting usuario:', insertError)
-        }
-      }
-
+      // A linha em public.usuarios e criada automaticamente pelo trigger
+      // on_auth_user_created (ver supabase/migrations/20260619_rls_and_auth_user_id.sql).
+      // Sessao ja ativa (auto-confirm habilitado) -> dashboard.
       router.push('/dashboard')
       router.refresh()
     } catch {
