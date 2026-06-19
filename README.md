@@ -1,94 +1,169 @@
 # MyCash
 
-Plataforma de gestão financeira pessoal com rastreamento automatizado de despesas, metas financeiras e assistente de IA para orientação financeira.
+Plataforma de gestão financeira pessoal com sincronização automática de contas via Open Finance, controle de transações, metas financeiras e lembretes de pagamentos.
 
-## Tecnologias Utilizadas
+## Objetivos
 
-### Frontend
-- **React 19** com TypeScript
-- **Vite** para build rápido
-- **Tailwind CSS** para estilização
-- **React Router DOM** para navegação
-- **Lucide React** para ícones
-- **Zustand** para gerenciamento de estado
-- **React Hook Form + Zod** para formulários e validação
+- Centralizar a visão financeira do usuário (saldos, receitas, despesas, metas) em uma única interface
+- Reduzir o trabalho manual de lançamento de transações por meio de integração com Open Finance (Pluggy)
+- Apresentar a saúde financeira de forma compreensível, com gráficos e indicadores mensais
+- Notificar o usuário sobre vencimentos e desvios de orçamento
 
-### Backend & BaaS
-- **Supabase** para banco de dados e autenticação
-- **Supabase Edge Functions** para funções serverless
+## Selling-points
 
-### IA & Utilitários
-- **Google Generative AI (Gemini)** para o assistente financeiro
-- **ESLint + Prettier** para código limpo
+- **Multi-conta**: agrega contas-corrente, poupança, cartões e investimentos em um único dashboard
+- **Open Finance brasileiro**: integração com Pluggy cobre os principais bancos do país
+- **Web responsivo**: dark UI desenhada no Figma, navegação mobile-friendly
+- **Server-side rendering**: dados sensíveis ficam server-side (Next.js App Router), reduzindo exposição no cliente
+- **Row Level Security**: isolamento por usuário garantido no banco (Supabase Postgres)
 
-## Estrutura do Projeto
+## Funcionalidades principais
 
-```
-src/
-├── components/     # Componentes UI reutilizáveis
-├── lib/           # Utilitários e cliente Supabase
-├── hooks/         # Hooks customizados React
-├── types/         # Interfaces TypeScript
-└── ...
-supabase/
-├── functions/     # Edge Functions (Deno/TypeScript)
-└── ...
-```
+| Área | O que faz |
+|---|---|
+| **Autenticação** | Cadastro e login por e-mail/senha (Supabase Auth), recuperação de senha, callback OAuth |
+| **Dashboard** | Saldo total agregado, receitas/despesas do mês, metas ativas, próximos lembretes, transações recentes, gráfico de 6 meses |
+| **Transações** | CRUD completo, filtros por tipo/categoria/conta, busca por descrição |
+| **Contas bancárias** | Cadastro manual + sincronização via Pluggy (Open Finance) |
+| **Metas financeiras** | Criação, acompanhamento de progresso, adição parcial de valor |
+| **Lembretes** | Contas a pagar/receber com data de vencimento e valor previsto |
+| **Notificações** | Eventos do sistema (metas, lembretes, alertas de saldo) |
 
-## Configuração do Ambiente
+## Stack
 
-1. **Clone o repositório:**
+**Front-end**
+- [Next.js 14.2](https://nextjs.org) (App Router) + [React 18](https://react.dev)
+- [TypeScript 5](https://www.typescriptlang.org)
+- [Tailwind CSS 3.4](https://tailwindcss.com)
+- [Recharts](https://recharts.org) para gráficos
+- [Lucide React](https://lucide.dev) para ícones
+- [date-fns](https://date-fns.org) para manipulação de datas
+
+**Back-end / Persistência**
+- [Supabase](https://supabase.com) — Auth + Postgres (com Row Level Security)
+- Next.js API Route Handlers como camada REST (`src/app/api/`)
+
+**Integrações**
+- [Pluggy SDK](https://pluggy.ai) — Open Finance (sincronização de contas e transações)
+
+**Ferramentas**
+- ESLint 8 + `eslint-config-next`
+- PostCSS 8
+- GitHub Actions (typecheck + lint a cada push)
+- Vercel para deploy contínuo
+
+## Setup
+
+### Pré-requisitos
+- Node.js 20+
+- npm 10+
+- Conta no Supabase (gratuita) com um projeto criado
+
+### Passos
+
+1. **Clone o repositório**
    ```bash
    git clone https://github.com/bernardoguerraa/mycash.git
    cd mycash
    ```
 
-2. **Instale as dependências:**
+2. **Instale as dependências**
    ```bash
-   npm install
+   npm ci
    ```
 
-3. **Configure as variáveis de ambiente:**
-   ```bash
-   cp .env.example .env
-   ```
-   
-   Preencha o arquivo `.env` com:
-   - `VITE_SUPABASE_URL` - URL do seu projeto Supabase
-   - `VITE_SUPABASE_ANON_KEY` - Chave anônima do Supabase
-   - `GEMINI_API_KEY` - API key do Google Gemini
+3. **Configure as variáveis de ambiente**
 
-4. **Inicie o ambiente local Supabase:**
-   ```bash
-   npx supabase start
+   Crie um arquivo `.env.local` na raiz do projeto com:
+
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=https://<seu-projeto>.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=<sua-chave-anon>
+   SUPABASE_SERVICE_ROLE_KEY=<sua-chave-service-role>
    ```
 
-5. **Execute o projeto:**
+   Opcionais (para a integração Pluggy):
+
+   ```env
+   PLUGGY_CLIENT_ID=<seu-client-id-pluggy>
+   PLUGGY_CLIENT_SECRET=<seu-client-secret-pluggy>
+   NEXT_PUBLIC_APP_URL=http://localhost:3000
+   ```
+
+   Veja [`docs/Referências/variaveis-ambiente.md`](./docs/Referências/variaveis-ambiente.md) para a especificação completa.
+
+4. **Rode em modo desenvolvimento**
    ```bash
    npm run dev
    ```
 
-## Status do Projeto
+   O app sobe em http://localhost:3000.
 
-- Setup inicial completo
-- Estrutura de pastas organizada
-- Dependências instaladas
-- Ambiente Supabase configurado
-- Edge Functions preparadas
-- **Em andamento:** Modelagem do banco de dados e RLS
+### Outros comandos
 
-## Próximos Passos
+| Comando | O que faz |
+|---|---|
+| `npm run build` | Build de produção (lint + typecheck + compilação) |
+| `npm run start` | Roda o build de produção |
+| `npm run lint` | Roda ESLint |
+| `npx tsc --noEmit` | Apenas typecheck |
 
-- [ ] Modelagem do banco de dados
-- [ ] Configuração de Row Level Security (RLS)
-- [ ] Autenticação de usuários
-- [ ] Interface de transações
-- [ ] Sistema de metas financeiras
-- [ ] Assistente de IA integrado
+## Documentação
+
+A documentação segue o framework [Diátaxis](https://diataxis.fr) e está em [`docs/`](./docs):
+
+- [`docs/Tutoriais/`](./docs/Tutoriais/) — aprendizado guiado (primeiro setup, primeira feature)
+- [`docs/How-tos/`](./docs/How-tos/) — receitas para tarefas comuns (configurar envs, criar migration)
+- [`docs/Referências/`](./docs/Referências/) — especificações (rotas, schema, variáveis de ambiente)
+- [`docs/Explanações/`](./docs/Explanações/) — decisões de stack e arquitetura
+
+## Estrutura do projeto
+
+```
+src/
+├── app/
+│   ├── (dashboard)/          # rotas autenticadas (dashboard, transacoes, contas, ...)
+│   ├── api/pluggy/           # rotas REST da integração Pluggy
+│   ├── auth/callback/        # callback OAuth/e-mail
+│   ├── login/                # tela de login
+│   ├── registro/             # tela de cadastro
+│   └── recuperar-senha/      # recuperação de senha
+├── components/               # componentes React por área (contas, transacoes, metas, ...)
+├── lib/
+│   ├── supabase/             # clients (browser/server/service) + middleware
+│   └── pluggy/               # client + sync + mapping
+├── types/                    # interfaces (incluindo schema do banco)
+└── middleware.ts             # refresh de sessão Supabase
+
+docs/                         # documentação Diátaxis
+supabase/migrations/          # migrations SQL do Supabase
+```
+
+## Status do projeto
+
+- ✅ Front-end implementado a partir do design Figma
+- ✅ Autenticação (cadastro, login, recuperação de senha)
+- ✅ Dashboard com dados reais do Supabase (saldo, receitas/despesas, metas, lembretes)
+- ✅ CRUD de transações, contas, metas, lembretes
+- ✅ Sincronização Pluggy (Open Finance) codada
+- ✅ Deploy contínuo na Vercel
+- 🚧 Migration do Pluggy a ser aplicada no banco
+- 🚧 Testes automatizados
+- 🚧 Front-end móvel (nativo)
+
+## Equipe
+
+| Membro | GitHub | Contato |
+|---|---|---|
+| Bernardo Guerra | [@bernardoguerraa](https://github.com/bernardoguerraa) | _(adicionar contato)_ |
+| Luiz Otávio | [@luizin004](https://github.com/luizin004) | _(adicionar contato)_ |
+| Matheus Bueno | [@mbu3no](https://github.com/mbu3no) | _(adicionar contato)_ |
+
+> **Para os membros**: preencham o contato de preferência (e-mail acadêmico, LinkedIn, etc.) substituindo o placeholder acima.
 
 ## Contribuição
 
-Sinta-se à vontade para abrir issues e pull requests para melhorar o projeto!
+Contribuições são bem-vindas. Para reportar um problema ou propor uma melhoria, abra uma issue ou pull request.
 
 ## Licença
 
