@@ -1,0 +1,31 @@
+name: Supabase Keepalive
+
+# Mantem o projeto Supabase ativo no free tier (que pausa apos 7 dias
+# sem requisicoes). Faz uma chamada diaria ao endpoint de health.
+
+on:
+  schedule:
+    # Todos os dias as 08:00 UTC (05:00 BRT)
+    - cron: '0 8 * * *'
+  # Permite acionar manualmente pela aba Actions
+  workflow_dispatch:
+
+jobs:
+  ping:
+    name: Pingar Supabase para evitar auto-pause
+    runs-on: ubuntu-latest
+    steps:
+      - name: Chamada ao endpoint de health
+        run: |
+          URL="https://ztnaapthygsnhrosemvj.supabase.co/auth/v1/health"
+          echo "Pingando $URL"
+          code=$(curl -s -o /dev/null -w "%{http_code}" -m 30 "$URL")
+          echo "HTTP $code"
+          if [ "$code" = "200" ] || [ "$code" = "401" ]; then
+            echo "Supabase ativo (200=ok com chave, 401=ok sem chave; ambos indicam servidor de pe)"
+            exit 0
+          else
+            echo "Supabase nao respondeu como esperado (recebido: $code)"
+            echo "Pode estar pausado/fora do ar. Restaurar manualmente em supabase.com/dashboard."
+            exit 1
+          fi
