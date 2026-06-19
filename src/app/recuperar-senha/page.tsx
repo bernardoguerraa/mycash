@@ -19,8 +19,11 @@ export default function RecuperarSenhaPage() {
 
     try {
       const supabase = createClient()
+      // Manda direto pra /auth/reset-password (a propria pagina troca o
+      // code por sessao). Evita ter que liberar URLs com query string no
+      // allowlist do Supabase, que vinha falhando.
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/callback?next=/auth/reset-password`,
+        redirectTo: `${window.location.origin}/auth/reset-password`,
       })
 
       if (error) {

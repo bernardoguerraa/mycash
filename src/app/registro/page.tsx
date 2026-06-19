@@ -14,7 +14,6 @@ export default function RegistroPage() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const [pendingConfirmEmail, setPendingConfirmEmail] = useState<string | null>(null)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -51,11 +50,10 @@ export default function RegistroPage() {
         return
       }
 
-      // Quando a confirmacao de email esta habilitada no Supabase, signUp
-      // retorna `user` mas `session` nula. Nesse caso a insercao em `usuarios`
-      // rodaria como anonima e violaria RLS — adiamos para o callback pos-confirmacao.
+      // Sem sessao (confirmacao de email habilitada): redireciona pra
+      // pagina dedicada com botao de reenvio.
       if (!data.session) {
-        setPendingConfirmEmail(email)
+        router.push(`/auth/confirme-seu-email?email=${encodeURIComponent(email)}`)
         return
       }
 
@@ -88,35 +86,12 @@ export default function RegistroPage() {
       <div className="card p-8">
         <h2 className="text-lg font-semibold text-white mb-6">Criar conta</h2>
 
-        {pendingConfirmEmail && (
-          <div className="space-y-4">
-            <div className="animate-fade-up rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-4 text-sm text-emerald-300">
-              <p className="font-semibold mb-1">Conta criada!</p>
-              <p>
-                Enviamos um link de confirmação para{' '}
-                <span className="font-medium text-emerald-200">{pendingConfirmEmail}</span>.
-                Clique no link do e-mail para ativar a conta antes de fazer login.
-              </p>
-              <p className="mt-2 text-xs text-emerald-400/80">
-                Não recebeu? Verifique a caixa de spam.
-              </p>
-            </div>
-            <Link
-              href="/login"
-              className="block w-full py-3 px-4 text-center bg-surface-3 hover:bg-surface-4 border border-edge-2 text-white font-medium rounded-xl transition-colors"
-            >
-              Ir para o login
-            </Link>
-          </div>
-        )}
-
-        {error && !pendingConfirmEmail && (
+        {error && (
           <div className="mb-4 animate-fade-up rounded-xl bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400">
             {error}
           </div>
         )}
 
-        {!pendingConfirmEmail && (
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="nome" className="block text-xs font-medium text-zinc-400 mb-1.5 uppercase tracking-wider">
@@ -189,16 +164,13 @@ export default function RegistroPage() {
             )}
           </button>
         </form>
-        )}
 
-        {!pendingConfirmEmail && (
-          <p className="mt-6 text-center text-sm text-zinc-500">
-            Já tem uma conta?{' '}
-            <Link href="/login" className="text-emerald-400 hover:text-emerald-300 font-medium transition-colors">
-              Entrar
-            </Link>
-          </p>
-        )}
+        <p className="mt-6 text-center text-sm text-zinc-500">
+          Já tem uma conta?{' '}
+          <Link href="/login" className="text-emerald-400 hover:text-emerald-300 font-medium transition-colors">
+            Entrar
+          </Link>
+        </p>
       </div>
     </div>
   )
