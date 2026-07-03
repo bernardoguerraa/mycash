@@ -28,3 +28,6 @@ jobs:
 
       - name: Run ESLint (espelha o lint que o Vercel executa no build)
         run: npm run lint
+
+      - name: Run tests (Vitest)
+        run: npm run test:ci

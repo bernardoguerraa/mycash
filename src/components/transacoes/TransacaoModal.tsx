@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { X } from 'lucide-react'
 import { TipoTransacao } from '@/types/database'
-import { createClient } from '@/lib/supabase/client'
+import { api, ApiError } from '@/lib/api/client'
 
 interface Transacao {
   id_transacao: number
@@ -41,7 +41,6 @@ const CATEGORIAS = [
 ]
 
 export default function TransacaoModal({ contas, transacao, onClose, onSaved }: Props) {
-  const supabase = createClient()
   const overlayRef = useRef<HTMLDivElement>(null)
 
   const isEditing = transacao !== null
@@ -137,27 +136,19 @@ export default function TransacaoModal({ contas, transacao, onClose, onSaved }: 
       data_transacao: dataTransacao,
     }
 
-    let error
-
-    if (isEditing) {
-      const result = await supabase
-        .from('transacoes')
-        .update(payload)
-        .eq('id_transacao', transacao.id_transacao)
-      error = result.error
-    } else {
-      const result = await supabase.from('transacoes').insert(payload)
-      error = result.error
+    try {
+      if (isEditing) {
+        await api.transacoes.update(transacao.id_transacao, payload)
+      } else {
+        await api.transacoes.create(payload)
+      }
+      onSaved()
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : 'Erro inesperado ao salvar.'
+      setErrors({ form: message })
+    } finally {
+      setSubmitting(false)
     }
-
-    setSubmitting(false)
-
-    if (error) {
-      setErrors({ form: error.message })
-      return
-    }
-
-    onSaved()
   }
 
   return (

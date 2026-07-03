@@ -12,7 +12,7 @@ import {
   PiggyBank,
   Smartphone,
 } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+import { api } from '@/lib/api/client'
 import { Database } from '@/types/database'
 import ContaModal from './ContaModal'
 import PluggyConnectButton from './PluggyConnectButton'
@@ -57,20 +57,16 @@ export default function ContasClient({ contas: initialContas }: ContasClientProp
   const [editingConta, setEditingConta] = useState<ContaBancaria | null>(null)
   const [deleting, setDeleting] = useState<number | null>(null)
 
-  const supabase = createClient()
-
   const totalBalance = contas.reduce((sum, c) => sum + (c.saldo_atual || 0), 0)
 
   async function handleDelete(id: number) {
     if (!confirm('Tem certeza que deseja excluir esta conta?')) return
     setDeleting(id)
-    const { error } = await supabase
-      .from('contas_bancarias')
-      .delete()
-      .eq('id_conta', id)
-
-    if (!error) {
+    try {
+      await api.contas.delete(id)
       setContas((prev) => prev.filter((c) => c.id_conta !== id))
+    } catch (err) {
+      console.error('Falha ao excluir conta:', err)
     }
     setDeleting(null)
   }

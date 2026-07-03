@@ -17,7 +17,7 @@ import {
 import { TipoTransacao } from '@/types/database'
 import TransacaoModal from './TransacaoModal'
 import DeleteConfirmModal from './DeleteConfirmModal'
-import { createClient } from '@/lib/supabase/client'
+import { api } from '@/lib/api/client'
 import { useRouter } from 'next/navigation'
 
 interface Transacao {
@@ -60,7 +60,6 @@ type SortDir = 'asc' | 'desc'
 
 export default function TransacoesClient({ initialTransacoes, contas }: Props) {
   const router = useRouter()
-  const supabase = createClient()
 
   const [transacoes, setTransacoes] = useState<Transacao[]>(initialTransacoes)
 
@@ -189,31 +188,24 @@ export default function TransacoesClient({ initialTransacoes, contas }: Props) {
     setShowModal(false)
     setEditingTransacao(null)
     router.refresh()
-    // Refetch client-side for immediate UI update
-    const fetchData = async () => {
-      const contaIds = contas.map((c) => c.id_conta)
-      if (contaIds.length === 0) return
-      const { data } = await supabase
-        .from('transacoes')
-        .select('*')
-        .in('id_conta', contaIds)
-        .order('data_transacao', { ascending: false })
-      if (data) setTransacoes(data)
-    }
-    fetchData()
-  }, [contas, router, supabase])
+    // Refetch via API para atualizar UI imediatamente
+    api.transacoes
+      .list({ limit: 500 })
+      .then((data) => setTransacoes(data))
+      .catch(() => {
+        // Falha na refetch nao deveria bloquear a UI — router.refresh() cobre
+      })
+  }, [router])
 
   const handleDelete = async () => {
     if (!deletingTransacao) return
-    const { error } = await supabase
-      .from('transacoes')
-      .delete()
-      .eq('id_transacao', deletingTransacao.id_transacao)
-
-    if (!error) {
+    try {
+      await api.transacoes.delete(deletingTransacao.id_transacao)
       setTransacoes((prev) =>
         prev.filter((t) => t.id_transacao !== deletingTransacao.id_transacao)
       )
+    } catch (err) {
+      console.error('Falha ao excluir transacao:', err)
     }
     setDeletingTransacao(null)
     router.refresh()

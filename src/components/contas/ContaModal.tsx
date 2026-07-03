@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { X, Loader2, AlertCircle } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+import { api, ApiError } from '@/lib/api/client'
 import { Database } from '@/types/database'
 
 type ContaBancaria = Database['public']['Tables']['contas_bancarias']['Row']
@@ -31,8 +31,6 @@ export default function ContaModal({ conta, onClose, onSaved }: ContaModalProps)
   const [error, setError] = useState<string | null>(null)
 
   const isEditing = conta !== null
-
-  const supabase = createClient()
 
   // Close on Escape
   useEffect(() => {
@@ -90,60 +88,16 @@ export default function ContaModal({ conta, onClose, onSaved }: ContaModalProps)
       saldo_atual: parseCurrency(saldoAtual),
     }
 
-    if (isEditing) {
-      const { data, error: updateError } = await supabase
-        .from('contas_bancarias')
-        .update(payload)
-        .eq('id_conta', conta.id_conta)
-        .select()
-        .single()
-
-      if (updateError) {
-        setError(updateError.message)
-        setSaving(false)
-        return
-      }
-      if (data) onSaved(data)
-    } else {
-      // Get user id for insert
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-
-      if (!user) {
-        setError('Sessão expirada. Faça login novamente.')
-        setSaving(false)
-        return
-      }
-
-      // We need the id_usuario from the usuarios table
-      const { data: usuario } = await supabase
-        .from('usuarios')
-        .select('id_usuario')
-        .eq('email', user.email!)
-        .single()
-
-      if (!usuario) {
-        setError('Usuário não encontrado.')
-        setSaving(false)
-        return
-      }
-
-      const { data, error: insertError } = await supabase
-        .from('contas_bancarias')
-        .insert({ ...payload, id_usuario: usuario.id_usuario })
-        .select()
-        .single()
-
-      if (insertError) {
-        setError(insertError.message)
-        setSaving(false)
-        return
-      }
-      if (data) onSaved(data)
+    try {
+      const saved = isEditing
+        ? await api.contas.update(conta.id_conta, payload)
+        : await api.contas.create(payload)
+      onSaved(saved)
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Erro inesperado ao salvar.')
+    } finally {
+      setSaving(false)
     }
-
-    setSaving(false)
   }
 
   return (
