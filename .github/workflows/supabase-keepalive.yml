@@ -1,31 +1,85 @@
 name: Supabase Keepalive
 
-# Mantem o projeto Supabase ativo no free tier (que pausa apos 7 dias
-# sem requisicoes). Faz uma chamada diaria ao endpoint de health.
+# Free tier do Supabase pausa por inatividade do PROJETO (nao so do
+# serviço de auth). Fazemos uma query real no Postgres via PostgREST
+# para resetar o contador. Se estiver pausado quando o cron rodar,
+# tenta restaurar via Management API (requer SUPABASE_ACCESS_TOKEN)
+# e nao falha o job (evita spam de e-mail).
 
 on:
   schedule:
-    # Todos os dias as 08:00 UTC (05:00 BRT)
+    # 08:00 UTC (05:00 BRT) todos os dias
     - cron: '0 8 * * *'
-  # Permite acionar manualmente pela aba Actions
   workflow_dispatch:
 
+env:
+  PROJECT_REF: ztnaapthygsnhrosemvj
+  # Anon key: publica por design (vai pro bundle do cliente), pode ficar no repo
+  SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp0bmFhcHRoeWdzbmhyb3NlbXZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMTUwNTIsImV4cCI6MjA4OTU5MTA1Mn0.fKferZp8KPNd3KieoMALRojpCE1AA14OPKFq3NJ2Tg8
+
 jobs:
-  ping:
-    name: Pingar Supabase para evitar auto-pause
+  keepalive:
+    name: Query no Postgres (mantem projeto ativo)
     runs-on: ubuntu-latest
     steps:
-      - name: Chamada ao endpoint de health
+      - name: Query REST (reseta contador de inatividade do banco)
+        id: check
         run: |
-          URL="https://ztnaapthygsnhrosemvj.supabase.co/auth/v1/health"
-          echo "Pingando $URL"
-          code=$(curl -s -o /dev/null -w "%{http_code}" -m 30 "$URL")
+          set +e
+          URL="https://${PROJECT_REF}.supabase.co/rest/v1/usuarios?select=id_usuario&limit=0"
+          echo "GET $URL"
+          resp=$(curl -s -m 30 -w "\n%{http_code}" \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Prefer: count=exact" \
+            "$URL")
+          code=$(echo "$resp" | tail -1)
+          body=$(echo "$resp" | sed '$d')
           echo "HTTP $code"
-          if [ "$code" = "200" ] || [ "$code" = "401" ]; then
-            echo "Supabase ativo (200=ok com chave, 401=ok sem chave; ambos indicam servidor de pe)"
+          echo "$body"
+
+          if [ "$code" = "200" ] || [ "$code" = "206" ] || [ "$code" = "401" ]; then
+            echo "status=alive" >> $GITHUB_OUTPUT
+            echo "Projeto ativo, query executou (auto-pause counter resetado)"
             exit 0
-          else
-            echo "Supabase nao respondeu como esperado (recebido: $code)"
-            echo "Pode estar pausado/fora do ar. Restaurar manualmente em supabase.com/dashboard."
-            exit 1
           fi
+
+          if [ "$code" = "000" ]; then
+            echo "status=paused" >> $GITHUB_OUTPUT
+            echo "DNS nao resolve o host — projeto muito provavelmente PAUSADO"
+          else
+            echo "status=paused" >> $GITHUB_OUTPUT
+            echo "Resposta inesperada (HTTP $code) — tratando como pausado"
+          fi
+          exit 0
+
+      - name: Tentar restaurar via Management API (opcional)
+        if: steps.check.outputs.status == 'paused'
+        run: |
+          set +e
+          if [ -z "${{ secrets.SUPABASE_ACCESS_TOKEN }}" ]; then
+            echo "SUPABASE_ACCESS_TOKEN nao configurado."
+            echo "Para habilitar auto-restore:"
+            echo "  1. Gerar Personal Access Token em supabase.com/dashboard/account/tokens"
+            echo "  2. Adicionar como secret SUPABASE_ACCESS_TOKEN em Settings -> Secrets and variables -> Actions"
+            echo ""
+            echo "Por enquanto: restaure manualmente em supabase.com/dashboard"
+            exit 0
+          fi
+
+          echo "Tentando restaurar projeto via Management API..."
+          resp=$(curl -s -m 60 -w "\n%{http_code}" -X POST \
+            "https://api.supabase.com/v1/projects/${PROJECT_REF}/restore" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ACCESS_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{}')
+          code=$(echo "$resp" | tail -1)
+          body=$(echo "$resp" | sed '$d')
+          echo "HTTP $code"
+          echo "$body"
+
+          if [ "$code" = "200" ] || [ "$code" = "201" ] || [ "$code" = "204" ]; then
+            echo "Restore iniciado. Projeto vai ficar disponivel em ~1-3 minutos."
+          else
+            echo "Restore via API nao completou (HTTP $code). Restaure manualmente."
+          fi
+          exit 0
