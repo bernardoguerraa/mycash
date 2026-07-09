@@ -14,7 +14,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "MyCash — Gestão Financeira",
+  title: "MyCash. Gestão Financeira",
   description:
     "Plataforma de gestão financeira pessoal com sincronização automática via Open Finance, metas e lembretes",
   manifest: "/manifest.webmanifest",
