@@ -13,7 +13,7 @@ import {
   ArrowDownLeft,
   ArrowUpRight,
 } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+import { api } from '@/lib/api/client'
 import { Database, TipoLembrete } from '@/types/database'
 import LembreteModal from './LembreteModal'
 
@@ -21,7 +21,6 @@ type Lembrete = Database['public']['Tables']['lembretes']['Row']
 
 interface LembretesClientProps {
   lembretes: Lembrete[]
-  idUsuario: number
 }
 
 const formatCurrency = (value: number) =>
@@ -81,7 +80,7 @@ const groupConfig: Record<StatusGroup, { label: string; color: string; borderCol
   },
 }
 
-export default function LembretesClient({ lembretes: initialLembretes, idUsuario }: LembretesClientProps) {
+export default function LembretesClient({ lembretes: initialLembretes }: LembretesClientProps) {
   const [lembretes, setLembretes] = useState<Lembrete[]>(initialLembretes)
   const [modalOpen, setModalOpen] = useState(false)
   const [editingLembrete, setEditingLembrete] = useState<Lembrete | null>(null)
@@ -89,8 +88,6 @@ export default function LembretesClient({ lembretes: initialLembretes, idUsuario
   const [toggling, setToggling] = useState<number | null>(null)
   const [filterTipo, setFilterTipo] = useState<FilterTipo>('todos')
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('todos')
-
-  const supabase = createClient()
 
   const filtered = useMemo(() => {
     return lembretes.filter((l) => {
@@ -131,13 +128,11 @@ export default function LembretesClient({ lembretes: initialLembretes, idUsuario
   async function handleDelete(id: number) {
     if (!confirm('Tem certeza que deseja excluir este lembrete?')) return
     setDeleting(id)
-    const { error } = await supabase
-      .from('lembretes')
-      .delete()
-      .eq('id_lembrete', id)
-
-    if (!error) {
+    try {
+      await api.lembretes.delete(id)
       setLembretes((prev) => prev.filter((l) => l.id_lembrete !== id))
+    } catch (err) {
+      console.error('Falha ao excluir lembrete:', err)
     }
     setDeleting(null)
   }
@@ -145,12 +140,8 @@ export default function LembretesClient({ lembretes: initialLembretes, idUsuario
   async function handleToggleAtivo(lembrete: Lembrete) {
     setToggling(lembrete.id_lembrete)
     const newAtivo = !lembrete.ativo
-    const { error } = await supabase
-      .from('lembretes')
-      .update({ ativo: newAtivo })
-      .eq('id_lembrete', lembrete.id_lembrete)
-
-    if (!error) {
+    try {
+      await api.lembretes.update(lembrete.id_lembrete, { ativo: newAtivo })
       setLembretes((prev) =>
         prev.map((l) =>
           l.id_lembrete === lembrete.id_lembrete
@@ -158,6 +149,8 @@ export default function LembretesClient({ lembretes: initialLembretes, idUsuario
             : l
         )
       )
+    } catch (err) {
+      console.error('Falha ao alternar lembrete:', err)
     }
     setToggling(null)
   }
@@ -429,7 +422,6 @@ export default function LembretesClient({ lembretes: initialLembretes, idUsuario
       {modalOpen && (
         <LembreteModal
           lembrete={editingLembrete}
-          idUsuario={idUsuario}
           onClose={() => {
             setModalOpen(false)
             setEditingLembrete(null)

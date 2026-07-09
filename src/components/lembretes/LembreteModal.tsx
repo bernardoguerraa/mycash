@@ -2,21 +2,19 @@
 
 import { useState } from 'react'
 import { X } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+import { api } from '@/lib/api/client'
 import { Database, TipoLembrete } from '@/types/database'
 
 type Lembrete = Database['public']['Tables']['lembretes']['Row']
 
 interface LembreteModalProps {
   lembrete: Lembrete | null
-  idUsuario: number
   onClose: () => void
   onSaved: (lembrete: Lembrete) => void
 }
 
 export default function LembreteModal({
   lembrete,
-  idUsuario,
   onClose,
   onSaved,
 }: LembreteModalProps) {
@@ -31,8 +29,6 @@ export default function LembreteModal({
   const [ativo, setAtivo] = useState(lembrete?.ativo ?? true)
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
-
-  const supabase = createClient()
 
   function validate(): boolean {
     const newErrors: Record<string, string> = {}
@@ -59,42 +55,27 @@ export default function LembreteModal({
     setSaving(true)
     const parsedValor = parseFloat(valorPrevisto)
 
-    if (isEditing) {
-      const { data, error } = await supabase
-        .from('lembretes')
-        .update({
-          descricao: descricao.trim(),
-          data_vencimento: dataVencimento,
-          valor_previsto: parsedValor,
-          tipo,
-          ativo,
-        })
-        .eq('id_lembrete', lembrete.id_lembrete)
-        .select()
-        .single()
-
-      if (!error && data) {
-        onSaved(data)
-      }
-    } else {
-      const { data, error } = await supabase
-        .from('lembretes')
-        .insert({
-          id_usuario: idUsuario,
-          descricao: descricao.trim(),
-          data_vencimento: dataVencimento,
-          valor_previsto: parsedValor,
-          tipo,
-          ativo,
-        })
-        .select()
-        .single()
-
-      if (!error && data) {
-        onSaved(data)
-      }
+    // id_usuario nao vai no body — o handler /api/lembretes deriva da sessao.
+    const payload = {
+      descricao: descricao.trim(),
+      data_vencimento: dataVencimento,
+      valor_previsto: parsedValor,
+      tipo,
+      ativo,
     }
-    setSaving(false)
+
+    try {
+      const saved = isEditing
+        ? await api.lembretes.update(lembrete.id_lembrete, payload)
+        : await api.lembretes.create(payload)
+      onSaved(saved)
+    } catch (err) {
+      setErrors({
+        form: err instanceof Error ? err.message : 'Erro ao salvar lembrete.',
+      })
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (

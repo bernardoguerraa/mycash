@@ -15,7 +15,7 @@ import {
   Flame,
 } from 'lucide-react'
 import { Database, StatusMeta } from '@/types/database'
-import { createClient } from '@/lib/supabase/client'
+import { api } from '@/lib/api/client'
 import { useRouter } from 'next/navigation'
 import MetaModal from './MetaModal'
 import AddValorModal from './AddValorModal'
@@ -24,7 +24,6 @@ type Meta = Database['public']['Tables']['metas_financeiras']['Row']
 
 interface MetasClientProps {
   metas: Meta[]
-  idUsuario: number
 }
 
 const formatCurrency = (value: number) =>
@@ -71,7 +70,7 @@ function getStatusConfig(status: StatusMeta) {
   }
 }
 
-export default function MetasClient({ metas, idUsuario }: MetasClientProps) {
+export default function MetasClient({ metas }: MetasClientProps) {
   const router = useRouter()
   const [statusFilter, setStatusFilter] = useState<StatusMeta | 'Todas'>('Todas')
   const [metaModal, setMetaModal] = useState<{ open: boolean; meta?: Meta }>({
@@ -99,8 +98,11 @@ export default function MetasClient({ metas, idUsuario }: MetasClientProps) {
   const handleDelete = async (idMeta: number) => {
     if (!confirm('Tem certeza que deseja excluir esta meta?')) return
     setDeleting(idMeta)
-    const supabase = createClient()
-    await supabase.from('metas_financeiras').delete().eq('id_meta', idMeta)
+    try {
+      await api.metas.delete(idMeta)
+    } catch (err) {
+      console.error('Falha ao excluir meta:', err)
+    }
     setDeleting(null)
     router.refresh()
   }
@@ -367,7 +369,6 @@ export default function MetasClient({ metas, idUsuario }: MetasClientProps) {
       {metaModal.open && (
         <MetaModal
           meta={metaModal.meta}
-          idUsuario={idUsuario}
           onClose={() => setMetaModal({ open: false })}
           onSaved={() => {
             setMetaModal({ open: false })

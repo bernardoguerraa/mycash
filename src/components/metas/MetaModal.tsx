@@ -3,13 +3,12 @@
 import { useState, useEffect, FormEvent } from 'react'
 import { X, Target } from 'lucide-react'
 import { Database, StatusMeta } from '@/types/database'
-import { createClient } from '@/lib/supabase/client'
+import { api, ApiError } from '@/lib/api/client'
 
 type Meta = Database['public']['Tables']['metas_financeiras']['Row']
 
 interface MetaModalProps {
   meta?: Meta
-  idUsuario: number
   onClose: () => void
   onSaved: () => void
 }
@@ -34,7 +33,6 @@ function formatCurrencyInput(value: number): string {
 
 export default function MetaModal({
   meta,
-  idUsuario,
   onClose,
   onSaved,
 }: MetaModalProps) {
@@ -101,10 +99,10 @@ export default function MetaModal({
     if (!validate()) return
 
     setSaving(true)
-    const supabase = createClient()
 
+    // id_usuario nao vai mais no body — o handler /api/metas deriva
+    // da sessao. A prop `idUsuario` fica so por retrocompatibilidade.
     const payload = {
-      id_usuario: idUsuario,
       titulo: titulo.trim(),
       valor_objetivo: parseCurrencyInput(valorObjetivo),
       valor_atual: parseCurrencyInput(valorAtual),
@@ -113,17 +111,19 @@ export default function MetaModal({
       status,
     }
 
-    if (isEditing && meta) {
-      await supabase
-        .from('metas_financeiras')
-        .update(payload)
-        .eq('id_meta', meta.id_meta)
-    } else {
-      await supabase.from('metas_financeiras').insert(payload)
+    try {
+      if (isEditing && meta) {
+        await api.metas.update(meta.id_meta, payload)
+      } else {
+        await api.metas.create(payload)
+      }
+      onSaved()
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : 'Erro inesperado ao salvar meta.'
+      setErrors({ form: message })
+    } finally {
+      setSaving(false)
     }
-
-    setSaving(false)
-    onSaved()
   }
 
   const statusOptions: { value: StatusMeta; label: string }[] = [

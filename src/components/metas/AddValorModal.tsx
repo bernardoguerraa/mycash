@@ -3,7 +3,7 @@
 import { useState, useEffect, FormEvent } from 'react'
 import { X, PiggyBank, TrendingUp } from 'lucide-react'
 import { Database } from '@/types/database'
-import { createClient } from '@/lib/supabase/client'
+import { api, ApiError } from '@/lib/api/client'
 
 type Meta = Database['public']['Tables']['metas_financeiras']['Row']
 
@@ -69,7 +69,6 @@ export default function AddValorModal({
     }
 
     setSaving(true)
-    const supabase = createClient()
 
     const updates: Database['public']['Tables']['metas_financeiras']['Update'] = {
       valor_atual: newTotal,
@@ -80,13 +79,14 @@ export default function AddValorModal({
       updates.status = 'Concluida'
     }
 
-    await supabase
-      .from('metas_financeiras')
-      .update(updates)
-      .eq('id_meta', meta.id_meta)
-
-    setSaving(false)
-    onSaved()
+    try {
+      await api.metas.update(meta.id_meta, updates)
+      onSaved()
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Erro ao atualizar meta.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const remaining = Math.max(meta.valor_objetivo - meta.valor_atual, 0)

@@ -29,5 +29,5 @@ export default async function LembretesPage() {
     .eq('id_usuario', usuario.id_usuario)
     .order('data_vencimento', { ascending: true })
 
-  return <LembretesClient lembretes={lembretes ?? []} idUsuario={usuario.id_usuario} />
+  return <LembretesClient lembretes={lembretes ?? []} />
 }

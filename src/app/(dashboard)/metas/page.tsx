@@ -29,5 +29,5 @@ export default async function MetasPage() {
     .eq('id_usuario', usuario.id_usuario)
     .order('data_limite', { ascending: true })
 
-  return <MetasClient metas={metas ?? []} idUsuario={usuario.id_usuario} />
+  return <MetasClient metas={metas ?? []} />
 }

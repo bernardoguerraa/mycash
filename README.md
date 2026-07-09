@@ -142,14 +142,19 @@ supabase/migrations/          # migrations SQL do Supabase
 ## Status do projeto
 
 - ✅ Front-end implementado a partir do design Figma
-- ✅ Autenticação (cadastro, login, recuperação de senha)
-- ✅ Dashboard com dados reais do Supabase (saldo, receitas/despesas, metas, lembretes)
-- ✅ CRUD de transações, contas, metas, lembretes
-- ✅ Sincronização Pluggy (Open Finance) codada
-- ✅ Deploy contínuo na Vercel
-- 🚧 Migration do Pluggy a ser aplicada no banco
-- 🚧 Testes automatizados
-- 🚧 Front-end móvel (nativo)
+- ✅ **Layout responsivo** — sidebar vira drawer no mobile, grids adaptam por breakpoint
+- ✅ Autenticação completa (cadastro, confirmação de e-mail, login, reset de senha)
+- ✅ Dashboard com dados reais (saldo, receitas/despesas, metas, lembretes)
+- ✅ CRUD de transações, contas, metas, lembretes, notificações
+- ✅ **API REST** — 5 recursos × 4-5 métodos = 20+ endpoints ([docs](./docs/Referências/rotas-api.md))
+- ✅ **Repository pattern** para isolar domínio da persistência ([por quê](./docs/Explanações/03-repository-pattern.md))
+- ✅ **Row Level Security** — isolamento por usuário garantido no banco
+- ✅ Sincronização Pluggy (Open Finance) codada + migration aplicada
+- ✅ Deploy contínuo na Vercel + CI (typecheck + lint + testes) em cada push
+- ✅ Testes automatizados com Vitest (19+ testes cobrindo API client e Repositories)
+- ✅ Cron de keepalive Supabase com auto-restore via Management API
+- ✅ Alternância tema claro/escuro persistente
+- 🚧 App móvel nativo (opcional — o web já é responsivo)
 
 ## Equipe
 

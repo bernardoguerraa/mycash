@@ -11,7 +11,7 @@ import {
 } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { ptBR } from 'date-fns/locale/pt-BR'
-import { createClient } from '@/lib/supabase/client'
+import { api } from '@/lib/api/client'
 import { Database, TipoNotificacao } from '@/types/database'
 
 type Notificacao = Database['public']['Tables']['notificacoes']['Row']
@@ -51,8 +51,6 @@ export default function NotificacoesClient({
   const [markingAll, setMarkingAll] = useState(false)
   const [markingId, setMarkingId] = useState<number | null>(null)
 
-  const supabase = createClient()
-
   const filtered = useMemo(() => {
     if (filter === 'nao_lidas') {
       return notificacoes.filter((n) => !n.lida)
@@ -67,17 +65,13 @@ export default function NotificacoesClient({
 
   async function handleMarkAsRead(id: number) {
     setMarkingId(id)
-    const { error } = await supabase
-      .from('notificacoes')
-      .update({ lida: true })
-      .eq('id_notificacao', id)
-
-    if (!error) {
+    try {
+      await api.notificacoes.update(id, { lida: true })
       setNotificacoes((prev) =>
-        prev.map((n) =>
-          n.id_notificacao === id ? { ...n, lida: true } : n
-        )
+        prev.map((n) => (n.id_notificacao === id ? { ...n, lida: true } : n))
       )
+    } catch (err) {
+      console.error('Falha ao marcar como lida:', err)
     }
     setMarkingId(null)
   }
@@ -90,15 +84,14 @@ export default function NotificacoesClient({
     if (unreadIds.length === 0) return
 
     setMarkingAll(true)
-    const { error } = await supabase
-      .from('notificacoes')
-      .update({ lida: true })
-      .in('id_notificacao', unreadIds)
-
-    if (!error) {
-      setNotificacoes((prev) =>
-        prev.map((n) => ({ ...n, lida: true }))
+    try {
+      // Marca em paralelo — cada uma via API
+      await Promise.all(
+        unreadIds.map((id) => api.notificacoes.update(id, { lida: true }))
       )
+      setNotificacoes((prev) => prev.map((n) => ({ ...n, lida: true })))
+    } catch (err) {
+      console.error('Falha ao marcar todas como lidas:', err)
     }
     setMarkingAll(false)
   }
