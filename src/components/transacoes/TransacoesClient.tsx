@@ -197,18 +197,20 @@ export default function TransacoesClient({ initialTransacoes, contas }: Props) {
       })
   }, [router])
 
+  // Lazy update: remove da UI imediatamente; se o backend recusar, restaura.
   const handleDelete = async () => {
     if (!deletingTransacao) return
-    try {
-      await api.transacoes.delete(deletingTransacao.id_transacao)
-      setTransacoes((prev) =>
-        prev.filter((t) => t.id_transacao !== deletingTransacao.id_transacao)
-      )
-    } catch (err) {
-      console.error('Falha ao excluir transacao:', err)
-    }
+    const id = deletingTransacao.id_transacao
+    const snapshot = transacoes
+    setTransacoes((prev) => prev.filter((t) => t.id_transacao !== id))
     setDeletingTransacao(null)
-    router.refresh()
+    try {
+      await api.transacoes.delete(id)
+      router.refresh()
+    } catch (err) {
+      console.error('Falha ao excluir transacao — revertendo:', err)
+      setTransacoes(snapshot)
+    }
   }
 
   const resetFilters = () => {

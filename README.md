@@ -161,10 +161,10 @@ supabase/migrations/          # migrations SQL do Supabase
 | Membro | GitHub | Contato |
 |---|---|---|
 | Bernardo Guerra | [@bernardoguerraa](https://github.com/bernardoguerraa) | _(adicionar contato)_ |
-| Luiz Otávio | [@luizin004](https://github.com/luizin004) | _(adicionar contato)_ |
-| Matheus Bueno | [@mbu3no](https://github.com/mbu3no) | _(adicionar contato)_ |
-
-> **Para os membros**: preencham o contato de preferência (e-mail acadêmico, LinkedIn, etc.) substituindo o placeholder acima.
+| Frederico Pires | [@Fredgomes28](https://github.com/Fredgomes28) | [d2023006205@unifei.edu.br](mailto:d2023006205@unifei.edu.br) |
+| Luiz Otávio | [@luizin004](https://github.com/luizin004) | [d2023009833@unifei.edu.br](mailto:d2023009833@unifei.edu.br) |
+| Matheus Bueno | [@mbu3no](https://github.com/mbu3no) | [d2023013120@unifei.edu.br](mailto:d2023013120@unifei.edu.br) · [LinkedIn](https://www.linkedin.com/in/matheusltbueno/) |
+| Rodrigo Amorim | — | [d2023010861@unifei.edu.br](mailto:d2023010861@unifei.edu.br) |
 
 ## Contribuição
 

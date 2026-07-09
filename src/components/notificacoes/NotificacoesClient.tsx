@@ -63,17 +63,22 @@ export default function NotificacoesClient({
     [notificacoes]
   )
 
+  // Lazy update: atualiza a UI imediatamente e reverte se o backend recusar.
+  // O usuario ve o feedback sem esperar o roundtrip do servidor.
   async function handleMarkAsRead(id: number) {
+    const snapshot = notificacoes
     setMarkingId(id)
+    setNotificacoes((prev) =>
+      prev.map((n) => (n.id_notificacao === id ? { ...n, lida: true } : n))
+    )
     try {
       await api.notificacoes.update(id, { lida: true })
-      setNotificacoes((prev) =>
-        prev.map((n) => (n.id_notificacao === id ? { ...n, lida: true } : n))
-      )
     } catch (err) {
-      console.error('Falha ao marcar como lida:', err)
+      console.error('Falha ao marcar como lida — revertendo:', err)
+      setNotificacoes(snapshot)
+    } finally {
+      setMarkingId(null)
     }
-    setMarkingId(null)
   }
 
   async function handleMarkAllAsRead() {
@@ -83,17 +88,19 @@ export default function NotificacoesClient({
 
     if (unreadIds.length === 0) return
 
+    const snapshot = notificacoes
     setMarkingAll(true)
+    setNotificacoes((prev) => prev.map((n) => ({ ...n, lida: true })))
     try {
-      // Marca em paralelo — cada uma via API
       await Promise.all(
         unreadIds.map((id) => api.notificacoes.update(id, { lida: true }))
       )
-      setNotificacoes((prev) => prev.map((n) => ({ ...n, lida: true })))
     } catch (err) {
-      console.error('Falha ao marcar todas como lidas:', err)
+      console.error('Falha ao marcar todas — revertendo:', err)
+      setNotificacoes(snapshot)
+    } finally {
+      setMarkingAll(false)
     }
-    setMarkingAll(false)
   }
 
   return (

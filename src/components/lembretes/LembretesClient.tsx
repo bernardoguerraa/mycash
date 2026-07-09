@@ -125,34 +125,41 @@ export default function LembretesClient({ lembretes: initialLembretes }: Lembret
     return { totalPagar, totalReceber, vencidosCount }
   }, [lembretes])
 
+  // Lazy update: remove/altera na UI antes do backend confirmar; reverte em erro.
   async function handleDelete(id: number) {
     if (!confirm('Tem certeza que deseja excluir este lembrete?')) return
+    const snapshot = lembretes
     setDeleting(id)
+    setLembretes((prev) => prev.filter((l) => l.id_lembrete !== id))
     try {
       await api.lembretes.delete(id)
-      setLembretes((prev) => prev.filter((l) => l.id_lembrete !== id))
     } catch (err) {
-      console.error('Falha ao excluir lembrete:', err)
+      console.error('Falha ao excluir lembrete — revertendo:', err)
+      setLembretes(snapshot)
+    } finally {
+      setDeleting(null)
     }
-    setDeleting(null)
   }
 
   async function handleToggleAtivo(lembrete: Lembrete) {
-    setToggling(lembrete.id_lembrete)
+    const snapshot = lembretes
     const newAtivo = !lembrete.ativo
+    setToggling(lembrete.id_lembrete)
+    setLembretes((prev) =>
+      prev.map((l) =>
+        l.id_lembrete === lembrete.id_lembrete
+          ? { ...l, ativo: newAtivo }
+          : l
+      )
+    )
     try {
       await api.lembretes.update(lembrete.id_lembrete, { ativo: newAtivo })
-      setLembretes((prev) =>
-        prev.map((l) =>
-          l.id_lembrete === lembrete.id_lembrete
-            ? { ...l, ativo: newAtivo }
-            : l
-        )
-      )
     } catch (err) {
-      console.error('Falha ao alternar lembrete:', err)
+      console.error('Falha ao alternar lembrete — revertendo:', err)
+      setLembretes(snapshot)
+    } finally {
+      setToggling(null)
     }
-    setToggling(null)
   }
 
   function handleEdit(lembrete: Lembrete) {

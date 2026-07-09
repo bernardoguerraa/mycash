@@ -59,16 +59,20 @@ export default function ContasClient({ contas: initialContas }: ContasClientProp
 
   const totalBalance = contas.reduce((sum, c) => sum + (c.saldo_atual || 0), 0)
 
+  // Lazy update: remove imediatamente da UI; restaura se falhar no backend.
   async function handleDelete(id: number) {
     if (!confirm('Tem certeza que deseja excluir esta conta?')) return
+    const snapshot = contas
     setDeleting(id)
+    setContas((prev) => prev.filter((c) => c.id_conta !== id))
     try {
       await api.contas.delete(id)
-      setContas((prev) => prev.filter((c) => c.id_conta !== id))
     } catch (err) {
-      console.error('Falha ao excluir conta:', err)
+      console.error('Falha ao excluir conta — revertendo:', err)
+      setContas(snapshot)
+    } finally {
+      setDeleting(null)
     }
-    setDeleting(null)
   }
 
   function handleEdit(conta: ContaBancaria) {

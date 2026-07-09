@@ -70,8 +70,11 @@ function getStatusConfig(status: StatusMeta) {
   }
 }
 
-export default function MetasClient({ metas }: MetasClientProps) {
+export default function MetasClient({ metas: initialMetas }: MetasClientProps) {
   const router = useRouter()
+  // Estado local para permitir lazy update (otimistic UI).
+  // A prop `initialMetas` semeia; refreshes vem do router.
+  const [metas, setMetas] = useState<Meta[]>(initialMetas)
   const [statusFilter, setStatusFilter] = useState<StatusMeta | 'Todas'>('Todas')
   const [metaModal, setMetaModal] = useState<{ open: boolean; meta?: Meta }>({
     open: false,
@@ -95,16 +98,21 @@ export default function MetasClient({ metas }: MetasClientProps) {
     return { total, emAndamento, concluidas, totalInvestido }
   }, [metas])
 
+  // Lazy update: remove imediatamente da UI; restaura se o backend recusar.
   const handleDelete = async (idMeta: number) => {
     if (!confirm('Tem certeza que deseja excluir esta meta?')) return
+    const snapshot = metas
     setDeleting(idMeta)
+    setMetas((prev) => prev.filter((m) => m.id_meta !== idMeta))
     try {
       await api.metas.delete(idMeta)
+      router.refresh()
     } catch (err) {
-      console.error('Falha ao excluir meta:', err)
+      console.error('Falha ao excluir meta — revertendo:', err)
+      setMetas(snapshot)
+    } finally {
+      setDeleting(null)
     }
-    setDeleting(null)
-    router.refresh()
   }
 
   const statCards = [
