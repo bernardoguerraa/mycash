@@ -17,7 +17,7 @@ sobre o repositório.
 
 ## Decisão 1 — Framework
 
-**Escolhido: Expo (React Native), SDK 57.**
+**Escolhido: Expo (React Native), SDK 54.**
 
 O material da disciplina apresenta o espectro de opções. Posicionando o MyCash
 nele:
@@ -32,7 +32,7 @@ nele:
 O motivo decisivo não foi "React Native é melhor", e sim **continuidade de
 modelo mental**. O time já desenvolve há um ano e meio em React com o App Router
 do Next.js, que usa roteamento baseado em arquivos. O Expo Router usa o mesmo
-princípio: um arquivo em `src/app/` vira uma rota. A curva de aprendizado fica
+princípio: um arquivo em `app/` vira uma rota. A curva de aprendizado fica
 concentrada nas APIs de UI do RN (`View`, `Text`, `StyleSheet`) — que é
 exatamente o conteúdo da disciplina — em vez de se dividir entre linguagem,
 IDE, roteamento e paradigma ao mesmo tempo.
@@ -43,6 +43,15 @@ consideravelmente mais longo. Como o projeto não precisa (ainda) de módulos
 nativos customizados, o Expo entrega o mesmo resultado com muito menos atrito. A
 saída não fica bloqueada: `npx expo prebuild` gera as pastas nativas a qualquer
 momento, e `npx expo run:android` compila localmente usando o Android Studio.
+
+**Por que SDK 54 e não o mais novo (57):** o scaffold nasceu no 57, mas foi
+rebaixado para o 54. O motivo é o **Expo Go em celular físico**. No emulador o
+`expo start` baixa sozinho a versão do Expo Go que casa com o SDK do projeto —
+qualquer SDK funciona. No celular, o Expo Go é o que estiver publicado na loja,
+e é ele que dita o SDK suportado. Como a turma e o
+[repositório de exemplo do professor](https://github.com/erfelipe/Expo-Exemplo)
+estão no 54, ficar no 57 significaria não conseguir demonstrar no aparelho e ter
+trechos de código da aula que não colam no nosso projeto.
 
 **PWA já existe — por que um app nativo?** O web já é responsivo e instalável
 (ver [`docs/How-tos/como-instalar-como-pwa.md`](../How-tos/como-instalar-como-pwa.md)).
@@ -150,7 +159,7 @@ primeira hora de trabalho**:
 ### Cuidados obrigatórios enquanto o mobile viver neste repo
 
 1. **Não remover `"mobile"` do `exclude` do `tsconfig.json` da raiz.** O web usa
-   React 18.3.1 e o mobile React 19.2.3 — são incompatíveis em nível de tipos.
+   React 18.3.1 e o mobile React 19.1.0 — são incompatíveis em nível de tipos.
 2. **O `/mobile` não tem CI.** O `ci.yml` roda typecheck, lint e Vitest apenas na
    raiz. Regressões no mobile só aparecem se alguém rodar na mão. Rodar
    `npx tsc --noEmit` dentro de `mobile/` antes de abrir PR.
@@ -166,12 +175,13 @@ a migração é barata enquanto o mobile ainda tem poucas telas.
 
 ## Ambiente de desenvolvimento
 
-Stack do scaffold: Expo SDK 57.0.12, React Native 0.86.2, React 19.2.3,
-TypeScript 6, roteamento por arquivos em `mobile/src/app/`.
+Stack do scaffold: Expo SDK 54.0.36, React Native 0.81.5, React 19.1.0,
+TypeScript 5.9, roteamento por arquivos em `mobile/app/`.
 
 ```bash
 cd mobile
 npx expo start --android   # abre no emulador
+npx expo start --tunnel    # QR code que funciona em celular fisico
 ```
 
 Pré-requisitos por máquina do time: JDK 17, Android SDK com plataforma
@@ -179,10 +189,27 @@ android-35, um AVD API 35 e as variáveis `ANDROID_HOME`, `ANDROID_SDK_ROOT` e
 `JAVA_HOME` configuradas — o material da disciplina destaca justamente esse
 ponto, e é onde a maioria dos setups falha.
 
-> **Atenção ao Expo Go:** a versão instalada no emulador precisa ser a 57.x.
-> Instalações antigas (ex.: 2.33.x, de projetos anteriores da matéria) não
-> executam SDK 57. O CLI detecta e oferece a substituição automaticamente.
+> **Atenção ao Expo Go:** a versão precisa casar com o SDK. No emulador o CLI
+> resolve sozinho (baixa a build correta, ~100 MB na primeira vez). Se o
+> emulador já tiver um Expo Go de outro SDK, o CLI pede confirmação para
+> substituir — `adb uninstall host.exp.exponent` força o caminho limpo.
 
-O `mobile/AGENTS.md`, criado pelo scaffold, orienta consultar
-https://docs.expo.dev/versions/v57.0.0/ antes de escrever código — o SDK 57
-introduziu mudanças relevantes de API.
+> **Celular físico e o `--tunnel`:** o QR code padrão aponta para o IP da rede
+> local, então o celular só conecta se estiver no mesmo Wi-Fi e sem isolamento
+> de cliente — o que redes de universidade costumam bloquear.
+> `npx expo start --tunnel` roteia por fora da rede e funciona inclusive no 4G.
+> Exige `npm install -g @expo/ngrok`.
+
+### O projeto não pode viver dentro do OneDrive
+
+Sintoma: o Metro morre no boot com
+`EINVAL: invalid argument, readlink '...\package.json'`.
+
+Causa: o OneDrive marca todo arquivo sincronizado com um *reparse point* de
+placeholder (tag `0x9000a01a`). O `fs.readdir` do Node reporta esses arquivos
+como symlink — `dirent.isSymbolicLink() === true` para `package.json`,
+`app.json`, qualquer um. O `metro-file-map` acredita e chama `readlink`, que o
+Windows recusa com `EINVAL`. Diretórios escapam; arquivos não.
+
+Não tem contorno por configuração: o repositório precisa estar fora da pasta
+sincronizada. O caminho atual é `C:\Users\mathe\dev\my-cash`.
