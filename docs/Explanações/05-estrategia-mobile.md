@@ -96,6 +96,33 @@ ser reescritas no mobile. Se essa duplicação incomodar, o caminho é extrair o
 Repositories para um pacote compartilhado — mas isso só vale a pena depois que o
 mobile tiver telas de escrita suficientes para justificar.
 
+### Revisão: passar a usar a API (21/08/2026)
+
+Na avaliação parcial os professores sugeriram **consumir a API REST do Next.js**
+em vez de ir direto ao banco. A Fase 1 já entregue continua no acesso direto; a
+migração acontece a partir da Fase 2, junto com as telas de escrita — que é
+justamente onde a duplicação de regras começaria a doer.
+
+O bloqueio dessa mudança era de autenticação, e já foi resolvido:
+
+> As rotas de `/api/*` liam a sessão **apenas de cookie** (`createServerClient`
+> do `@supabase/ssr`). O app nativo não tem cookie — guarda a sessão no
+> AsyncStorage e manda `Authorization: Bearer <access_token>`. Toda chamada
+> vinda do mobile responderia `401`.
+>
+> `createClientFromRequest(req)` (em `src/lib/supabase/server.ts`) passa a ler
+> o cabeçalho quando ele existe e cai no cookie quando não existe. As 13 rotas
+> foram migradas. A mudança é aditiva: o web continua funcionando igual.
+
+Do lado do app, `mobile/lib/api.ts` já anexa o token em toda requisição. Falta
+apenas trocar as chamadas `supabase.from(...)` das telas por `api.get(...)`.
+
+**Sobre a URL base:** o padrão é a produção na Vercel, que funciona de qualquer
+rede. Para apontar ao servidor local, definir `EXPO_PUBLIC_API_URL` — lembrando
+que no emulador Android o host da máquina é `10.0.2.2`, não `localhost`. Era
+esse detalhe de rede um dos motivos originais para não usar a API; usar a URL
+publicada o elimina.
+
 ## Decisão 3 — Telas e processos
 
 As 13 telas do web não vão todas para o mobile de uma vez. O recorte segue a

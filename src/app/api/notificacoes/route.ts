@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClientFromRequest } from '@/lib/supabase/server'
 import { getCurrentIdUsuario } from '@/lib/api/auth'
 
 export const runtime = 'nodejs'
@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic'
 
 // GET /api/notificacoes — lista notificacoes do usuario logado
 export async function GET(req: NextRequest) {
-  const supabase = createClient()
+  const supabase = createClientFromRequest(req)
   const idUsuario = await getCurrentIdUsuario(supabase)
   if (!idUsuario) return NextResponse.json({ error: 'nao autenticado' }, { status: 401 })
 
@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
 // POST /api/notificacoes — cria notificacao manual (uso debug/admin)
 // Body: { mensagem, tipo, lida? }
 export async function POST(req: NextRequest) {
-  const supabase = createClient()
+  const supabase = createClientFromRequest(req)
   const idUsuario = await getCurrentIdUsuario(supabase)
   if (!idUsuario) return NextResponse.json({ error: 'nao autenticado' }, { status: 401 })
 

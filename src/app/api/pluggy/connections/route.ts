@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClientFromRequest } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getPluggyClient } from '@/lib/pluggy/client'
 import { syncPluggyItem } from '@/lib/pluggy/sync'
@@ -8,7 +8,7 @@ export const runtime = 'nodejs'
 
 /** Callback do widget: recebe itemId criado, persiste conexão e faz 1º sync. */
 export async function POST(req: NextRequest) {
-  const supabase = createClient()
+  const supabase = createClientFromRequest(req)
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
 
 /** Deleta conexão + item Pluggy. */
 export async function DELETE(req: NextRequest) {
-  const supabase = createClient()
+  const supabase = createClientFromRequest(req)
   const {
     data: { user },
   } = await supabase.auth.getUser()

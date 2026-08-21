@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClientFromRequest } from '@/lib/supabase/server'
 import { getCurrentIdUsuario } from '@/lib/api/auth'
 
 export const runtime = 'nodejs'
@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic'
 
 // GET /api/transacoes — lista as transacoes do usuario logado (RLS filtra)
 export async function GET(req: NextRequest) {
-  const supabase = createClient()
+  const supabase = createClientFromRequest(req)
   const idUsuario = await getCurrentIdUsuario(supabase)
   if (!idUsuario) return NextResponse.json({ error: 'nao autenticado' }, { status: 401 })
 
@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
 // Body: { id_conta, data_transacao, tipo, categoria, descricao, valor }
 // id_conta precisa pertencer ao usuario (RLS WITH CHECK valida)
 export async function POST(req: NextRequest) {
-  const supabase = createClient()
+  const supabase = createClientFromRequest(req)
   const idUsuario = await getCurrentIdUsuario(supabase)
   if (!idUsuario) return NextResponse.json({ error: 'nao autenticado' }, { status: 401 })
 

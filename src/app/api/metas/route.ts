@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClientFromRequest } from '@/lib/supabase/server'
 import { getCurrentIdUsuario } from '@/lib/api/auth'
 
 export const runtime = 'nodejs'
@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic'
 
 // GET /api/metas — lista metas do usuario logado
 export async function GET(req: NextRequest) {
-  const supabase = createClient()
+  const supabase = createClientFromRequest(req)
   const idUsuario = await getCurrentIdUsuario(supabase)
   if (!idUsuario) return NextResponse.json({ error: 'nao autenticado' }, { status: 401 })
 
@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
 // POST /api/metas — cria nova meta (id_usuario derivado da sessao)
 // Body: { titulo, valor_objetivo, valor_atual?, data_inicio?, data_limite, status? }
 export async function POST(req: NextRequest) {
-  const supabase = createClient()
+  const supabase = createClientFromRequest(req)
   const idUsuario = await getCurrentIdUsuario(supabase)
   if (!idUsuario) return NextResponse.json({ error: 'nao autenticado' }, { status: 401 })
 
