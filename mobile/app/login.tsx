@@ -13,7 +13,9 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { MyCash } from '@/constants/mycash';
+import type { Cores } from '@/constants/mycash';
+import { criarUseEstilos } from '@/lib/estilos';
+import { useTema } from '@/lib/tema';
 import { supabase } from '@/lib/supabase';
 
 /**
@@ -26,6 +28,9 @@ const abrirCadastro = () => WebBrowser.openBrowserAsync(`${SITE}/registro`);
 const abrirRecuperacao = () => WebBrowser.openBrowserAsync(`${SITE}/recuperar-senha`);
 
 export default function LoginScreen() {
+  const styles = useEstilos();
+  const { cores } = useTema();
+
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState<string | null>(null);
@@ -80,7 +85,7 @@ export default function LoginScreen() {
                 value={email}
                 onChangeText={setEmail}
                 placeholder="voce@email.com"
-                placeholderTextColor={MyCash.textMute}
+                placeholderTextColor={cores.textMute}
                 autoCapitalize="none"
                 autoCorrect={false}
                 keyboardType="email-address"
@@ -95,7 +100,7 @@ export default function LoginScreen() {
                 value={senha}
                 onChangeText={setSenha}
                 placeholder="••••••••"
-                placeholderTextColor={MyCash.textMute}
+                placeholderTextColor={cores.textMute}
                 secureTextEntry
                 onSubmitEditing={entrar}
                 returnKeyType="go"
@@ -113,7 +118,7 @@ export default function LoginScreen() {
               onPress={entrar}
               disabled={enviando}>
               {enviando ? (
-                <ActivityIndicator color="#04140d" />
+                <ActivityIndicator color={cores.sobreAccent} />
               ) : (
                 <Text style={styles.botaoTexto}>Entrar</Text>
               )}
@@ -136,8 +141,9 @@ export default function LoginScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: MyCash.surface0 },
+const useEstilos = criarUseEstilos((c: Cores) =>
+  StyleSheet.create({
+  safe: { flex: 1, backgroundColor: c.surface0 },
   flex: { flex: 1 },
   scroll: { flexGrow: 1, justifyContent: 'center', padding: 24, gap: 40 },
 
@@ -146,46 +152,46 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 18,
-    backgroundColor: MyCash.accent,
+    backgroundColor: c.accent,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  logoTexto: { fontSize: 34, fontWeight: '800', color: '#04140d' },
-  titulo: { fontSize: 30, fontWeight: '700', color: MyCash.text, letterSpacing: -0.5 },
-  subtitulo: { fontSize: 14, color: MyCash.textDim },
+  logoTexto: { fontSize: 34, fontWeight: '800', color: c.sobreAccent },
+  titulo: { fontSize: 30, fontWeight: '700', color: c.text, letterSpacing: -0.5 },
+  subtitulo: { fontSize: 14, color: c.textDim },
 
   form: { gap: 16 },
   campo: { gap: 7 },
-  label: { fontSize: 13, fontWeight: '600', color: MyCash.textDim },
+  label: { fontSize: 13, fontWeight: '600', color: c.textDim },
   input: {
-    backgroundColor: MyCash.surface2,
+    backgroundColor: c.surface2,
     borderWidth: 1,
-    borderColor: MyCash.edge2,
+    borderColor: c.edge2,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
-    color: MyCash.text,
+    color: c.text,
   },
 
   erroBox: {
-    backgroundColor: MyCash.dangerMuted,
+    backgroundColor: c.dangerMuted,
     borderWidth: 1,
-    borderColor: MyCash.danger,
+    borderColor: c.danger,
     borderRadius: 10,
     padding: 12,
   },
-  erroTexto: { color: MyCash.danger, fontSize: 13.5 },
+  erroTexto: { color: c.danger, fontSize: 13.5 },
 
   botao: {
-    backgroundColor: MyCash.accent,
+    backgroundColor: c.accent,
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',
     marginTop: 4,
   },
-  botaoPressed: { backgroundColor: MyCash.accentDark },
-  botaoTexto: { color: '#04140d', fontSize: 16, fontWeight: '700' },
+  botaoPressed: { backgroundColor: c.accentDark },
+  botaoTexto: { color: c.sobreAccent, fontSize: 16, fontWeight: '700' },
 
   rodape: {
     flexDirection: 'row',
@@ -193,6 +199,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     marginTop: 8,
   },
-  rodapeTexto: { textAlign: 'center', color: MyCash.textMute, fontSize: 13.5 },
-  rodapeLink: { color: MyCash.accentLight, fontSize: 13.5, fontWeight: '600' },
-});
+  rodapeTexto: { textAlign: 'center', color: c.textMute, fontSize: 13.5 },
+  rodapeLink: { color: c.accentLight, fontSize: 13.5, fontWeight: '600' },
+  })
+);

@@ -14,9 +14,12 @@ import {
   ModalConfirmacao,
   Seletor,
   Tela,
-  estilos as ui,
+  useEstilos,
 } from '@/components/ui/kit';
-import { MyCash, formatarTempoRelativo } from '@/constants/mycash';
+import { formatarTempoRelativo } from '@/constants/mycash';
+import type { Cores } from '@/constants/mycash';
+import { criarUseEstilos } from '@/lib/estilos';
+import { useTema } from '@/lib/tema';
 import { useRecurso } from '@/hooks/use-recurso';
 import { notificacoesRepository } from '@/lib/repositories';
 import type { Notificacao, TipoNotificacao } from '@/types/database';
@@ -28,14 +31,20 @@ const carregar = () => notificacoesRepository.listar();
 type IconeNome = ComponentProps<typeof Ionicons>['name'];
 
 /** Mesmos icones e cores por tipo do NotificacoesClient do web. */
-const APARENCIA: Record<TipoNotificacao, { icone: IconeNome; cor: string; fundo: string }> = {
-  Sistema: { icone: 'settings-outline', cor: MyCash.info, fundo: MyCash.infoMuted },
-  Meta: { icone: 'flag-outline', cor: MyCash.roxo, fundo: MyCash.roxoMuted },
-  Lembrete: { icone: 'notifications-outline', cor: MyCash.warn, fundo: MyCash.warnMuted },
-  Alerta: { icone: 'alert-circle-outline', cor: MyCash.danger, fundo: MyCash.dangerMuted },
-};
+type Aparencia = { icone: IconeNome; cor: string; fundo: string };
+
+const aparencias = (cores: Cores): Record<TipoNotificacao, Aparencia> => ({
+  Sistema: { icone: 'settings-outline', cor: cores.info, fundo: cores.infoMuted },
+  Meta: { icone: 'flag-outline', cor: cores.roxo, fundo: cores.roxoMuted },
+  Lembrete: { icone: 'notifications-outline', cor: cores.warn, fundo: cores.warnMuted },
+  Alerta: { icone: 'alert-circle-outline', cor: cores.danger, fundo: cores.dangerMuted },
+});
 
 export default function NotificacoesScreen() {
+  const ui = useEstilos();
+  const proprios = useProprios();
+  const { cores } = useTema();
+
   const { dados, setDados, carregando, atualizando, erro, aoPuxar, recarregar } = useRecurso(
     carregar,
     VAZIO
@@ -43,6 +52,8 @@ export default function NotificacoesScreen() {
 
   const [filtro, setFiltro] = useState<'todas' | 'nao_lidas'>('todas');
   const [marcandoTodas, setMarcandoTodas] = useState(false);
+
+  const mapaAparencia = aparencias(cores);
 
   const [excluindo, setExcluindo] = useState<Notificacao | null>(null);
   const [confirmando, setConfirmando] = useState(false);
@@ -153,7 +164,7 @@ export default function NotificacoesScreen() {
       ) : (
         <View style={proprios.lista}>
           {filtradas.map((n) => {
-            const aparencia = APARENCIA[n.tipo] ?? APARENCIA.Sistema;
+            const aparencia = mapaAparencia[n.tipo] ?? mapaAparencia.Sistema;
             return (
               <Pressable key={n.id_notificacao} onPress={() => marcarComoLida(n)}>
                 <Cartao style={[proprios.cartao, !n.lida && proprios.naoLida]}>
@@ -174,7 +185,7 @@ export default function NotificacoesScreen() {
                     {!n.lida ? <View style={proprios.pontoNaoLida} /> : null}
                     <BotaoIcone
                       icone="trash-outline"
-                      cor={MyCash.danger}
+                      cor={cores.danger}
                       aoTocar={() => setExcluindo(n)}
                     />
                   </View>
@@ -197,10 +208,11 @@ export default function NotificacoesScreen() {
   );
 }
 
-const proprios = StyleSheet.create({
+const useProprios = criarUseEstilos((c: Cores) =>
+  StyleSheet.create({
   lista: { gap: 8 },
   cartao: { flexDirection: 'row', alignItems: 'center', gap: 11, padding: 13 },
-  naoLida: { borderColor: 'rgba(16,185,129,0.28)', backgroundColor: MyCash.surface3 },
+  naoLida: { borderColor: 'rgba(16,185,129,0.28)', backgroundColor: c.surface3 },
   icone: {
     width: 36,
     height: 36,
@@ -208,9 +220,10 @@ const proprios = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  mensagem: { fontSize: 14, color: MyCash.textDim, lineHeight: 19 },
-  mensagemNaoLida: { color: MyCash.text, fontWeight: '600' },
-  meta: { fontSize: 11.5, color: MyCash.textMute, marginTop: 3 },
+  mensagem: { fontSize: 14, color: c.textDim, lineHeight: 19 },
+  mensagemNaoLida: { color: c.text, fontWeight: '600' },
+  meta: { fontSize: 11.5, color: c.textMute, marginTop: 3 },
   direita: { alignItems: 'center', gap: 7 },
-  pontoNaoLida: { width: 7, height: 7, borderRadius: 4, backgroundColor: MyCash.accent },
-});
+  pontoNaoLida: { width: 7, height: 7, borderRadius: 4, backgroundColor: c.accent },
+  })
+);

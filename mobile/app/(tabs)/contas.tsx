@@ -17,16 +17,18 @@ import {
   ModalFormulario,
   Seletor,
   Tela,
-  estilos as ui,
+  useEstilos,
 } from '@/components/ui/kit';
 import {
-  MyCash,
   TIPOS_CONTA,
   formatCurrency,
   parseValor,
   rotuloTipoConta,
   sanitizarValor,
 } from '@/constants/mycash';
+import type { Cores } from '@/constants/mycash';
+import { criarUseEstilos } from '@/lib/estilos';
+import { useTema } from '@/lib/tema';
 import { useRecurso } from '@/hooks/use-recurso';
 import { contasRepository } from '@/lib/repositories';
 import type { Conta } from '@/types/database';
@@ -43,6 +45,10 @@ type Formulario = {
 };
 
 export default function ContasScreen() {
+  const ui = useEstilos();
+  const proprios = useProprios();
+  const { cores } = useTema();
+
   const { dados, carregando, atualizando, erro, aoPuxar, recarregar } = useRecurso(carregar, VAZIO);
 
   const [editando, setEditando] = useState<Conta | null>(null);
@@ -155,13 +161,13 @@ export default function ContasScreen() {
           rotulo="Contas cadastradas"
           valor={String(dados.length)}
           icone="wallet-outline"
-          cor={MyCash.info}
+          cor={cores.info}
         />
         <CartaoEstatistica
           rotulo="Sincronizadas"
           valor={String(conectadas)}
           icone="sync-outline"
-          cor={MyCash.accentLight}
+          cor={cores.accentLight}
         />
       </View>
 
@@ -180,7 +186,7 @@ export default function ContasScreen() {
               <Cartao key={conta.id_conta}>
                 <View style={proprios.topo}>
                   <View style={proprios.icone}>
-                    <Ionicons name="business-outline" size={18} color={MyCash.accentLight} />
+                    <Ionicons name="business-outline" size={18} color={cores.accentLight} />
                   </View>
 
                   <View style={ui.flex1}>
@@ -196,7 +202,7 @@ export default function ContasScreen() {
                     <BotaoIcone icone="pencil" aoTocar={() => abrirEdicao(conta)} />
                     <BotaoIcone
                       icone="trash-outline"
-                      cor={MyCash.danger}
+                      cor={cores.danger}
                       aoTocar={() => setExcluindo(conta)}
                     />
                   </View>
@@ -208,7 +214,7 @@ export default function ContasScreen() {
                     <Text
                       style={[
                         proprios.saldoConta,
-                        { color: negativo ? MyCash.danger : MyCash.text },
+                        { color: negativo ? cores.danger : cores.text },
                       ]}>
                       {formatCurrency(conta.saldo_atual)}
                     </Text>
@@ -216,8 +222,8 @@ export default function ContasScreen() {
 
                   <Etiqueta
                     texto={doPluggy ? 'Open Finance' : 'Manual'}
-                    cor={doPluggy ? MyCash.info : MyCash.textDim}
-                    fundo={doPluggy ? MyCash.infoMuted : MyCash.surface3}
+                    cor={doPluggy ? cores.info : cores.textDim}
+                    fundo={doPluggy ? cores.infoMuted : cores.surface3}
                   />
                 </View>
               </Cartao>
@@ -278,17 +284,18 @@ export default function ContasScreen() {
   );
 }
 
-const proprios = StyleSheet.create({
+const useProprios = criarUseEstilos((c: Cores) =>
+  StyleSheet.create({
   saldoCartao: {
-    backgroundColor: MyCash.accentMuted,
+    backgroundColor: c.accentMuted,
     borderWidth: 1,
     borderColor: 'rgba(16,185,129,0.35)',
     borderRadius: 16,
     padding: 18,
     gap: 5,
   },
-  saldoRotulo: { fontSize: 13, color: MyCash.accentLight, fontWeight: '600' },
-  saldoValor: { fontSize: 28, fontWeight: '700', color: MyCash.text, letterSpacing: -0.8 },
+  saldoRotulo: { fontSize: 13, color: c.accentLight, fontWeight: '600' },
+  saldoValor: { fontSize: 28, fontWeight: '700', color: c.text, letterSpacing: -0.8 },
 
   lista: { gap: 10 },
   topo: { flexDirection: 'row', alignItems: 'center', gap: 11 },
@@ -298,10 +305,10 @@ const proprios = StyleSheet.create({
     borderRadius: 11,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: MyCash.accentMuted,
+    backgroundColor: c.accentMuted,
   },
-  instituicao: { fontSize: 15, fontWeight: '700', color: MyCash.text },
-  numero: { fontSize: 12, color: MyCash.textMute, marginTop: 2 },
+  instituicao: { fontSize: 15, fontWeight: '700', color: c.text },
+  numero: { fontSize: 12, color: c.textMute, marginTop: 2 },
   acoes: { flexDirection: 'row', gap: 6 },
 
   rodape: {
@@ -309,10 +316,11 @@ const proprios = StyleSheet.create({
     alignItems: 'flex-end',
     justifyContent: 'space-between',
     borderTopWidth: 1,
-    borderTopColor: MyCash.edge1,
+    borderTopColor: c.edge1,
     paddingTop: 11,
     marginTop: 3,
   },
-  saldoLabelPequeno: { fontSize: 11.5, color: MyCash.textMute },
+  saldoLabelPequeno: { fontSize: 11.5, color: c.textMute },
   saldoConta: { fontSize: 19, fontWeight: '700', marginTop: 2 },
-});
+  })
+);

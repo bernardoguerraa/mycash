@@ -12,10 +12,13 @@ import {
   CartaoEstatistica,
   Etiqueta,
   ModalConfirmacao,
+  Seletor,
   Tela,
-  estilos as ui,
+  useEstilos,
 } from '@/components/ui/kit';
-import { MyCash } from '@/constants/mycash';
+import type { Cores } from '@/constants/mycash';
+import { criarUseEstilos } from '@/lib/estilos';
+import { useTema } from '@/lib/tema';
 import { useRecurso } from '@/hooks/use-recurso';
 import { perfilRepository } from '@/lib/repositories';
 import { supabase } from '@/lib/supabase';
@@ -29,13 +32,17 @@ const VAZIO: Perfil = {
 
 const carregar = () => perfilRepository.carregar();
 
-function corDoStatus(status: StatusConta) {
-  if (status === 'Ativo') return { cor: MyCash.accentLight, fundo: MyCash.accentMuted };
-  if (status === 'Bloqueado') return { cor: MyCash.danger, fundo: MyCash.dangerMuted };
-  return { cor: MyCash.textDim, fundo: MyCash.surface3 };
+function corDoStatus(status: StatusConta, cores: Cores) {
+  if (status === 'Ativo') return { cor: cores.accentLight, fundo: cores.accentMuted };
+  if (status === 'Bloqueado') return { cor: cores.danger, fundo: cores.dangerMuted };
+  return { cor: cores.textDim, fundo: cores.surface3 };
 }
 
 export default function PerfilScreen() {
+  const ui = useEstilos();
+  const proprios = useProprios();
+  const { cores, modo, definirModo } = useTema();
+
   const { dados, carregando, atualizando, erro, aoPuxar, recarregar } = useRecurso(carregar, VAZIO);
 
   const [editandoNome, setEditandoNome] = useState(false);
@@ -53,7 +60,7 @@ export default function PerfilScreen() {
   const usuario = dados.usuario;
   const plano = usuario?.plano ?? 'Free';
   const statusConta = usuario?.status_conta ?? 'Ativo';
-  const status = corDoStatus(statusConta);
+  const status = corDoStatus(statusConta, cores);
 
   const dataCadastro = usuario?.data_cadastro
     ? new Date(usuario.data_cadastro).toLocaleDateString('pt-BR', {
@@ -150,14 +157,14 @@ export default function PerfilScreen() {
         <View style={proprios.etiquetas}>
           <Etiqueta
             texto={plano}
-            cor={plano === 'Premium' ? MyCash.warn : MyCash.textDim}
-            fundo={plano === 'Premium' ? MyCash.warnMuted : MyCash.surface3}
+            cor={plano === 'Premium' ? cores.warn : cores.textDim}
+            fundo={plano === 'Premium' ? cores.warnMuted : cores.surface3}
           />
           <Etiqueta texto={statusConta} cor={status.cor} fundo={status.fundo} />
         </View>
 
         <View style={proprios.desde}>
-          <Ionicons name="calendar-outline" size={13} color={MyCash.textMute} />
+          <Ionicons name="calendar-outline" size={13} color={cores.textMute} />
           <Text style={proprios.desdeTexto}>Membro desde {dataCadastro}</Text>
         </View>
       </Cartao>
@@ -167,26 +174,26 @@ export default function PerfilScreen() {
           rotulo="Contas"
           valor={String(dados.stats.totalContas)}
           icone="wallet-outline"
-          cor={MyCash.info}
+          cor={cores.info}
         />
         <CartaoEstatistica
           rotulo="Transações"
           valor={String(dados.stats.totalTransacoes)}
           icone="swap-horizontal-outline"
-          cor={MyCash.accentLight}
+          cor={cores.accentLight}
         />
         <CartaoEstatistica
           rotulo="Metas"
           valor={String(dados.stats.totalMetas)}
           icone="flag-outline"
-          cor={MyCash.roxo}
+          cor={cores.roxo}
         />
       </View>
 
       {/* Nome */}
       <Cartao>
         <View style={proprios.secaoTopo}>
-          <Ionicons name="person-outline" size={16} color={MyCash.accentLight} />
+          <Ionicons name="person-outline" size={16} color={cores.accentLight} />
           <Text style={proprios.secaoTitulo}>Nome completo</Text>
         </View>
 
@@ -229,7 +236,7 @@ export default function PerfilScreen() {
       {/* Senha */}
       <Cartao>
         <View style={proprios.secaoTopo}>
-          <Ionicons name="lock-closed-outline" size={16} color={MyCash.accentLight} />
+          <Ionicons name="lock-closed-outline" size={16} color={cores.accentLight} />
           <Text style={proprios.secaoTitulo}>Alterar senha</Text>
         </View>
 
@@ -256,6 +263,29 @@ export default function PerfilScreen() {
         <Botao titulo="Alterar senha" compacto aoTocar={trocarSenha} ocupado={salvandoSenha} />
       </Cartao>
 
+      {/* Aparencia — equivalente ao ThemeToggle do web. */}
+      <Cartao>
+        <View style={proprios.secaoTopo}>
+          <Ionicons name="contrast-outline" size={16} color={cores.accent} />
+          <Text style={proprios.secaoTitulo}>Aparência</Text>
+        </View>
+
+        <Seletor
+          opcoes={[
+            { value: 'sistema', label: 'Do sistema' },
+            { value: 'claro', label: 'Claro' },
+            { value: 'escuro', label: 'Escuro' },
+          ]}
+          valor={modo}
+          aoEscolher={definirModo}
+        />
+
+        <Text style={proprios.aparenciaNota}>
+          &quot;Do sistema&quot; acompanha o ajuste do aparelho. A escolha fica salva no
+          celular.
+        </Text>
+      </Cartao>
+
       <Botao
         titulo="Sair da conta"
         icone="log-out-outline"
@@ -277,26 +307,29 @@ export default function PerfilScreen() {
   );
 }
 
-const proprios = StyleSheet.create({
+const useProprios = criarUseEstilos((c: Cores) =>
+  StyleSheet.create({
   cartaoPerfil: { alignItems: 'center', gap: 7, paddingVertical: 22 },
   avatar: {
     width: 68,
     height: 68,
     borderRadius: 22,
-    backgroundColor: MyCash.accentMuted,
+    backgroundColor: c.accentMuted,
     borderWidth: 1,
     borderColor: 'rgba(16,185,129,0.35)',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  avatarTexto: { fontSize: 25, fontWeight: '800', color: MyCash.accentLight },
-  nome: { fontSize: 18, fontWeight: '700', color: MyCash.text, marginTop: 4 },
-  email: { fontSize: 13, color: MyCash.textDim },
+  avatarTexto: { fontSize: 25, fontWeight: '800', color: c.accentLight },
+  nome: { fontSize: 18, fontWeight: '700', color: c.text, marginTop: 4 },
+  email: { fontSize: 13, color: c.textDim },
   etiquetas: { flexDirection: 'row', gap: 7, marginTop: 4 },
   desde: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 3 },
-  desdeTexto: { fontSize: 11.5, color: MyCash.textMute },
+  desdeTexto: { fontSize: 11.5, color: c.textMute },
 
   secaoTopo: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  secaoTitulo: { fontSize: 15, fontWeight: '700', color: MyCash.text },
-  valorCampo: { fontSize: 14.5, color: MyCash.textDim },
-});
+  secaoTitulo: { fontSize: 15, fontWeight: '700', color: c.text },
+  valorCampo: { fontSize: 14.5, color: c.textDim },
+  aparenciaNota: { fontSize: 11.5, color: c.textMute, lineHeight: 16 },
+  })
+);

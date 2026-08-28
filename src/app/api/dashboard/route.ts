@@ -27,24 +27,19 @@ export async function GET(req: NextRequest) {
   if (!idUsuario) return NextResponse.json({ error: 'nao autenticado' }, { status: 401 })
 
   const agora = new Date()
-  const primeiroDia = new Date(agora.getFullYear(), agora.getMonth(), 1).toISOString()
-  const ultimoDia = new Date(
-    agora.getFullYear(),
-    agora.getMonth() + 1,
-    0,
-    23,
-    59,
-    59
-  ).toISOString()
+  // A serie cobre os seis meses que terminam no atual, entao a janela comeca
+  // no primeiro dia de cinco meses atras. O mes corrente sai da mesma
+  // consulta — nao vale uma ida a mais ao banco so para ele.
+  const inicioSerie = new Date(agora.getFullYear(), agora.getMonth() - 5, 1)
   const hoje = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate()).toISOString()
 
-  const [contas, doMes, metasAtivas, recentes, lembretes] = await Promise.all([
+  const [perfil, contas, seisMeses, metasAtivas, recentes, lembretes] = await Promise.all([
+    supabase.from('usuarios').select('nome_completo').eq('id_usuario', idUsuario).maybeSingle(),
     supabase.from('contas_bancarias').select('saldo_atual'),
     supabase
       .from('transacoes')
-      .select('valor, tipo')
-      .gte('data_transacao', primeiroDia)
-      .lte('data_transacao', ultimoDia),
+      .select('valor, tipo, data_transacao')
+      .gte('data_transacao', inicioSerie.toISOString()),
     supabase
       .from('metas_financeiras')
       .select('*', { count: 'exact', head: true })
@@ -63,26 +58,58 @@ export async function GET(req: NextRequest) {
       .limit(4),
   ])
 
-  const falha = contas.error ?? doMes.error ?? recentes.error ?? lembretes.error
+  const falha = contas.error ?? seisMeses.error ?? recentes.error ?? lembretes.error
   if (falha) return NextResponse.json({ error: falha.message }, { status: 500 })
 
   const saldoTotal = (contas.data ?? []).reduce((soma, c) => soma + (c.saldo_atual || 0), 0)
 
-  const somar = (tipo: 'Entrada' | 'Saida') =>
-    (doMes.data ?? [])
-      .filter((t) => t.tipo === tipo)
-      .reduce((soma, t) => soma + Math.abs(t.valor || 0), 0)
+  // Seis baldes, do mais antigo ao mes corrente. Meses sem lancamento ficam
+  // zerados de proposito: o grafico do web preenche os meses anteriores com
+  // uma aproximacao do mes atual, o que desenha movimento que nao existiu.
+  const MESES = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
 
-  const entradas = somar('Entrada')
-  const saidas = somar('Saida')
+  const serieMensal = Array.from({ length: 6 }, (_, i) => {
+    const ref = new Date(agora.getFullYear(), agora.getMonth() - (5 - i), 1)
+    return {
+      mes: MESES[ref.getMonth()],
+      ano: ref.getFullYear(),
+      indice: ref.getFullYear() * 12 + ref.getMonth(),
+      entradas: 0,
+      saidas: 0,
+    }
+  })
+
+  const porIndice = new Map(serieMensal.map((m) => [m.indice, m]))
+
+  for (const t of seisMeses.data ?? []) {
+    const data = new Date(t.data_transacao)
+    const balde = porIndice.get(data.getFullYear() * 12 + data.getMonth())
+    if (!balde) continue
+    if (t.tipo === 'Entrada') balde.entradas += Math.abs(t.valor || 0)
+    else if (t.tipo === 'Saida') balde.saidas += Math.abs(t.valor || 0)
+  }
+
+  const mesCorrente = serieMensal[serieMensal.length - 1]
+  const entradas = mesCorrente.entradas
+  const saidas = mesCorrente.saidas
 
   return NextResponse.json({
     data: {
+      // O nome vem daqui, e nao do user_metadata do Supabase Auth: o cadastro
+      // grava o nome completo na tabela `usuarios`, e o metadata do Auth fica
+      // vazio. Sem isso a saudacao cai no prefixo do e-mail.
+      nome: perfil.data?.nome_completo ?? '',
       saldoTotal,
       entradas,
       saidas,
       saldoMes: entradas - saidas,
       metasAtivas: metasAtivas.count ?? 0,
+      serieMensal: serieMensal.map(({ mes, ano, entradas, saidas }) => ({
+        mes,
+        ano,
+        entradas,
+        saidas,
+      })),
       recentes: recentes.data ?? [],
       proximosLembretes: lembretes.data ?? [],
     },

@@ -1,12 +1,12 @@
-import { DarkTheme, ThemeProvider } from '@react-navigation/native';
+import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import 'react-native-reanimated';
 
-import { MyCash } from '@/constants/mycash';
 import { AuthProvider, useAuth } from '@/lib/auth';
+import { TemaProvider, useTema } from '@/lib/tema';
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -18,6 +18,7 @@ export const unstable_settings = {
  */
 function Gate() {
   const { session, carregando } = useAuth();
+  const { cores, escuro } = useTema();
   const segments = useSegments();
   const router = useRouter();
 
@@ -35,31 +36,34 @@ function Gate() {
 
   if (carregando) {
     return (
-      <View style={{ flex: 1, backgroundColor: MyCash.surface0, justifyContent: 'center' }}>
-        <ActivityIndicator color={MyCash.accent} size="large" />
+      <View style={{ flex: 1, backgroundColor: cores.surface0, justifyContent: 'center' }}>
+        <ActivityIndicator color={cores.accent} size="large" />
       </View>
     );
   }
 
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: MyCash.surface0 },
-      }}>
-      <Stack.Screen name="login" />
-      <Stack.Screen name="(tabs)" />
-    </Stack>
+    <ThemeProvider value={escuro ? DarkTheme : DefaultTheme}>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: cores.surface0 },
+        }}>
+        <Stack.Screen name="login" />
+        <Stack.Screen name="(tabs)" />
+      </Stack>
+      {/* A barra de status inverte junto com o tema. */}
+      <StatusBar style={escuro ? 'light' : 'dark'} />
+    </ThemeProvider>
   );
 }
 
 export default function RootLayout() {
   return (
-    <ThemeProvider value={DarkTheme}>
+    <TemaProvider>
       <AuthProvider>
         <Gate />
-        <StatusBar style="light" />
       </AuthProvider>
-    </ThemeProvider>
+    </TemaProvider>
   );
 }

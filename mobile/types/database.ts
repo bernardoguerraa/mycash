@@ -123,12 +123,24 @@ export type NotificacaoInput = {
  * Retorno de GET /api/dashboard. O recorte do mes e a soma dos saldos ficam
  * no servidor — o app so desenha o que chega.
  */
+/** Um mes da serie de GET /api/dashboard. */
+export type PontoMensal = {
+  mes: string;
+  ano: number;
+  entradas: number;
+  saidas: number;
+};
+
 export type ResumoDashboard = {
+  /** nome_completo da tabela usuarios; vazio se o cadastro nao tiver nome. */
+  nome: string;
   saldoTotal: number;
   entradas: number;
   saidas: number;
   saldoMes: number;
   metasAtivas: number;
+  /** Seis meses, do mais antigo ao corrente. */
+  serieMensal: PontoMensal[];
   recentes: Transacao[];
   proximosLembretes: Pick<
     Lembrete,

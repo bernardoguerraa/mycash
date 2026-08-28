@@ -16,10 +16,9 @@ import {
   ModalFormulario,
   Seletor,
   Tela,
-  estilos as ui,
+  useEstilos,
 } from '@/components/ui/kit';
 import {
-  MyCash,
   dataValida,
   formatCurrency,
   formatDateLong,
@@ -27,6 +26,9 @@ import {
   sanitizarData,
   sanitizarValor,
 } from '@/constants/mycash';
+import type { Cores } from '@/constants/mycash';
+import { criarUseEstilos } from '@/lib/estilos';
+import { useTema } from '@/lib/tema';
 import { useRecurso } from '@/hooks/use-recurso';
 import { lembretesRepository, type GrupoVencimento } from '@/lib/repositories';
 import type { Lembrete, TipoLembrete } from '@/types/database';
@@ -36,10 +38,17 @@ const VAZIO: Lembrete[] = [];
 const carregar = () => lembretesRepository.listar();
 
 /** Mesmos grupos e cores do LembretesClient do web. */
-const GRUPOS: { chave: GrupoVencimento; titulo: string; cor: string; icone: 'alert-circle' | 'time' | 'calendar' }[] = [
-  { chave: 'vencidos', titulo: 'Vencidos', cor: MyCash.danger, icone: 'alert-circle' },
-  { chave: 'proximos', titulo: 'Próximos (7 dias)', cor: MyCash.warn, icone: 'time' },
-  { chave: 'futuros', titulo: 'Futuros', cor: MyCash.accentLight, icone: 'calendar' },
+type Grupo = {
+  chave: GrupoVencimento;
+  titulo: string;
+  cor: string;
+  icone: 'alert-circle' | 'time' | 'calendar';
+};
+
+const grupos = (cores: Cores): Grupo[] => [
+  { chave: 'vencidos', titulo: 'Vencidos', cor: cores.danger, icone: 'alert-circle' },
+  { chave: 'proximos', titulo: 'Próximos (7 dias)', cor: cores.warn, icone: 'time' },
+  { chave: 'futuros', titulo: 'Futuros', cor: cores.accentLight, icone: 'calendar' },
 ];
 
 type Formulario = {
@@ -51,6 +60,10 @@ type Formulario = {
 };
 
 export default function LembretesScreen() {
+  const ui = useEstilos();
+  const proprios = useProprios();
+  const { cores } = useTema();
+
   const { dados, carregando, atualizando, erro, aoPuxar, recarregar, setDados } = useRecurso(
     carregar,
     VAZIO
@@ -202,13 +215,13 @@ export default function LembretesScreen() {
           rotulo="A pagar (ativos)"
           valor={formatCurrency(resumo.pagar)}
           icone="arrow-up-circle-outline"
-          cor={MyCash.warn}
+          cor={cores.warn}
         />
         <CartaoEstatistica
           rotulo="A receber (ativos)"
           valor={formatCurrency(resumo.receber)}
           icone="arrow-down-circle-outline"
-          cor={MyCash.accentLight}
+          cor={cores.accentLight}
         />
       </View>
 
@@ -239,7 +252,7 @@ export default function LembretesScreen() {
           descricao={dados.length ? 'Troque os filtros acima.' : 'Toque em Novo para criar o primeiro.'}
         />
       ) : (
-        GRUPOS.map((grupo) => {
+        grupos(cores).map((grupo) => {
           const itens = agrupados[grupo.chave];
           if (itens.length === 0) return null;
 
@@ -260,13 +273,13 @@ export default function LembretesScreen() {
                         style={[
                           proprios.icone,
                           {
-                            backgroundColor: receber ? MyCash.accentMuted : MyCash.warnMuted,
+                            backgroundColor: receber ? cores.accentMuted : cores.warnMuted,
                           },
                         ]}>
                         <Ionicons
                           name={receber ? 'arrow-down' : 'arrow-up'}
                           size={16}
-                          color={receber ? MyCash.accentLight : MyCash.warn}
+                          color={receber ? cores.accentLight : cores.warn}
                         />
                       </View>
 
@@ -282,7 +295,7 @@ export default function LembretesScreen() {
                       <Text
                         style={[
                           proprios.valor,
-                          { color: receber ? MyCash.accentLight : MyCash.warn },
+                          { color: receber ? cores.accentLight : cores.warn },
                         ]}>
                         {formatCurrency(l.valor_previsto)}
                       </Text>
@@ -293,8 +306,8 @@ export default function LembretesScreen() {
                         <Switch
                           value={l.ativo}
                           onValueChange={() => alternarAtivo(l)}
-                          trackColor={{ false: MyCash.surface4, true: MyCash.accentDark }}
-                          thumbColor={l.ativo ? MyCash.accentLight : MyCash.textMute}
+                          trackColor={{ false: cores.surface4, true: cores.accentDark }}
+                          thumbColor={l.ativo ? cores.accentLight : cores.textMute}
                         />
                         <Text style={proprios.switchTexto}>{l.ativo ? 'Ativo' : 'Inativo'}</Text>
                       </View>
@@ -303,7 +316,7 @@ export default function LembretesScreen() {
                         <BotaoIcone icone="pencil" aoTocar={() => abrirEdicao(l)} />
                         <BotaoIcone
                           icone="trash-outline"
-                          cor={MyCash.danger}
+                          cor={cores.danger}
                           aoTocar={() => setExcluindo(l)}
                         />
                       </View>
@@ -363,8 +376,8 @@ export default function LembretesScreen() {
             <Switch
               value={form.ativo}
               onValueChange={(ativo) => setForm({ ...form, ativo })}
-              trackColor={{ false: MyCash.surface4, true: MyCash.accentDark }}
-              thumbColor={form.ativo ? MyCash.accentLight : MyCash.textMute}
+              trackColor={{ false: cores.surface4, true: cores.accentDark }}
+              thumbColor={form.ativo ? cores.accentLight : cores.textMute}
             />
           </View>
         </ModalFormulario>
@@ -382,11 +395,12 @@ export default function LembretesScreen() {
   );
 }
 
-const proprios = StyleSheet.create({
+const useProprios = criarUseEstilos((c: Cores) =>
+  StyleSheet.create({
   grupo: { gap: 8 },
   grupoTopo: { flexDirection: 'row', alignItems: 'center', gap: 7, marginTop: 6 },
   grupoTitulo: { fontSize: 14, fontWeight: '700', flex: 1 },
-  grupoContador: { fontSize: 12, color: MyCash.textMute, fontWeight: '600' },
+  grupoContador: { fontSize: 12, color: c.textMute, fontWeight: '600' },
 
   inativo: { opacity: 0.55 },
 
@@ -398,8 +412,8 @@ const proprios = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  descricao: { fontSize: 14.5, fontWeight: '600', color: MyCash.text },
-  vencimento: { fontSize: 12, color: MyCash.textMute, marginTop: 2 },
+  descricao: { fontSize: 14.5, fontWeight: '600', color: c.text },
+  vencimento: { fontSize: 12, color: c.textMute, marginTop: 2 },
   valor: { fontSize: 14.5, fontWeight: '700' },
 
   rodape: {
@@ -407,12 +421,12 @@ const proprios = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     borderTopWidth: 1,
-    borderTopColor: MyCash.edge1,
+    borderTopColor: c.edge1,
     paddingTop: 9,
     marginTop: 2,
   },
   switchLinha: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  switchTexto: { fontSize: 12.5, color: MyCash.textDim },
+  switchTexto: { fontSize: 12.5, color: c.textDim },
   acoes: { flexDirection: 'row', gap: 6 },
 
   switchCampo: {
@@ -421,4 +435,5 @@ const proprios = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 2,
   },
-});
+  })
+);

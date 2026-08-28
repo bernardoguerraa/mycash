@@ -10,9 +10,11 @@ import {
   Carregando,
   Cartao,
   Tela,
-  estilos as ui,
+  useEstilos,
 } from '@/components/ui/kit';
-import { MyCash } from '@/constants/mycash';
+import type { Cores } from '@/constants/mycash';
+import { criarUseEstilos } from '@/lib/estilos';
+import { useTema } from '@/lib/tema';
 import { useRecurso } from '@/hooks/use-recurso';
 import { useAuth } from '@/lib/auth';
 import { lembretesRepository, notificacoesRepository } from '@/lib/repositories';
@@ -34,6 +36,9 @@ async function carregar(): Promise<Contadores> {
 type IconeNome = ComponentProps<typeof Ionicons>['name'];
 
 export default function MaisScreen() {
+  const proprios = useProprios();
+  const { cores } = useTema();
+
   const router = useRouter();
   const { session } = useAuth();
   const { dados, carregando, atualizando, erro, aoPuxar } = useRecurso(carregar, VAZIO);
@@ -49,8 +54,8 @@ export default function MaisScreen() {
       <View style={proprios.lista}>
         <Atalho
           icone="notifications-outline"
-          cor={MyCash.warn}
-          fundo={MyCash.warnMuted}
+          cor={cores.warn}
+          fundo={cores.warnMuted}
           titulo="Lembretes"
           descricao="Contas a pagar e a receber"
           contador={dados.lembretesAtivos}
@@ -59,8 +64,8 @@ export default function MaisScreen() {
 
         <Atalho
           icone="mail-unread-outline"
-          cor={MyCash.info}
-          fundo={MyCash.infoMuted}
+          cor={cores.info}
+          fundo={cores.infoMuted}
           titulo="Notificações"
           descricao="Avisos do sistema"
           contador={dados.naoLidas}
@@ -69,8 +74,8 @@ export default function MaisScreen() {
 
         <Atalho
           icone="person-outline"
-          cor={MyCash.accentLight}
-          fundo={MyCash.accentMuted}
+          cor={cores.accentLight}
+          fundo={cores.accentMuted}
           titulo="Perfil"
           descricao="Seus dados, senha e sair da conta"
           aoTocar={() => router.push('/(tabs)/perfil')}
@@ -78,8 +83,8 @@ export default function MaisScreen() {
 
         <Atalho
           icone="globe-outline"
-          cor={MyCash.roxo}
-          fundo={MyCash.roxoMuted}
+          cor={cores.roxo}
+          fundo={cores.roxoMuted}
           titulo="Abrir o MyCash no navegador"
           descricao="Relatórios e Open Finance ficam na versão web"
           aoTocar={() => WebBrowser.openBrowserAsync(SITE)}
@@ -118,6 +123,10 @@ function Atalho({
   contador?: number;
   aoTocar: () => void;
 }) {
+  const ui = useEstilos();
+  const proprios = useProprios();
+  const { cores } = useTema();
+
   return (
     <Pressable onPress={aoTocar} style={({ pressed }) => pressed && { opacity: 0.7 }}>
       <Cartao style={proprios.atalho}>
@@ -138,13 +147,15 @@ function Atalho({
           </View>
         ) : null}
 
-        <Ionicons name="chevron-forward" size={17} color={MyCash.textMute} />
+        <Ionicons name="chevron-forward" size={17} color={cores.textMute} />
       </Cartao>
     </Pressable>
   );
 }
 
 function Linha({ rotulo, valor }: { rotulo: string; valor: string }) {
+  const proprios = useProprios();
+
   return (
     <View style={proprios.linhaTecnica}>
       <Text style={proprios.linhaRotulo}>{rotulo}</Text>
@@ -155,7 +166,8 @@ function Linha({ rotulo, valor }: { rotulo: string; valor: string }) {
   );
 }
 
-const proprios = StyleSheet.create({
+const useProprios = criarUseEstilos((c: Cores) =>
+  StyleSheet.create({
   lista: { gap: 9 },
   atalho: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 },
   icone: {
@@ -165,22 +177,23 @@ const proprios = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  atalhoTitulo: { fontSize: 14.5, fontWeight: '700', color: MyCash.text },
-  atalhoDescricao: { fontSize: 12, color: MyCash.textMute, marginTop: 2 },
+  atalhoTitulo: { fontSize: 14.5, fontWeight: '700', color: c.text },
+  atalhoDescricao: { fontSize: 12, color: c.textMute, marginTop: 2 },
   selo: {
     minWidth: 22,
     height: 22,
     borderRadius: 11,
     paddingHorizontal: 6,
-    backgroundColor: MyCash.accent,
+    backgroundColor: c.accent,
     alignItems: 'center',
     justifyContent: 'center',
   },
   seloTexto: { fontSize: 11.5, fontWeight: '800', color: '#04140d' },
 
-  tecnicoTitulo: { fontSize: 14, fontWeight: '700', color: MyCash.text, marginBottom: 2 },
+  tecnicoTitulo: { fontSize: 14, fontWeight: '700', color: c.text, marginBottom: 2 },
   linhaTecnica: { flexDirection: 'row', justifyContent: 'space-between', gap: 12 },
-  linhaRotulo: { fontSize: 12.5, color: MyCash.textMute },
-  linhaValor: { flex: 1, fontSize: 12.5, color: MyCash.textDim, textAlign: 'right' },
-  tecnicoNota: { fontSize: 11.5, color: MyCash.textMute, lineHeight: 16, marginTop: 4 },
-});
+  linhaRotulo: { fontSize: 12.5, color: c.textMute },
+  linhaValor: { flex: 1, fontSize: 12.5, color: c.textDim, textAlign: 'right' },
+  tecnicoNota: { fontSize: 11.5, color: c.textMute, lineHeight: 16, marginTop: 4 },
+  })
+);

@@ -18,10 +18,9 @@ import {
   ModalFormulario,
   Seletor,
   Tela,
-  estilos as ui,
+  useEstilos,
 } from '@/components/ui/kit';
 import {
-  MyCash,
   dataValida,
   formatCurrency,
   formatDateLong,
@@ -30,6 +29,9 @@ import {
   sanitizarData,
   sanitizarValor,
 } from '@/constants/mycash';
+import type { Cores } from '@/constants/mycash';
+import { criarUseEstilos } from '@/lib/estilos';
+import { useTema } from '@/lib/tema';
 import { useRecurso } from '@/hooks/use-recurso';
 import { metasRepository } from '@/lib/repositories';
 import type { Meta, StatusMeta } from '@/types/database';
@@ -39,14 +41,14 @@ const VAZIO: Meta[] = [];
 const carregar = () => metasRepository.listar();
 
 /** Mesmas cores de status do MetasClient do web. */
-function aparenciaStatus(status: StatusMeta) {
+function aparenciaStatus(status: StatusMeta, cores: Cores) {
   switch (status) {
     case 'Concluida':
-      return { label: 'Concluída', cor: MyCash.accentLight, fundo: MyCash.accentMuted };
+      return { label: 'Concluída', cor: cores.accentLight, fundo: cores.accentMuted };
     case 'Cancelada':
-      return { label: 'Cancelada', cor: MyCash.danger, fundo: MyCash.dangerMuted };
+      return { label: 'Cancelada', cor: cores.danger, fundo: cores.dangerMuted };
     default:
-      return { label: 'Em andamento', cor: MyCash.warn, fundo: MyCash.warnMuted };
+      return { label: 'Em andamento', cor: cores.warn, fundo: cores.warnMuted };
   }
 }
 
@@ -60,6 +62,10 @@ type Formulario = {
 };
 
 export default function MetasScreen() {
+  const ui = useEstilos();
+  const proprios = useProprios();
+  const { cores } = useTema();
+
   const { dados, carregando, atualizando, erro, aoPuxar, recarregar } = useRecurso(carregar, VAZIO);
 
   const [filtro, setFiltro] = useState<'Todas' | StatusMeta>('Todas');
@@ -223,13 +229,13 @@ export default function MetasScreen() {
           rotulo="Em andamento"
           valor={String(stats.emAndamento)}
           icone="flame-outline"
-          cor={MyCash.warn}
+          cor={cores.warn}
         />
         <CartaoEstatistica
           rotulo="Concluídas"
           valor={String(stats.concluidas)}
           icone="checkmark-circle-outline"
-          cor={MyCash.accentLight}
+          cor={cores.accentLight}
         />
       </View>
 
@@ -260,7 +266,7 @@ export default function MetasScreen() {
           {filtradas.map((meta) => {
             const progresso = metasRepository.progresso(meta);
             const dias = metasRepository.diasRestantes(meta);
-            const status = aparenciaStatus(meta.status);
+            const status = aparenciaStatus(meta.status, cores);
             const emAndamento = meta.status === 'EmAndamento';
             const atrasada = emAndamento && dias < 0;
 
@@ -280,7 +286,7 @@ export default function MetasScreen() {
                     <BotaoIcone icone="pencil" aoTocar={() => abrirEdicao(meta)} />
                     <BotaoIcone
                       icone="trash-outline"
-                      cor={MyCash.danger}
+                      cor={cores.danger}
                       aoTocar={() => setExcluindo(meta)}
                     />
                   </View>
@@ -295,7 +301,7 @@ export default function MetasScreen() {
 
                 <BarraProgresso
                   percentual={progresso}
-                  cor={meta.status === 'Concluida' ? MyCash.accent : MyCash.info}
+                  cor={meta.status === 'Concluida' ? cores.accent : cores.info}
                 />
 
                 <View style={proprios.rodape}>
@@ -304,7 +310,7 @@ export default function MetasScreen() {
                   <View style={proprios.rodapeDireita}>
                     <Text style={proprios.percentual}>{progresso.toFixed(0)}%</Text>
                     {emAndamento ? (
-                      <Text style={[proprios.dias, atrasada && { color: MyCash.danger }]}>
+                      <Text style={[proprios.dias, atrasada && { color: cores.danger }]}>
                         <Ionicons name="time-outline" size={11} />{' '}
                         {atrasada ? `${Math.abs(dias)}d atrasada` : `${dias}d restantes`}
                       </Text>
@@ -433,19 +439,20 @@ export default function MetasScreen() {
   );
 }
 
-const proprios = StyleSheet.create({
-  investidoRotulo: { fontSize: 12.5, color: MyCash.textDim },
-  investidoValor: { fontSize: 23, fontWeight: '700', color: MyCash.text, letterSpacing: -0.5 },
+const useProprios = criarUseEstilos((c: Cores) =>
+  StyleSheet.create({
+  investidoRotulo: { fontSize: 12.5, color: c.textDim },
+  investidoValor: { fontSize: 23, fontWeight: '700', color: c.text, letterSpacing: -0.5 },
 
   lista: { gap: 10 },
   topo: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  titulo: { fontSize: 15.5, fontWeight: '700', color: MyCash.text },
-  prazo: { fontSize: 12, color: MyCash.textMute, marginTop: 2 },
+  titulo: { fontSize: 15.5, fontWeight: '700', color: c.text },
+  prazo: { fontSize: 12, color: c.textMute, marginTop: 2 },
   acoes: { flexDirection: 'row', gap: 6 },
 
   valores: { flexDirection: 'row', alignItems: 'baseline', gap: 6, marginTop: 2 },
-  valorAtual: { fontSize: 19, fontWeight: '700', color: MyCash.text },
-  valorObjetivo: { fontSize: 12.5, color: MyCash.textMute },
+  valorAtual: { fontSize: 19, fontWeight: '700', color: c.text },
+  valorObjetivo: { fontSize: 12.5, color: c.textMute },
 
   rodape: {
     flexDirection: 'row',
@@ -454,9 +461,10 @@ const proprios = StyleSheet.create({
     marginTop: 2,
   },
   rodapeDireita: { alignItems: 'flex-end' },
-  percentual: { fontSize: 13, fontWeight: '700', color: MyCash.text },
-  dias: { fontSize: 11, color: MyCash.textMute, marginTop: 1 },
+  percentual: { fontSize: 13, fontWeight: '700', color: c.text },
+  dias: { fontSize: 11, color: c.textMute, marginTop: 1 },
 
-  aporteMeta: { fontSize: 16, fontWeight: '700', color: MyCash.text },
-  aporteFalta: { fontSize: 13, color: MyCash.textDim, marginTop: -8 },
-});
+  aporteMeta: { fontSize: 16, fontWeight: '700', color: c.text },
+  aporteFalta: { fontSize: 13, color: c.textDim, marginTop: -8 },
+  })
+);

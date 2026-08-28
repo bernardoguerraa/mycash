@@ -2,34 +2,40 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { GraficoMensal } from '@/components/ui/grafico-mensal';
 import {
   Aviso,
+  BotaoTema,
   Carregando,
   Cartao,
   CartaoEstatistica,
   EstadoVazio,
   Tela,
-  estilos as ui,
+  useEstilos,
 } from '@/components/ui/kit';
 import {
-  MyCash,
   formatCurrency,
   formatDate,
   formatDateLong,
   getGreeting,
   rotuloCategoria,
 } from '@/constants/mycash';
+import type { Cores } from '@/constants/mycash';
+import { criarUseEstilos } from '@/lib/estilos';
+import { useTema } from '@/lib/tema';
 import { useRecurso } from '@/hooks/use-recurso';
 import { useAuth } from '@/lib/auth';
 import { dashboardRepository } from '@/lib/repositories';
 import type { ResumoDashboard } from '@/types/database';
 
 const VAZIO: ResumoDashboard = {
+  nome: '',
   saldoTotal: 0,
   entradas: 0,
   saidas: 0,
   saldoMes: 0,
   metasAtivas: 0,
+  serieMensal: [],
   recentes: [],
   proximosLembretes: [],
 };
@@ -44,11 +50,18 @@ const VAZIO: ResumoDashboard = {
 const carregar = () => dashboardRepository.resumo();
 
 export default function DashboardScreen() {
+  const ui = useEstilos();
+  const proprios = useProprios();
+  const { cores } = useTema();
+
   const { session } = useAuth();
   const router = useRouter();
   const { dados, carregando, atualizando, erro, aoPuxar } = useRecurso(carregar, VAZIO);
 
+  // O nome cadastrado vem da API. O metadata do Auth e o prefixo do e-mail
+  // ficam so como rede de seguranca para contas antigas sem nome.
   const nome =
+    dados.nome ||
     (session?.user.user_metadata?.full_name as string | undefined) ||
     (session?.user.user_metadata?.name as string | undefined) ||
     session?.user.email?.split('@')[0] ||
@@ -60,9 +73,16 @@ export default function DashboardScreen() {
 
   return (
     <Tela atualizando={atualizando} aoPuxar={aoPuxar}>
-      <View>
-        <Text style={proprios.saudacao}>{getGreeting()},</Text>
-        <Text style={proprios.nome}>{nome}</Text>
+      <View style={proprios.topo}>
+        <View style={ui.flex1}>
+          <Text style={proprios.saudacao}>{getGreeting()},</Text>
+          {/* Nome completo cabe em duas linhas; cortar em uma deixava
+              "Matheus Lucas Tavares Bu...". */}
+          <Text style={proprios.nome} numberOfLines={2}>
+            {nome}
+          </Text>
+        </View>
+        <BotaoTema />
       </View>
 
       {erro ? <Aviso texto={erro} /> : null}
@@ -70,9 +90,9 @@ export default function DashboardScreen() {
       <View
         style={[
           proprios.saldoCartao,
-          saldoNegativo && { backgroundColor: MyCash.dangerMuted, borderColor: MyCash.danger },
+          saldoNegativo && { backgroundColor: cores.dangerMuted, borderColor: cores.danger },
         ]}>
-        <Text style={[proprios.saldoRotulo, saldoNegativo && { color: MyCash.danger }]}>
+        <Text style={[proprios.saldoRotulo, saldoNegativo && { color: cores.danger }]}>
           Saldo consolidado
         </Text>
         <Text style={proprios.saldoValor}>{formatCurrency(dados.saldoTotal)}</Text>
@@ -83,13 +103,13 @@ export default function DashboardScreen() {
           rotulo="Entradas do mês"
           valor={formatCurrency(dados.entradas)}
           icone="arrow-down-circle-outline"
-          cor={MyCash.accentLight}
+          cor={cores.accentLight}
         />
         <CartaoEstatistica
           rotulo="Saídas do mês"
           valor={formatCurrency(dados.saidas)}
           icone="arrow-up-circle-outline"
-          cor={MyCash.danger}
+          cor={cores.danger}
         />
       </View>
 
@@ -98,15 +118,17 @@ export default function DashboardScreen() {
           rotulo="Metas em andamento"
           valor={String(dados.metasAtivas)}
           icone="flag-outline"
-          cor={MyCash.info}
+          cor={cores.info}
         />
         <CartaoEstatistica
           rotulo="Saldo do mês"
           valor={formatCurrency(dados.saldoMes)}
           icone="trending-up-outline"
-          cor={dados.saldoMes >= 0 ? MyCash.accentLight : MyCash.danger}
+          cor={dados.saldoMes >= 0 ? cores.accentLight : cores.danger}
         />
       </View>
+
+      {dados.serieMensal.length > 0 ? <GraficoMensal serie={dados.serieMensal} /> : null}
 
       <Secao
         titulo="Transações recentes"
@@ -129,12 +151,12 @@ export default function DashboardScreen() {
                 <View
                   style={[
                     proprios.itemIcone,
-                    { backgroundColor: entrada ? MyCash.accentMuted : MyCash.dangerMuted },
+                    { backgroundColor: entrada ? cores.accentMuted : cores.dangerMuted },
                   ]}>
                   <Ionicons
                     name={entrada ? 'arrow-down' : 'arrow-up'}
                     size={16}
-                    color={entrada ? MyCash.accentLight : MyCash.danger}
+                    color={entrada ? cores.accentLight : cores.danger}
                   />
                 </View>
 
@@ -151,7 +173,7 @@ export default function DashboardScreen() {
                 <Text
                   style={[
                     proprios.itemValor,
-                    { color: entrada ? MyCash.accentLight : MyCash.danger },
+                    { color: entrada ? cores.accentLight : cores.danger },
                   ]}>
                   {entrada ? '+' : '−'}
                   {formatCurrency(Math.abs(t.valor || 0))}
@@ -191,7 +213,7 @@ export default function DashboardScreen() {
                 <Text
                   style={[
                     proprios.itemValor,
-                    { color: receber ? MyCash.accentLight : MyCash.warn },
+                    { color: receber ? cores.accentLight : cores.warn },
                   ]}>
                   {formatCurrency(l.valor_previsto)}
                 </Text>
@@ -213,6 +235,8 @@ function Secao({
   acao?: string;
   aoTocarAcao?: () => void;
 }) {
+  const proprios = useProprios();
+
   return (
     <View style={proprios.secao}>
       <Text style={proprios.secaoTitulo}>{titulo}</Text>
@@ -225,20 +249,22 @@ function Secao({
   );
 }
 
-const proprios = StyleSheet.create({
-  saudacao: { fontSize: 15, color: MyCash.textDim },
-  nome: { fontSize: 26, fontWeight: '700', color: MyCash.text, letterSpacing: -0.4 },
+const useProprios = criarUseEstilos((c: Cores) =>
+  StyleSheet.create({
+  topo: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
+  saudacao: { fontSize: 15, color: c.textDim },
+  nome: { fontSize: 24, fontWeight: '700', color: c.text, letterSpacing: -0.4, lineHeight: 29 },
 
   saldoCartao: {
-    backgroundColor: MyCash.accentMuted,
+    backgroundColor: c.accentMuted,
     borderWidth: 1,
     borderColor: 'rgba(16,185,129,0.35)',
     borderRadius: 16,
     padding: 20,
     gap: 6,
   },
-  saldoRotulo: { fontSize: 13, color: MyCash.accentLight, fontWeight: '600' },
-  saldoValor: { fontSize: 31, fontWeight: '700', color: MyCash.text, letterSpacing: -1 },
+  saldoRotulo: { fontSize: 13, color: c.accentLight, fontWeight: '600' },
+  saldoValor: { fontSize: 31, fontWeight: '700', color: c.text, letterSpacing: -1 },
 
   secao: {
     flexDirection: 'row',
@@ -246,17 +272,17 @@ const proprios = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: 8,
   },
-  secaoTitulo: { fontSize: 16, fontWeight: '600', color: MyCash.text },
-  secaoAcao: { fontSize: 13, fontWeight: '600', color: MyCash.accentLight },
+  secaoTitulo: { fontSize: 16, fontWeight: '600', color: c.text },
+  secaoAcao: { fontSize: 13, fontWeight: '600', color: c.accentLight },
 
   lista: { gap: 8 },
   item: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    backgroundColor: MyCash.surface2,
+    backgroundColor: c.surface2,
     borderWidth: 1,
-    borderColor: MyCash.edge1,
+    borderColor: c.edge1,
     borderRadius: 12,
     padding: 13,
   },
@@ -267,9 +293,10 @@ const proprios = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  itemTitulo: { fontSize: 14.5, color: MyCash.text, fontWeight: '600' },
-  itemMeta: { fontSize: 12, color: MyCash.textMute, marginTop: 2 },
+  itemTitulo: { fontSize: 14.5, color: c.text, fontWeight: '600' },
+  itemMeta: { fontSize: 12, color: c.textMute, marginTop: 2 },
   itemValor: { fontSize: 14.5, fontWeight: '700' },
 
   lembreteCartao: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 13 },
-});
+  })
+);

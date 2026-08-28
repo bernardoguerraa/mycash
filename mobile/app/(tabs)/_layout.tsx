@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import type { ComponentProps } from 'react';
 
-import { MyCash } from '@/constants/mycash';
+import { useTema } from '@/lib/tema';
 
 type IconeNome = ComponentProps<typeof Ionicons>['name'];
 
@@ -21,15 +21,17 @@ function icone(nome: IconeNome, nomeAtivo: IconeNome) {
 }
 
 export default function TabLayout() {
+  const { cores } = useTema();
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: MyCash.accent,
-        tabBarInactiveTintColor: MyCash.textMute,
+        tabBarActiveTintColor: cores.accent,
+        tabBarInactiveTintColor: cores.textMute,
         tabBarStyle: {
-          backgroundColor: MyCash.surface1,
-          borderTopColor: MyCash.edge1,
+          backgroundColor: cores.surface1,
+          borderTopColor: cores.edge1,
         },
         tabBarLabelStyle: { fontSize: 10.5, fontWeight: '600' },
       }}>

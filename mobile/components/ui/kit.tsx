@@ -2,8 +2,12 @@
  * Primitivas visuais compartilhadas pelas telas.
  *
  * O web resolve isso com Tailwind + lucide-react; no React Native nao ha
- * classes, entao os mesmos tokens de `constants/mycash.ts` viram StyleSheet
- * aqui e as telas so compoem.
+ * classes, entao os tokens de `constants/mycash.ts` viram StyleSheet aqui e
+ * as telas so compoem.
+ *
+ * Tudo aqui e sensivel ao tema: `useEstilos()` devolve a folha da paleta em
+ * vigor e `useTema().cores` da as cores para o que precisa ser calculado em
+ * tempo de render (variantes de botao, tons de aviso).
  */
 
 import { Ionicons } from '@expo/vector-icons';
@@ -24,7 +28,9 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { MyCash } from '@/constants/mycash';
+import type { Cores } from '@/constants/mycash';
+import { criarUseEstilos } from '@/lib/estilos';
+import { useTema } from '@/lib/tema';
 
 type IconeNome = ComponentProps<typeof Ionicons>['name'];
 
@@ -41,6 +47,9 @@ export function Tela({
   atualizando?: boolean;
   aoPuxar?: () => void;
 }) {
+  const estilos = useEstilos();
+  const { cores } = useTema();
+
   return (
     <SafeAreaView style={estilos.tela} edges={['top']}>
       <ScrollView
@@ -51,14 +60,33 @@ export function Tela({
             <RefreshControl
               refreshing={!!atualizando}
               onRefresh={aoPuxar}
-              tintColor={MyCash.accent}
-              colors={[MyCash.accent]}
+              tintColor={cores.accent}
+              colors={[cores.accent]}
             />
           ) : undefined
         }>
         {children}
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+/**
+ * Alterna claro/escuro em um toque. Fica no cabecalho de todas as telas —
+ * enterrar isso numa tela de ajustes so faz o usuario procurar.
+ *
+ * Sempre grava um modo explicito: quem toca aqui esta dizendo qual tema
+ * quer, nao pedindo para seguir o aparelho. O modo "do sistema" continua
+ * disponivel no Perfil.
+ */
+export function BotaoTema() {
+  const { escuro, definirModo } = useTema();
+
+  return (
+    <BotaoIcone
+      icone={escuro ? 'sunny-outline' : 'moon-outline'}
+      aoTocar={() => definirModo(escuro ? 'claro' : 'escuro')}
+    />
   );
 }
 
@@ -71,6 +99,8 @@ export function Cabecalho({
   subtitulo?: string;
   acao?: ReactNode;
 }) {
+  const estilos = useEstilos();
+
   return (
     <View style={estilos.cabecalho}>
       <View style={estilos.flex1}>
@@ -78,37 +108,38 @@ export function Cabecalho({
         {subtitulo ? <Text style={estilos.cabecalhoSub}>{subtitulo}</Text> : null}
       </View>
       {acao}
+      <BotaoTema />
     </View>
   );
 }
 
 export function Carregando() {
+  const estilos = useEstilos();
+  const { cores } = useTema();
+
   return (
     <SafeAreaView style={[estilos.tela, estilos.centro]}>
-      <ActivityIndicator color={MyCash.accent} size="large" />
+      <ActivityIndicator color={cores.accent} size="large" />
     </SafeAreaView>
   );
 }
 
 export function Aviso({ texto, tom = 'erro' }: { texto: string; tom?: 'erro' | 'info' }) {
+  const estilos = useEstilos();
+  const { cores } = useTema();
+
   const erro = tom === 'erro';
+  const cor = erro ? cores.danger : cores.info;
+  const fundo = erro ? cores.dangerMuted : cores.infoMuted;
+
   return (
-    <View
-      style={[
-        estilos.aviso,
-        {
-          backgroundColor: erro ? MyCash.dangerMuted : MyCash.infoMuted,
-          borderColor: erro ? MyCash.danger : MyCash.info,
-        },
-      ]}>
+    <View style={[estilos.aviso, { backgroundColor: fundo, borderColor: cor }]}>
       <Ionicons
         name={erro ? 'alert-circle-outline' : 'information-circle-outline'}
         size={16}
-        color={erro ? MyCash.danger : MyCash.info}
+        color={cor}
       />
-      <Text style={[estilos.avisoTexto, { color: erro ? MyCash.danger : MyCash.info }]}>
-        {texto}
-      </Text>
+      <Text style={[estilos.avisoTexto, { color: cor }]}>{texto}</Text>
     </View>
   );
 }
@@ -122,9 +153,12 @@ export function EstadoVazio({
   titulo: string;
   descricao?: string;
 }) {
+  const estilos = useEstilos();
+  const { cores } = useTema();
+
   return (
     <View style={estilos.vazio}>
-      <Ionicons name={icone} size={34} color={MyCash.textMute} />
+      <Ionicons name={icone} size={34} color={cores.textMute} />
       <Text style={estilos.vazioTitulo}>{titulo}</Text>
       {descricao ? <Text style={estilos.vazioTexto}>{descricao}</Text> : null}
     </View>
@@ -142,6 +176,7 @@ export function Cartao({
   children: ReactNode;
   style?: ComponentProps<typeof View>['style'];
 }) {
+  const estilos = useEstilos();
   return <View style={[estilos.cartao, style]}>{children}</View>;
 }
 
@@ -149,22 +184,26 @@ export function CartaoEstatistica({
   rotulo,
   valor,
   icone,
-  cor = MyCash.text,
+  cor,
 }: {
   rotulo: string;
   valor: string;
   icone?: IconeNome;
   cor?: string;
 }) {
+  const estilos = useEstilos();
+  const { cores } = useTema();
+  const tom = cor ?? cores.text;
+
   return (
     <View style={[estilos.cartao, estilos.flex1, estilos.statCartao]}>
       <View style={estilos.statTopo}>
         <Text style={estilos.statRotulo} numberOfLines={1}>
           {rotulo}
         </Text>
-        {icone ? <Ionicons name={icone} size={15} color={cor} /> : null}
+        {icone ? <Ionicons name={icone} size={15} color={tom} /> : null}
       </View>
-      <Text style={[estilos.statValor, { color: cor }]} numberOfLines={1} adjustsFontSizeToFit>
+      <Text style={[estilos.statValor, { color: tom }]} numberOfLines={1} adjustsFontSizeToFit>
         {valor}
       </Text>
     </View>
@@ -172,6 +211,8 @@ export function CartaoEstatistica({
 }
 
 export function Etiqueta({ texto, cor, fundo }: { texto: string; cor: string; fundo: string }) {
+  const estilos = useEstilos();
+
   return (
     <View style={[estilos.etiqueta, { backgroundColor: fundo, borderColor: cor }]}>
       <View style={[estilos.etiquetaPonto, { backgroundColor: cor }]} />
@@ -180,13 +221,19 @@ export function Etiqueta({ texto, cor, fundo }: { texto: string; cor: string; fu
   );
 }
 
-export function BarraProgresso({ percentual, cor = MyCash.accent }: { percentual: number; cor?: string }) {
+export function BarraProgresso({ percentual, cor }: { percentual: number; cor?: string }) {
+  const estilos = useEstilos();
+  const { cores } = useTema();
+
   return (
     <View style={estilos.trilha}>
       <View
         style={[
           estilos.preenchimento,
-          { width: `${Math.max(0, Math.min(percentual, 100))}%`, backgroundColor: cor },
+          {
+            width: `${Math.max(0, Math.min(percentual, 100))}%`,
+            backgroundColor: cor ?? cores.accent,
+          },
         ]}
       />
     </View>
@@ -216,12 +263,15 @@ export function Botao({
   desabilitado?: boolean;
   compacto?: boolean;
 }) {
+  const estilos = useEstilos();
+  const { cores } = useTema();
+
   const inerte = ocupado || desabilitado;
-  const cores = {
-    primario: { fundo: MyCash.accent, borda: MyCash.accent, texto: '#04140d' },
-    secundario: { fundo: MyCash.surface3, borda: MyCash.edge2, texto: MyCash.text },
-    perigo: { fundo: MyCash.dangerMuted, borda: MyCash.danger, texto: MyCash.danger },
-    fantasma: { fundo: 'transparent', borda: 'transparent', texto: MyCash.textDim },
+  const tom = {
+    primario: { fundo: cores.accent, borda: cores.accent, texto: cores.sobreAccent },
+    secundario: { fundo: cores.surface3, borda: cores.edge2, texto: cores.text },
+    perigo: { fundo: cores.dangerMuted, borda: cores.danger, texto: cores.danger },
+    fantasma: { fundo: 'transparent', borda: 'transparent', texto: cores.textDim },
   }[variante];
 
   return (
@@ -231,15 +281,20 @@ export function Botao({
       style={({ pressed }) => [
         estilos.botao,
         compacto && estilos.botaoCompacto,
-        { backgroundColor: cores.fundo, borderColor: cores.borda },
+        { backgroundColor: tom.fundo, borderColor: tom.borda },
         (pressed || inerte) && { opacity: 0.6 },
       ]}>
       {ocupado ? (
-        <ActivityIndicator size="small" color={cores.texto} />
+        <ActivityIndicator size="small" color={tom.texto} />
       ) : (
         <>
-          {icone ? <Ionicons name={icone} size={16} color={cores.texto} /> : null}
-          <Text style={[estilos.botaoTexto, compacto && estilos.botaoTextoCompacto, { color: cores.texto }]}>
+          {icone ? <Ionicons name={icone} size={16} color={tom.texto} /> : null}
+          <Text
+            style={[
+              estilos.botaoTexto,
+              compacto && estilos.botaoTextoCompacto,
+              { color: tom.texto },
+            ]}>
             {titulo}
           </Text>
         </>
@@ -251,7 +306,7 @@ export function Botao({
 export function BotaoIcone({
   icone,
   aoTocar,
-  cor = MyCash.textDim,
+  cor,
   ocupado,
 }: {
   icone: IconeNome;
@@ -259,13 +314,21 @@ export function BotaoIcone({
   cor?: string;
   ocupado?: boolean;
 }) {
+  const estilos = useEstilos();
+  const { cores } = useTema();
+  const tom = cor ?? cores.textDim;
+
   return (
     <Pressable
       onPress={aoTocar}
       disabled={ocupado}
       hitSlop={8}
       style={({ pressed }) => [estilos.botaoIcone, pressed && { opacity: 0.5 }]}>
-      {ocupado ? <ActivityIndicator size="small" color={cor} /> : <Ionicons name={icone} size={18} color={cor} />}
+      {ocupado ? (
+        <ActivityIndicator size="small" color={tom} />
+      ) : (
+        <Ionicons name={icone} size={18} color={tom} />
+      )}
     </Pressable>
   );
 }
@@ -275,13 +338,16 @@ export function Campo({
   erro,
   ...props
 }: TextInputProps & { rotulo: string; erro?: string }) {
+  const estilos = useEstilos();
+  const { cores } = useTema();
+
   return (
     <View style={estilos.campo}>
       <Text style={estilos.rotulo}>{rotulo}</Text>
       <TextInput
-        placeholderTextColor={MyCash.textMute}
+        placeholderTextColor={cores.textMute}
         {...props}
-        style={[estilos.input, !!erro && { borderColor: MyCash.danger }, props.style]}
+        style={[estilos.input, !!erro && { borderColor: cores.danger }, props.style]}
       />
       {erro ? <Text style={estilos.campoErro}>{erro}</Text> : null}
     </View>
@@ -302,12 +368,20 @@ export function Seletor<T extends string | number>({
   aoEscolher: (v: T) => void;
   erro?: string;
 }) {
+  const estilos = useEstilos();
+
   return (
     <View style={estilos.campo}>
       {rotulo ? <Text style={estilos.rotulo}>{rotulo}</Text> : null}
+      {/*
+        Os chips sangram ate a borda da tela: preso na margem de 18px o
+        ultimo item aparecia cortado no meio e parecia defeito. Rolando de
+        ponta a ponta, o corte na borda vira o sinal de que ha mais.
+      */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
+        style={estilos.chipsArea}
         contentContainerStyle={estilos.chips}
         keyboardShouldPersistTaps="handled">
         {opcoes.map((opcao) => {
@@ -321,7 +395,9 @@ export function Seletor<T extends string | number>({
                 ativo && estilos.chipAtivo,
                 pressed && { opacity: 0.7 },
               ]}>
-              <Text style={[estilos.chipTexto, ativo && estilos.chipTextoAtivo]}>{opcao.label}</Text>
+              <Text style={[estilos.chipTexto, ativo && estilos.chipTextoAtivo]}>
+                {opcao.label}
+              </Text>
             </Pressable>
           );
         })}
@@ -354,6 +430,8 @@ export function ModalFormulario({
   rotuloSalvar?: string;
   children: ReactNode;
 }) {
+  const estilos = useEstilos();
+
   return (
     <Modal visible={visivel} transparent animationType="fade" onRequestClose={aoFechar}>
       <KeyboardAvoidingView
@@ -402,13 +480,16 @@ export function ModalConfirmacao({
   aoCancelar: () => void;
   confirmando?: boolean;
 }) {
+  const estilos = useEstilos();
+  const { cores } = useTema();
+
   return (
     <Modal visible={visivel} transparent animationType="fade" onRequestClose={aoCancelar}>
       <View style={estilos.modalFundo}>
         <View style={[estilos.modalCaixa, estilos.modalPequeno]}>
           <View style={estilos.confirmaTopo}>
             <View style={estilos.confirmaIcone}>
-              <Ionicons name="trash-outline" size={20} color={MyCash.danger} />
+              <Ionicons name="trash-outline" size={20} color={cores.danger} />
             </View>
             <Text style={estilos.modalTitulo}>{titulo}</Text>
           </View>
@@ -418,7 +499,12 @@ export function ModalConfirmacao({
               <Botao titulo="Cancelar" variante="secundario" aoTocar={aoCancelar} />
             </View>
             <View style={estilos.flex1}>
-              <Botao titulo="Excluir" variante="perigo" aoTocar={aoConfirmar} ocupado={confirmando} />
+              <Botao
+                titulo="Excluir"
+                variante="perigo"
+                aoTocar={aoConfirmar}
+                ocupado={confirmando}
+              />
             </View>
           </View>
         </View>
@@ -429,155 +515,163 @@ export function ModalConfirmacao({
 
 // ============================================================================
 
-export const estilos = StyleSheet.create({
-  tela: { flex: 1, backgroundColor: MyCash.surface0 },
-  telaConteudo: { padding: 18, gap: 14, paddingBottom: 40 },
-  centro: { justifyContent: 'center', alignItems: 'center' },
-  flex1: { flex: 1 },
-  linha: { flexDirection: 'row', gap: 10 },
+export const useEstilos = criarUseEstilos((c: Cores) =>
+  StyleSheet.create({
+    tela: { flex: 1, backgroundColor: c.surface0 },
+    telaConteudo: { padding: 18, gap: 14, paddingBottom: 40 },
+    centro: { justifyContent: 'center', alignItems: 'center' },
+    flex1: { flex: 1 },
+    linha: { flexDirection: 'row', gap: 10 },
 
-  cabecalho: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, marginBottom: 2 },
-  cabecalhoTitulo: { fontSize: 25, fontWeight: '700', color: MyCash.text, letterSpacing: -0.5 },
-  cabecalhoSub: { fontSize: 13.5, color: MyCash.textDim, marginTop: 3 },
+    cabecalho: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, marginBottom: 2 },
+    cabecalhoTitulo: { fontSize: 25, fontWeight: '700', color: c.text, letterSpacing: -0.5 },
+    cabecalhoSub: { fontSize: 13.5, color: c.textDim, marginTop: 3 },
 
-  aviso: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  avisoTexto: { flex: 1, fontSize: 13 },
+    aviso: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      borderWidth: 1,
+      borderRadius: 10,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+    },
+    avisoTexto: { flex: 1, fontSize: 13 },
 
-  vazio: {
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: MyCash.surface2,
-    borderWidth: 1,
-    borderColor: MyCash.edge1,
-    borderRadius: 14,
-    paddingVertical: 32,
-    paddingHorizontal: 20,
-  },
-  vazioTitulo: { color: MyCash.textDim, fontSize: 14.5, fontWeight: '600' },
-  vazioTexto: { color: MyCash.textMute, fontSize: 12.5, textAlign: 'center' },
+    vazio: {
+      alignItems: 'center',
+      gap: 8,
+      backgroundColor: c.surface2,
+      borderWidth: 1,
+      borderColor: c.edge1,
+      borderRadius: 14,
+      paddingVertical: 32,
+      paddingHorizontal: 20,
+    },
+    vazioTitulo: { color: c.textDim, fontSize: 14.5, fontWeight: '600' },
+    vazioTexto: { color: c.textMute, fontSize: 12.5, textAlign: 'center' },
 
-  cartao: {
-    backgroundColor: MyCash.surface2,
-    borderWidth: 1,
-    borderColor: MyCash.edge1,
-    borderRadius: 14,
-    padding: 15,
-    gap: 8,
-  },
-  statCartao: { padding: 13, gap: 6, minWidth: 0 },
-  statTopo: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 6 },
-  statRotulo: { flex: 1, fontSize: 12, color: MyCash.textDim },
-  statValor: { fontSize: 18, fontWeight: '700' },
+    cartao: {
+      backgroundColor: c.surface2,
+      borderWidth: 1,
+      borderColor: c.edge1,
+      borderRadius: 14,
+      padding: 15,
+      gap: 8,
+    },
+    statCartao: { padding: 13, gap: 6, minWidth: 0 },
+    statTopo: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: 6,
+    },
+    statRotulo: { flex: 1, fontSize: 12, color: c.textDim },
+    statValor: { fontSize: 18, fontWeight: '700' },
 
-  etiqueta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    alignSelf: 'flex-start',
-    borderWidth: 1,
-    borderRadius: 999,
-    paddingHorizontal: 9,
-    paddingVertical: 3,
-  },
-  etiquetaPonto: { width: 5, height: 5, borderRadius: 3 },
-  etiquetaTexto: { fontSize: 11, fontWeight: '600' },
+    etiqueta: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 5,
+      alignSelf: 'flex-start',
+      borderWidth: 1,
+      borderRadius: 999,
+      paddingHorizontal: 9,
+      paddingVertical: 3,
+    },
+    etiquetaPonto: { width: 5, height: 5, borderRadius: 3 },
+    etiquetaTexto: { fontSize: 11, fontWeight: '600' },
 
-  trilha: { height: 7, borderRadius: 4, backgroundColor: MyCash.surface4, overflow: 'hidden' },
-  preenchimento: { height: '100%', borderRadius: 4 },
+    trilha: { height: 7, borderRadius: 4, backgroundColor: c.surface4, overflow: 'hidden' },
+    preenchimento: { height: '100%', borderRadius: 4 },
 
-  botao: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 7,
-    borderWidth: 1,
-    borderRadius: 11,
-    paddingVertical: 13,
-    paddingHorizontal: 14,
-  },
-  botaoCompacto: { paddingVertical: 8, paddingHorizontal: 11, borderRadius: 9 },
-  botaoTexto: { fontSize: 14.5, fontWeight: '700' },
-  botaoTextoCompacto: { fontSize: 13 },
-  botaoIcone: {
-    width: 32,
-    height: 32,
-    borderRadius: 9,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: MyCash.surface3,
-  },
+    botao: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 7,
+      borderWidth: 1,
+      borderRadius: 11,
+      paddingVertical: 13,
+      paddingHorizontal: 14,
+    },
+    botaoCompacto: { paddingVertical: 8, paddingHorizontal: 11, borderRadius: 9 },
+    botaoTexto: { fontSize: 14.5, fontWeight: '700' },
+    botaoTextoCompacto: { fontSize: 13 },
+    botaoIcone: {
+      width: 32,
+      height: 32,
+      borderRadius: 9,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: c.surface3,
+    },
 
-  campo: { gap: 6 },
-  rotulo: { fontSize: 12.5, fontWeight: '600', color: MyCash.textDim },
-  input: {
-    backgroundColor: MyCash.surface3,
-    borderWidth: 1,
-    borderColor: MyCash.edge2,
-    borderRadius: 11,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 15.5,
-    color: MyCash.text,
-  },
-  campoErro: { fontSize: 12, color: MyCash.danger },
+    campo: { gap: 6 },
+    rotulo: { fontSize: 12.5, fontWeight: '600', color: c.textDim },
+    input: {
+      backgroundColor: c.surface3,
+      borderWidth: 1,
+      borderColor: c.edge2,
+      borderRadius: 11,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      fontSize: 15.5,
+      color: c.text,
+    },
+    campoErro: { fontSize: 12, color: c.danger },
 
-  chips: { flexDirection: 'row', gap: 7, paddingRight: 4 },
-  chip: {
-    borderWidth: 1,
-    borderColor: MyCash.edge2,
-    backgroundColor: MyCash.surface3,
-    borderRadius: 999,
-    paddingHorizontal: 13,
-    paddingVertical: 7,
-  },
-  chipAtivo: { backgroundColor: MyCash.accentMuted, borderColor: MyCash.accent },
-  chipTexto: { fontSize: 13, color: MyCash.textDim, fontWeight: '500' },
-  chipTextoAtivo: { color: MyCash.accentLight, fontWeight: '700' },
+    chipsArea: { marginHorizontal: -18 },
+    chips: { flexDirection: 'row', gap: 7, paddingHorizontal: 18 },
+    chip: {
+      borderWidth: 1,
+      borderColor: c.edge2,
+      backgroundColor: c.surface3,
+      borderRadius: 999,
+      paddingHorizontal: 13,
+      paddingVertical: 7,
+    },
+    chipAtivo: { backgroundColor: c.accentMuted, borderColor: c.accent },
+    chipTexto: { fontSize: 13, color: c.textDim, fontWeight: '500' },
+    chipTextoAtivo: { color: c.accent, fontWeight: '700' },
 
-  modalFundo: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.75)',
-    justifyContent: 'center',
-    padding: 16,
-  },
-  modalCaixa: {
-    backgroundColor: MyCash.surface1,
-    borderWidth: 1,
-    borderColor: MyCash.edge2,
-    borderRadius: 18,
-    maxHeight: '88%',
-    overflow: 'hidden',
-  },
-  modalPequeno: { padding: 18, gap: 14 },
-  modalTopo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 18,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: MyCash.edge1,
-  },
-  modalTitulo: { fontSize: 16.5, fontWeight: '700', color: MyCash.text },
-  modalCorpo: { padding: 18, gap: 14 },
-  modalRodape: { flexDirection: 'row', gap: 10, padding: 16, paddingTop: 4 },
+    modalFundo: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.6)',
+      justifyContent: 'center',
+      padding: 16,
+    },
+    modalCaixa: {
+      backgroundColor: c.surface1,
+      borderWidth: 1,
+      borderColor: c.edge2,
+      borderRadius: 18,
+      maxHeight: '88%',
+      overflow: 'hidden',
+    },
+    modalPequeno: { padding: 18, gap: 14 },
+    modalTopo: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 18,
+      paddingVertical: 14,
+      borderBottomWidth: 1,
+      borderBottomColor: c.edge1,
+    },
+    modalTitulo: { fontSize: 16.5, fontWeight: '700', color: c.text },
+    modalCorpo: { padding: 18, gap: 14 },
+    modalRodape: { flexDirection: 'row', gap: 10, padding: 16, paddingTop: 4 },
 
-  confirmaTopo: { flexDirection: 'row', alignItems: 'center', gap: 11 },
-  confirmaIcone: {
-    width: 38,
-    height: 38,
-    borderRadius: 11,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: MyCash.dangerMuted,
-  },
-  confirmaTexto: { fontSize: 13.5, color: MyCash.textDim, lineHeight: 19 },
-});
+    confirmaTopo: { flexDirection: 'row', alignItems: 'center', gap: 11 },
+    confirmaIcone: {
+      width: 38,
+      height: 38,
+      borderRadius: 11,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: c.dangerMuted,
+    },
+    confirmaTexto: { fontSize: 13.5, color: c.textDim, lineHeight: 19 },
+  })
+);

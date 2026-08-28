@@ -1,5 +1,5 @@
 import { useFocusEffect } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 /**
  * Carrega um recurso da API e cuida dos tres estados que toda tela repete:
@@ -9,8 +9,10 @@ import { useCallback, useState } from 'react';
  * uma transacao na aba Transacoes precisa mudar o saldo na aba Inicio sem o
  * usuario fazer nada.
  *
- * `carregar` precisa vir de um useCallback estavel, senao o efeito de foco
- * refaz a busca a cada render.
+ * `carregar` pode mudar entre renders — a versao mais recente fica numa ref,
+ * entao `recarregar` continua estavel enquanto sempre chama a busca atual.
+ * E o que permite uma tela filtrar no servidor (periodo, tipo) sem precisar
+ * remontar o hook a cada tecla.
  */
 export function useRecurso<T>(carregar: () => Promise<T>, inicial: T) {
   const [dados, setDados] = useState<T>(inicial);
@@ -18,14 +20,17 @@ export function useRecurso<T>(carregar: () => Promise<T>, inicial: T) {
   const [atualizando, setAtualizando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
 
+  const carregarRef = useRef(carregar);
+  carregarRef.current = carregar;
+
   const buscar = useCallback(async () => {
     try {
       setErro(null);
-      setDados(await carregar());
+      setDados(await carregarRef.current());
     } catch (e) {
       setErro(e instanceof Error ? e.message : 'Falha ao carregar os dados.');
     }
-  }, [carregar]);
+  }, []);
 
   useFocusEffect(
     useCallback(() => {

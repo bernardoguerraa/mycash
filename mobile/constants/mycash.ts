@@ -3,8 +3,52 @@
  * Fonte: tailwind.config.ts (accent) e src/app/globals.css (surfaces/edges).
  */
 
-export const MyCash = {
-  // superficies (tema escuro, que e o padrao do web)
+/**
+ * Paletas do MyCash. As chaves sao as mesmas nos dois temas, entao qualquer
+ * estilo escrito contra `Cores` funciona no claro e no escuro sem ramificar.
+ *
+ * O escuro espelha o web (tailwind.config.ts para o accent, globals.css para
+ * superficies e bordas). O claro segue a mesma escala do zinc invertida, com
+ * o verde escurecido um passo — o #10b981 do escuro nao tem contraste
+ * suficiente sobre branco para texto.
+ */
+
+export type Cores = {
+  surface0: string;
+  surface1: string;
+  surface2: string;
+  surface3: string;
+  surface4: string;
+
+  edge1: string;
+  edge2: string;
+  edge3: string;
+
+  text: string;
+  textDim: string;
+  textMute: string;
+
+  accent: string;
+  accentLight: string;
+  accentDark: string;
+  accentMuted: string;
+  /** Texto sobre o accent solido (botao primario). */
+  sobreAccent: string;
+
+  danger: string;
+  dangerMuted: string;
+
+  warn: string;
+  warnMuted: string;
+
+  info: string;
+  infoMuted: string;
+
+  roxo: string;
+  roxoMuted: string;
+};
+
+export const PALETA_ESCURA: Cores = {
   surface0: '#09090b',
   surface1: '#0c0d10',
   surface2: '#111318',
@@ -23,6 +67,7 @@ export const MyCash = {
   accentLight: '#34d399',
   accentDark: '#059669',
   accentMuted: 'rgba(16,185,129,0.12)',
+  sobreAccent: '#04140d',
 
   danger: '#f43f5e',
   dangerMuted: 'rgba(244,63,94,0.12)',
@@ -35,7 +80,47 @@ export const MyCash = {
 
   roxo: '#c084fc',
   roxoMuted: 'rgba(192,132,252,0.10)',
-} as const;
+};
+
+export const PALETA_CLARA: Cores = {
+  surface0: '#fafafa',
+  surface1: '#ffffff',
+  surface2: '#ffffff',
+  surface3: '#f4f4f5',
+  surface4: '#e4e4e7',
+
+  edge1: 'rgba(9,9,11,0.09)',
+  edge2: 'rgba(9,9,11,0.14)',
+  edge3: 'rgba(9,9,11,0.20)',
+
+  text: '#18181b',
+  textDim: '#52525b',
+  textMute: '#71717a',
+
+  accent: '#059669',
+  accentLight: '#047857',
+  accentDark: '#065f46',
+  accentMuted: 'rgba(5,150,105,0.10)',
+  sobreAccent: '#ffffff',
+
+  danger: '#e11d48',
+  dangerMuted: 'rgba(225,29,72,0.09)',
+
+  warn: '#b45309',
+  warnMuted: 'rgba(180,83,9,0.09)',
+
+  info: '#2563eb',
+  infoMuted: 'rgba(37,99,235,0.09)',
+
+  roxo: '#7c3aed',
+  roxoMuted: 'rgba(124,58,237,0.09)',
+};
+
+/**
+ * Alias historico. Fica valendo para o que ainda le a cor direto (o login,
+ * que nasce antes do provedor de tema). Telas novas usam useTema().
+ */
+export const MyCash = PALETA_ESCURA;
 
 // ============================================================================
 // Formatacao
