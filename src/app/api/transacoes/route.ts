@@ -6,6 +6,17 @@ import { ajustarSaldo, efeitoNoSaldo } from '@/lib/api/saldo'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
+/**
+ * Resposta nunca cacheada.
+ *
+ * `force-dynamic` so impede o Next de pre-renderizar; a resposta ainda podia
+ * ficar guardada na borda da Vercel e no OkHttp do Android. Deu para ver no
+ * app: o painel voltava com as transacoes novas e, na mesma resposta, o saldo
+ * e as metas de dez minutos antes. Sao dados por usuario e sempre variaveis,
+ * entao nenhum deles pode ser reaproveitado.
+ */
+const SEM_CACHE = { 'Cache-Control': 'no-store, no-cache, must-revalidate' }
+
 // GET /api/transacoes — lista as transacoes do usuario logado (RLS filtra)
 // Query: id_conta, tipo, de (YYYY-MM-DD), ate (YYYY-MM-DD), limit
 export async function GET(req: NextRequest) {
@@ -37,7 +48,7 @@ export async function GET(req: NextRequest) {
 
   const { data, error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ data })
+  return NextResponse.json({ data }, { headers: SEM_CACHE })
 }
 
 // POST /api/transacoes — cria uma nova transacao
@@ -78,5 +89,5 @@ export async function POST(req: NextRequest) {
   // O saldo da conta acompanha o lancamento.
   await ajustarSaldo(supabase, Number(id_conta), efeitoNoSaldo(tipo, Number(valor)))
 
-  return NextResponse.json({ data }, { status: 201 })
+  return NextResponse.json({ data }, { status: 201, headers: SEM_CACHE })
 }

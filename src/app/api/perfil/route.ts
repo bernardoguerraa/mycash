@@ -28,6 +28,17 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 /**
+ * Resposta nunca cacheada.
+ *
+ * `force-dynamic` so impede o Next de pre-renderizar; a resposta ainda podia
+ * ficar guardada na borda da Vercel e no OkHttp do Android. Deu para ver no
+ * app: o painel voltava com as transacoes novas e, na mesma resposta, o saldo
+ * e as metas de dez minutos antes. Sao dados por usuario e sempre variaveis,
+ * entao nenhum deles pode ser reaproveitado.
+ */
+const SEM_CACHE = { 'Cache-Control': 'no-store, no-cache, must-revalidate' }
+
+/**
  * GET /api/perfil — dados do usuario logado mais os contadores das telas.
  *
  * O web monta isso no server component de /perfil lendo a tabela `usuarios`
@@ -70,17 +81,20 @@ export async function GET(req: NextRequest) {
 
   const usuario = linha ? usuarioPublico(linha) : null
 
-  return NextResponse.json({
-    data: {
-      usuario,
-      email: user.email ?? '',
-      stats: {
-        totalContas: contas.count ?? 0,
-        totalTransacoes: transacoes.count ?? 0,
-        totalMetas: metas.count ?? 0,
+  return NextResponse.json(
+    {
+      data: {
+        usuario,
+        email: user.email ?? '',
+        stats: {
+          totalContas: contas.count ?? 0,
+          totalTransacoes: transacoes.count ?? 0,
+          totalMetas: metas.count ?? 0,
+        },
       },
     },
-  })
+    { headers: SEM_CACHE }
+  )
 }
 
 /**
@@ -109,5 +123,5 @@ export async function PATCH(req: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 })
 
-  return NextResponse.json({ data: usuarioPublico(data) })
+  return NextResponse.json({ data: usuarioPublico(data) }, { headers: SEM_CACHE })
 }

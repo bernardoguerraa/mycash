@@ -86,9 +86,15 @@ async function apiFetch<T>(caminho: string, init: RequestInit = {}): Promise<T> 
   try {
     resposta = await fetch(`${BASE}/api${caminho}`, {
       ...init,
+      // Sem isso o OkHttp do Android reaproveita a resposta do GET: dava para
+      // ver o painel voltar com o saldo e as metas de minutos atras enquanto
+      // as outras telas ja mostravam o valor novo. Dado financeiro por
+      // usuario nao pode sair de cache.
+      cache: 'no-store',
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
+        'Cache-Control': 'no-cache',
         Authorization: `Bearer ${token}`,
         ...init.headers,
       },

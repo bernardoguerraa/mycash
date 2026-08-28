@@ -6,6 +6,17 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 /**
+ * Resposta nunca cacheada.
+ *
+ * `force-dynamic` so impede o Next de pre-renderizar; a resposta ainda podia
+ * ficar guardada na borda da Vercel e no OkHttp do Android. Deu para ver no
+ * app: o painel voltava com as transacoes novas e, na mesma resposta, o saldo
+ * e as metas de dez minutos antes. Sao dados por usuario e sempre variaveis,
+ * entao nenhum deles pode ser reaproveitado.
+ */
+const SEM_CACHE = { 'Cache-Control': 'no-store, no-cache, must-revalidate' }
+
+/**
  * GET /api/dashboard — resumo consolidado do usuario logado.
  *
  * Mesmos numeros que o server component de /dashboard monta no web, so que
@@ -93,25 +104,28 @@ export async function GET(req: NextRequest) {
   const entradas = mesCorrente.entradas
   const saidas = mesCorrente.saidas
 
-  return NextResponse.json({
-    data: {
-      // O nome vem daqui, e nao do user_metadata do Supabase Auth: o cadastro
-      // grava o nome completo na tabela `usuarios`, e o metadata do Auth fica
-      // vazio. Sem isso a saudacao cai no prefixo do e-mail.
-      nome: perfil.data?.nome_completo ?? '',
-      saldoTotal,
-      entradas,
-      saidas,
-      saldoMes: entradas - saidas,
-      metasAtivas: metasAtivas.count ?? 0,
-      serieMensal: serieMensal.map(({ mes, ano, entradas, saidas }) => ({
-        mes,
-        ano,
+  return NextResponse.json(
+    {
+      data: {
+        // O nome vem daqui, e nao do user_metadata do Supabase Auth: o cadastro
+        // grava o nome completo na tabela `usuarios`, e o metadata do Auth fica
+        // vazio. Sem isso a saudacao cai no prefixo do e-mail.
+        nome: perfil.data?.nome_completo ?? '',
+        saldoTotal,
         entradas,
         saidas,
-      })),
-      recentes: recentes.data ?? [],
-      proximosLembretes: lembretes.data ?? [],
+        saldoMes: entradas - saidas,
+        metasAtivas: metasAtivas.count ?? 0,
+        serieMensal: serieMensal.map(({ mes, ano, entradas: e, saidas: sa }) => ({
+          mes,
+          ano,
+          entradas: e,
+          saidas: sa,
+        })),
+        recentes: recentes.data ?? [],
+        proximosLembretes: lembretes.data ?? [],
+      },
     },
-  })
+    { headers: SEM_CACHE }
+  )
 }
