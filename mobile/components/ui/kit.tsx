@@ -11,7 +11,8 @@
  */
 
 import { Ionicons } from '@expo/vector-icons';
-import type { ComponentProps, ReactNode } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, type ComponentProps, type ReactNode } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -30,6 +31,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { Cores } from '@/constants/mycash';
 import { criarUseEstilos } from '@/lib/estilos';
+import { useNotificacoes } from '@/lib/notificacoes-contexto';
 import { useTema } from '@/lib/tema';
 
 type IconeNome = ComponentProps<typeof Ionicons>['name'];
@@ -90,6 +92,39 @@ export function BotaoTema() {
   );
 }
 
+/**
+ * Sino com o numero de nao lidas, ao lado do botao de tema — mesmo lugar do
+ * Header do web. Reconta ao ganhar foco, entao voltar de Notificacoes com
+ * tudo lido zera o selo sem precisar recarregar.
+ */
+export function BotaoNotificacoes() {
+  const estilos = useEstilos();
+  const { cores } = useTema();
+  const { naoLidas, atualizar } = useNotificacoes();
+  const router = useRouter();
+
+  useFocusEffect(
+    useCallback(() => {
+      atualizar();
+    }, [atualizar])
+  );
+
+  return (
+    <View>
+      <BotaoIcone
+        icone={naoLidas > 0 ? 'notifications' : 'notifications-outline'}
+        cor={naoLidas > 0 ? cores.accent : undefined}
+        aoTocar={() => router.push('/(tabs)/notificacoes')}
+      />
+      {naoLidas > 0 ? (
+        <View style={estilos.selo}>
+          <Text style={estilos.seloTexto}>{naoLidas > 9 ? '9+' : naoLidas}</Text>
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
 export function Cabecalho({
   titulo,
   subtitulo,
@@ -108,6 +143,7 @@ export function Cabecalho({
         {subtitulo ? <Text style={estilos.cabecalhoSub}>{subtitulo}</Text> : null}
       </View>
       {acao}
+      <BotaoNotificacoes />
       <BotaoTema />
     </View>
   );
@@ -374,16 +410,12 @@ export function Seletor<T extends string | number>({
     <View style={estilos.campo}>
       {rotulo ? <Text style={estilos.rotulo}>{rotulo}</Text> : null}
       {/*
-        Os chips sangram ate a borda da tela: preso na margem de 18px o
-        ultimo item aparecia cortado no meio e parecia defeito. Rolando de
-        ponta a ponta, o corte na borda vira o sinal de que ha mais.
+        Os chips quebram linha em vez de rolar na horizontal. Com rolagem, a
+        ultima opcao aparecia cortada na borda e lia-se como defeito — e
+        dentro do modal, onde a caixa tem overflow hidden, nem dava para
+        adivinhar que havia mais. Quebrando, tudo fica visivel de uma vez.
       */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={estilos.chipsArea}
-        contentContainerStyle={estilos.chips}
-        keyboardShouldPersistTaps="handled">
+      <View style={estilos.chips}>
         {opcoes.map((opcao) => {
           const ativo = opcao.value === valor;
           return (
@@ -401,7 +433,7 @@ export function Seletor<T extends string | number>({
             </Pressable>
           );
         })}
-      </ScrollView>
+      </View>
       {erro ? <Text style={estilos.campoErro}>{erro}</Text> : null}
     </View>
   );
@@ -598,6 +630,21 @@ export const useEstilos = criarUseEstilos((c: Cores) =>
     botaoCompacto: { paddingVertical: 8, paddingHorizontal: 11, borderRadius: 9 },
     botaoTexto: { fontSize: 14.5, fontWeight: '700' },
     botaoTextoCompacto: { fontSize: 13 },
+    selo: {
+      position: 'absolute',
+      top: -3,
+      right: -3,
+      minWidth: 16,
+      height: 16,
+      borderRadius: 8,
+      paddingHorizontal: 4,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: c.danger,
+      borderWidth: 1.5,
+      borderColor: c.surface0,
+    },
+    seloTexto: { fontSize: 9.5, fontWeight: '800', color: '#fff' },
     botaoIcone: {
       width: 32,
       height: 32,
@@ -621,8 +668,7 @@ export const useEstilos = criarUseEstilos((c: Cores) =>
     },
     campoErro: { fontSize: 12, color: c.danger },
 
-    chipsArea: { marginHorizontal: -18 },
-    chips: { flexDirection: 'row', gap: 7, paddingHorizontal: 18 },
+    chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 7 },
     chip: {
       borderWidth: 1,
       borderColor: c.edge2,

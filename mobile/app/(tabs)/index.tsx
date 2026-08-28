@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { GraficoMensal } from '@/components/ui/grafico-mensal';
 import {
   Aviso,
+  BotaoNotificacoes,
   BotaoTema,
   Carregando,
   Cartao,
@@ -69,6 +70,13 @@ export default function DashboardScreen() {
 
   if (carregando) return <Carregando />;
 
+  // Campos de lista chegam com `?? []`: se a API estiver numa versao mais
+  // antiga que o app (deploy no meio do caminho), a tela mostra menos, mas
+  // nao quebra em `.length` de undefined.
+  const serie = dados.serieMensal ?? [];
+  const recentes = dados.recentes ?? [];
+  const lembretes = dados.proximosLembretes ?? [];
+
   const saldoNegativo = dados.saldoTotal < 0;
 
   return (
@@ -82,6 +90,7 @@ export default function DashboardScreen() {
             {nome}
           </Text>
         </View>
+        <BotaoNotificacoes />
         <BotaoTema />
       </View>
 
@@ -128,7 +137,7 @@ export default function DashboardScreen() {
         />
       </View>
 
-      {dados.serieMensal.length > 0 ? <GraficoMensal serie={dados.serieMensal} /> : null}
+      {serie.length > 0 ? <GraficoMensal serie={serie} /> : null}
 
       <Secao
         titulo="Transações recentes"
@@ -136,7 +145,7 @@ export default function DashboardScreen() {
         aoTocarAcao={() => router.push('/(tabs)/transacoes')}
       />
 
-      {dados.recentes.length === 0 ? (
+      {recentes.length === 0 ? (
         <EstadoVazio
           icone="receipt-outline"
           titulo="Nenhuma transação por aqui ainda"
@@ -144,7 +153,7 @@ export default function DashboardScreen() {
         />
       ) : (
         <View style={proprios.lista}>
-          {dados.recentes.map((t) => {
+          {recentes.map((t) => {
             const entrada = t.tipo === 'Entrada';
             return (
               <View key={t.id_transacao} style={proprios.item}>
@@ -190,7 +199,7 @@ export default function DashboardScreen() {
         aoTocarAcao={() => router.push('/(tabs)/lembretes')}
       />
 
-      {dados.proximosLembretes.length === 0 ? (
+      {lembretes.length === 0 ? (
         <EstadoVazio
           icone="notifications-outline"
           titulo="Nenhum lembrete ativo"
@@ -198,7 +207,7 @@ export default function DashboardScreen() {
         />
       ) : (
         <View style={proprios.lista}>
-          {dados.proximosLembretes.map((l) => {
+          {lembretes.map((l) => {
             const receber = l.tipo === 'ContaReceber';
             return (
               <Cartao key={l.id_lembrete} style={proprios.lembreteCartao}>

@@ -6,6 +6,7 @@ import { ActivityIndicator, View } from 'react-native';
 import 'react-native-reanimated';
 
 import { AuthProvider, useAuth } from '@/lib/auth';
+import { NotificacoesProvider } from '@/lib/notificacoes-contexto';
 import { TemaProvider, useTema } from '@/lib/tema';
 
 export const unstable_settings = {
@@ -62,7 +63,9 @@ export default function RootLayout() {
   return (
     <TemaProvider>
       <AuthProvider>
-        <Gate />
+        <NotificacoesProvider>
+          <Gate />
+        </NotificacoesProvider>
       </AuthProvider>
     </TemaProvider>
   );

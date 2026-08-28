@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClientFromRequest } from '@/lib/supabase/server'
 import { getCurrentIdUsuario } from '@/lib/api/auth'
+import { ajustarSaldo, efeitoNoSaldo } from '@/lib/api/saldo'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -73,5 +74,9 @@ export async function POST(req: NextRequest) {
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+
+  // O saldo da conta acompanha o lancamento.
+  await ajustarSaldo(supabase, Number(id_conta), efeitoNoSaldo(tipo, Number(valor)))
+
   return NextResponse.json({ data }, { status: 201 })
 }

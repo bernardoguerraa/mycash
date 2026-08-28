@@ -13,6 +13,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { BotaoTema } from '@/components/ui/kit';
+
 import type { Cores } from '@/constants/mycash';
 import { criarUseEstilos } from '@/lib/estilos';
 import { useTema } from '@/lib/tema';
@@ -63,6 +65,11 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
+      {/* Da para trocar o tema antes mesmo de entrar. */}
+      <View style={styles.barraTopo}>
+        <BotaoTema />
+      </View>
+
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -144,6 +151,7 @@ export default function LoginScreen() {
 const useEstilos = criarUseEstilos((c: Cores) =>
   StyleSheet.create({
   safe: { flex: 1, backgroundColor: c.surface0 },
+  barraTopo: { alignItems: 'flex-end', paddingHorizontal: 18, paddingTop: 8 },
   flex: { flex: 1 },
   scroll: { flexGrow: 1, justifyContent: 'center', padding: 24, gap: 40 },
 
