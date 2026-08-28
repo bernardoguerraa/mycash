@@ -24,6 +24,7 @@ import {
   TIPOS_CONTA,
   formatCurrency,
   parseValor,
+  rotuloTipoConta,
   sanitizarValor,
 } from '@/constants/mycash';
 import { useRecurso } from '@/hooks/use-recurso';
@@ -187,7 +188,7 @@ export default function ContasScreen() {
                       {conta.instituicao}
                     </Text>
                     <Text style={proprios.numero} numberOfLines={1}>
-                      {conta.tipo_conta} · nº {conta.numero_conta}
+                      {rotuloTipoConta(conta.tipo_conta)} · nº {conta.numero_conta}
                     </Text>
                   </View>
 

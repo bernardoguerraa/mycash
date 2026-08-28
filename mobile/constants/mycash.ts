@@ -76,7 +76,7 @@ export function formatarTempoRelativo(dateStr: string): string {
     [3600, 'hora', 'horas'],
     [86400, 'dia', 'dias'],
     [604800, 'semana', 'semanas'],
-    [2592000, 'mes', 'meses'],
+    [2592000, 'mês', 'meses'],
     [31536000, 'ano', 'anos'],
   ];
 
@@ -86,7 +86,7 @@ export function formatarTempoRelativo(dateStr: string): string {
   }
 
   const quantidade = Math.floor(segundos / escolhida[0]);
-  return `ha ${quantidade} ${quantidade === 1 ? escolhida[1] : escolhida[2]}`;
+  return `há ${quantidade} ${quantidade === 1 ? escolhida[1] : escolhida[2]}`;
 }
 
 /** Hoje no formato YYYY-MM-DD, que e o que a API espera nas datas. */
@@ -118,8 +118,17 @@ export function parseValor(entrada: string): number {
 /** Mantem no campo so o que pode compor um numero. */
 export const sanitizarValor = (bruto: string) => bruto.replace(/[^0-9.,-]/g, '');
 
-/** Mantem no campo so digitos e hifen, no formato de data. */
-export const sanitizarData = (bruto: string) => bruto.replace(/[^0-9-]/g, '').slice(0, 10);
+/**
+ * Formata a data enquanto se digita: so os digitos importam e os hifens
+ * entram sozinhos. Sem isso o usuario teria que acertar "2026-09-15" na
+ * unha, e no Android o teclado numerico nem mostra o hifen.
+ */
+export function sanitizarData(bruto: string): string {
+  const digitos = bruto.replace(/\D/g, '').slice(0, 8);
+  if (digitos.length <= 4) return digitos;
+  if (digitos.length <= 6) return `${digitos.slice(0, 4)}-${digitos.slice(4)}`;
+  return `${digitos.slice(0, 4)}-${digitos.slice(4, 6)}-${digitos.slice(6)}`;
+}
 
 /** Valida o formato YYYY-MM-DD e se a data existe de fato. */
 export function dataValida(entrada: string): boolean {
@@ -162,3 +171,25 @@ export const TIPOS_CONTA: { value: string; label: string }[] = [
   { value: 'Investimento', label: 'Investimento' },
   { value: 'Carteira Digital', label: 'Carteira Digital' },
 ];
+
+/**
+ * Os valores acima e os de CATEGORIAS vao sem acento de proposito: e assim
+ * que estao gravados no banco desde o web, e mexer nisso quebraria os
+ * registros existentes. O acento entra so na hora de mostrar.
+ */
+const ROTULOS_CATEGORIA: Record<string, string> = {
+  Alimentacao: 'Alimentação',
+  Saude: 'Saúde',
+  Educacao: 'Educação',
+  Salario: 'Salário',
+};
+
+const ROTULOS_TIPO_CONTA: Record<string, string> = {
+  Poupanca: 'Poupança',
+};
+
+/** Nome de exibicao da categoria; categorias livres passam intactas. */
+export const rotuloCategoria = (valor: string) => ROTULOS_CATEGORIA[valor] ?? valor;
+
+/** Nome de exibicao do tipo de conta. */
+export const rotuloTipoConta = (valor: string) => ROTULOS_TIPO_CONTA[valor] ?? valor;

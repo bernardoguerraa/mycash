@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { rotuloTipoConta } from '@/lib/labels'
 import { redirect } from 'next/navigation'
 import TransacoesClient from '@/components/transacoes/TransacoesClient'
 
@@ -45,7 +46,7 @@ export default async function TransacoesPage() {
   const contasMap =
     contas?.map((c) => ({
       id_conta: c.id_conta,
-      label: `${c.instituicao} - ${c.tipo_conta}`,
+      label: `${c.instituicao} - ${rotuloTipoConta(c.tipo_conta)}`,
     })) ?? []
 
   return (

@@ -6,6 +6,7 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 // GET /api/transacoes — lista as transacoes do usuario logado (RLS filtra)
+// Query: id_conta, tipo, de (YYYY-MM-DD), ate (YYYY-MM-DD), limit
 export async function GET(req: NextRequest) {
   const supabase = createClientFromRequest(req)
   const idUsuario = await getCurrentIdUsuario(supabase)
@@ -14,6 +15,8 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const idConta = searchParams.get('id_conta')
   const tipo = searchParams.get('tipo')
+  const de = searchParams.get('de')
+  const ate = searchParams.get('ate')
   const limit = Math.min(Number(searchParams.get('limit')) || 200, 500)
 
   let query = supabase
@@ -24,6 +27,12 @@ export async function GET(req: NextRequest) {
 
   if (idConta) query = query.eq('id_conta', Number(idConta))
   if (tipo === 'Entrada' || tipo === 'Saida') query = query.eq('tipo', tipo)
+
+  // Recorte por periodo. O app pedia a lista inteira e filtrava o mes no
+  // celular; com isso o corte acontece no Postgres, que e onde tem indice.
+  // `ate` inclui o dia todo — senao "ate 31/08" perderia tudo depois de 00h.
+  if (de) query = query.gte('data_transacao', de)
+  if (ate) query = query.lte('data_transacao', `${ate}T23:59:59.999`)
 
   const { data, error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

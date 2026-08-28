@@ -119,6 +119,23 @@ export type NotificacaoInput = {
   lida?: boolean;
 };
 
+/**
+ * Retorno de GET /api/dashboard. O recorte do mes e a soma dos saldos ficam
+ * no servidor — o app so desenha o que chega.
+ */
+export type ResumoDashboard = {
+  saldoTotal: number;
+  entradas: number;
+  saidas: number;
+  saldoMes: number;
+  metasAtivas: number;
+  recentes: Transacao[];
+  proximosLembretes: Pick<
+    Lembrete,
+    'id_lembrete' | 'descricao' | 'data_vencimento' | 'valor_previsto' | 'tipo'
+  >[];
+};
+
 /** Retorno de GET /api/perfil — o usuario mais os contadores das telas. */
 export type Perfil = {
   usuario: Usuario | null;

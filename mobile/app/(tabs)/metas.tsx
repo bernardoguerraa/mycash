@@ -367,7 +367,8 @@ export default function MetasScreen() {
             value={form.inicio}
             onChangeText={(inicio) => setForm({ ...form, inicio: sanitizarData(inicio) })}
             placeholder="AAAA-MM-DD"
-            keyboardType="numbers-and-punctuation"
+            keyboardType="numeric"
+            maxLength={10}
           />
 
           <Campo
@@ -375,7 +376,8 @@ export default function MetasScreen() {
             value={form.limite}
             onChangeText={(limite) => setForm({ ...form, limite: sanitizarData(limite) })}
             placeholder="AAAA-MM-DD"
-            keyboardType="numbers-and-punctuation"
+            keyboardType="numeric"
+            maxLength={10}
           />
 
           {editando ? (

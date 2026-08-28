@@ -17,79 +17,36 @@ import {
   formatDate,
   formatDateLong,
   getGreeting,
+  rotuloCategoria,
 } from '@/constants/mycash';
 import { useRecurso } from '@/hooks/use-recurso';
 import { useAuth } from '@/lib/auth';
-import {
-  contasRepository,
-  lembretesRepository,
-  metasRepository,
-  transacoesRepository,
-} from '@/lib/repositories';
-import type { Lembrete, Transacao } from '@/types/database';
+import { dashboardRepository } from '@/lib/repositories';
+import type { ResumoDashboard } from '@/types/database';
 
-type Resumo = {
-  saldoTotal: number;
-  entradas: number;
-  saidas: number;
-  metasAtivas: number;
-  recentes: Transacao[];
-  proximosLembretes: Lembrete[];
-};
-
-const VAZIO: Resumo = {
+const VAZIO: ResumoDashboard = {
   saldoTotal: 0,
   entradas: 0,
   saidas: 0,
+  saldoMes: 0,
   metasAtivas: 0,
   recentes: [],
   proximosLembretes: [],
 };
 
 /**
- * Mesmo painel do dashboard web (src/app/(dashboard)/dashboard/page.tsx),
- * so que montado a partir da API REST em vez de consultas diretas ao banco.
+ * Mesmo painel do dashboard web (src/app/(dashboard)/dashboard/page.tsx).
  *
- * A API nao filtra transacao por intervalo de data, entao o recorte do mes e
- * o corte das cinco mais recentes acontecem aqui — o volume que uma pessoa
- * fisica gera cabe no limite padrao da rota.
+ * Antes a tela puxava contas, transacoes, metas e lembretes em paralelo e
+ * recortava o mes corrente aqui no celular. Agora GET /api/dashboard entrega
+ * o resumo pronto: uma requisicao, e a conta feita no Postgres.
  */
-async function carregarResumo(): Promise<Resumo> {
-  const [contas, transacoes, metasAtivas, lembretes] = await Promise.all([
-    contasRepository.listar(),
-    transacoesRepository.listar(),
-    metasRepository.listar({ status: 'EmAndamento' }),
-    lembretesRepository.listar({ ativo: true }),
-  ]);
-
-  const agora = new Date();
-  const doMes = transacoes.filter((t) => {
-    const data = new Date(t.data_transacao);
-    return data.getMonth() === agora.getMonth() && data.getFullYear() === agora.getFullYear();
-  });
-
-  const somar = (lista: Transacao[]) =>
-    lista.reduce((total, t) => total + Math.abs(t.valor || 0), 0);
-
-  const hoje = new Date();
-  hoje.setHours(0, 0, 0, 0);
-
-  return {
-    saldoTotal: contasRepository.saldoConsolidado(contas),
-    entradas: somar(doMes.filter((t) => t.tipo === 'Entrada')),
-    saidas: somar(doMes.filter((t) => t.tipo === 'Saida')),
-    metasAtivas: metasAtivas.length,
-    recentes: transacoes.slice(0, 5),
-    proximosLembretes: lembretes
-      .filter((l) => new Date(`${l.data_vencimento.slice(0, 10)}T00:00:00`) >= hoje)
-      .slice(0, 4),
-  };
-}
+const carregar = () => dashboardRepository.resumo();
 
 export default function DashboardScreen() {
   const { session } = useAuth();
   const router = useRouter();
-  const { dados, carregando, atualizando, erro, aoPuxar } = useRecurso(carregarResumo, VAZIO);
+  const { dados, carregando, atualizando, erro, aoPuxar } = useRecurso(carregar, VAZIO);
 
   const nome =
     (session?.user.user_metadata?.full_name as string | undefined) ||
@@ -100,7 +57,6 @@ export default function DashboardScreen() {
   if (carregando) return <Carregando />;
 
   const saldoNegativo = dados.saldoTotal < 0;
-  const saldoMes = dados.entradas - dados.saidas;
 
   return (
     <Tela atualizando={atualizando} aoPuxar={aoPuxar}>
@@ -146,9 +102,9 @@ export default function DashboardScreen() {
         />
         <CartaoEstatistica
           rotulo="Saldo do mês"
-          valor={formatCurrency(saldoMes)}
+          valor={formatCurrency(dados.saldoMes)}
           icone="trending-up-outline"
-          cor={saldoMes >= 0 ? MyCash.accentLight : MyCash.danger}
+          cor={dados.saldoMes >= 0 ? MyCash.accentLight : MyCash.danger}
         />
       </View>
 
@@ -187,7 +143,8 @@ export default function DashboardScreen() {
                     {t.descricao || 'Sem descrição'}
                   </Text>
                   <Text style={proprios.itemMeta}>
-                    {t.categoria || 'Sem categoria'} · {formatDate(t.data_transacao)}
+                    {t.categoria ? rotuloCategoria(t.categoria) : 'Sem categoria'} ·{' '}
+                    {formatDate(t.data_transacao)}
                   </Text>
                 </View>
 

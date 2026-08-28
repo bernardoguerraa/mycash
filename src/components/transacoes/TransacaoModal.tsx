@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { X } from 'lucide-react'
 import { TipoTransacao } from '@/types/database'
 import { api, ApiError } from '@/lib/api/client'
+import { rotuloCategoria } from '@/lib/labels'
 
 interface Transacao {
   id_transacao: number
@@ -250,7 +251,7 @@ export default function TransacaoModal({ contas, transacao, onClose, onSaved }: 
             >
               {CATEGORIAS.map((cat) => (
                 <option key={cat} value={cat}>
-                  {cat}
+                  {rotuloCategoria(cat)}
                 </option>
               ))}
               <option value="__custom__">Outra (personalizada)...</option>

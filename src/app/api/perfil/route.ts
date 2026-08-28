@@ -1,6 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClientFromRequest } from '@/lib/supabase/server'
 import { getCurrentIdUsuario } from '@/lib/api/auth'
+import type { Database } from '@/types/database'
+
+type UsuarioRow = Database['public']['Tables']['usuarios']['Row']
+
+/**
+ * Campos do usuario que a rota pode devolver.
+ *
+ * E uma lista de permissao, nao de exclusao: `senha_hash` fica de fora, e
+ * qualquer coluna nova que apareca na tabela tambem fica — quem quiser
+ * expor precisa vir aqui de proposito.
+ */
+function usuarioPublico(linha: UsuarioRow) {
+  return {
+    id_usuario: linha.id_usuario,
+    auth_user_id: linha.auth_user_id,
+    nome_completo: linha.nome_completo,
+    email: linha.email,
+    data_cadastro: linha.data_cadastro,
+    plano: linha.plano,
+    status_conta: linha.status_conta,
+  }
+}
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -46,8 +68,7 @@ export async function GET(req: NextRequest) {
     linha = data
   }
 
-  // senha_hash nunca sai da rota, mesmo sendo hash.
-  const usuario = linha ? (({ senha_hash: _ignorado, ...resto }) => resto)(linha) : null
+  const usuario = linha ? usuarioPublico(linha) : null
 
   return NextResponse.json({
     data: {
@@ -88,6 +109,5 @@ export async function PATCH(req: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 })
 
-  const { senha_hash: _ignorado, ...usuario } = data
-  return NextResponse.json({ data: usuario })
+  return NextResponse.json({ data: usuarioPublico(data) })
 }

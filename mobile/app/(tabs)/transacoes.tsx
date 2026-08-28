@@ -25,6 +25,8 @@ import {
   formatDate,
   hojeISO,
   parseValor,
+  rotuloCategoria,
+  rotuloTipoConta,
   sanitizarData,
   sanitizarValor,
 } from '@/constants/mycash';
@@ -72,7 +74,7 @@ export default function TransacoesScreen() {
   const nomeConta = useMemo(() => {
     const mapa: Record<number, string> = {};
     dados.contas.forEach((c) => {
-      mapa[c.id_conta] = `${c.instituicao} · ${c.tipo_conta}`;
+      mapa[c.id_conta] = `${c.instituicao} · ${rotuloTipoConta(c.tipo_conta)}`;
     });
     return mapa;
   }, [dados.contas]);
@@ -251,7 +253,7 @@ export default function TransacoesScreen() {
       <Seletor
         opcoes={[
           { value: 'Todas', label: 'Toda categoria' },
-          ...categorias.map((c) => ({ value: c, label: c })),
+          ...categorias.map((c) => ({ value: c, label: rotuloCategoria(c) })),
         ]}
         valor={filtroCategoria}
         aoEscolher={setFiltroCategoria}
@@ -295,7 +297,7 @@ export default function TransacoesScreen() {
                     {t.descricao || 'Sem descrição'}
                   </Text>
                   <Text style={proprios.itemMeta} numberOfLines={1}>
-                    {t.categoria} · {formatDate(t.data_transacao)}
+                    {rotuloCategoria(t.categoria)} · {formatDate(t.data_transacao)}
                   </Text>
                   <Text style={proprios.itemConta} numberOfLines={1}>
                     {nomeConta[t.id_conta] ?? 'Conta removida'}
@@ -338,7 +340,7 @@ export default function TransacoesScreen() {
             rotulo="Conta"
             opcoes={dados.contas.map((c) => ({
               value: c.id_conta,
-              label: `${c.instituicao} · ${c.tipo_conta}`,
+              label: `${c.instituicao} · ${rotuloTipoConta(c.tipo_conta)}`,
             }))}
             valor={form.idConta}
             aoEscolher={(idConta) => setForm({ ...form, idConta })}
@@ -356,7 +358,7 @@ export default function TransacoesScreen() {
 
           <Seletor
             rotulo="Categoria"
-            opcoes={categorias.map((c) => ({ value: c, label: c }))}
+            opcoes={categorias.map((c) => ({ value: c, label: rotuloCategoria(c) }))}
             valor={form.categoria}
             aoEscolher={(categoria) => setForm({ ...form, categoria })}
           />
@@ -381,7 +383,8 @@ export default function TransacoesScreen() {
             value={form.data}
             onChangeText={(data) => setForm({ ...form, data: sanitizarData(data) })}
             placeholder="AAAA-MM-DD"
-            keyboardType="numbers-and-punctuation"
+            keyboardType="numeric"
+            maxLength={10}
           />
         </ModalFormulario>
       ) : null}

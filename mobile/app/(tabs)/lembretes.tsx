@@ -354,7 +354,8 @@ export default function LembretesScreen() {
             value={form.vencimento}
             onChangeText={(vencimento) => setForm({ ...form, vencimento: sanitizarData(vencimento) })}
             placeholder="AAAA-MM-DD"
-            keyboardType="numbers-and-punctuation"
+            keyboardType="numeric"
+            maxLength={10}
           />
 
           <View style={proprios.switchCampo}>

@@ -25,6 +25,7 @@ import type {
   Meta,
   Notificacao,
   Perfil,
+  ResumoDashboard,
   StatusMeta,
   TipoLembrete,
   TipoNotificacao,
@@ -34,6 +35,20 @@ import type {
 } from '@/types/database';
 
 // ============================================================================
+// Dashboard
+// ============================================================================
+
+export const dashboardRepository = {
+  /**
+   * Resumo do painel numa requisicao. A conta do mes e a soma dos saldos
+   * ficam em GET /api/dashboard, entao a tela nao recalcula nada.
+   */
+  resumo(): Promise<ResumoDashboard> {
+    return api.dashboard.get();
+  },
+};
+
+// ============================================================================
 // Transacoes
 // ============================================================================
 
@@ -41,11 +56,16 @@ export const transacoesRepository = {
   listar(filtros?: {
     idConta?: number;
     tipo?: TipoTransacao;
+    /** Recorte por periodo, em YYYY-MM-DD. Filtra no banco, nao no celular. */
+    de?: string;
+    ate?: string;
     limit?: number;
   }): Promise<Transacao[]> {
     return api.transacoes.list({
       id_conta: filtros?.idConta,
       tipo: filtros?.tipo,
+      de: filtros?.de,
+      ate: filtros?.ate,
       limit: filtros?.limit,
     });
   },
@@ -63,7 +83,7 @@ export const transacoesRepository = {
     valor: number;
   }): Promise<Transacao> {
     if (input.valor <= 0) {
-      throw new Error('O valor precisa ser positivo. Use tipo Saida para debitos.');
+      throw new Error('O valor precisa ser positivo. Use o tipo Saída para débitos.');
     }
     return api.transacoes.create({
       id_conta: input.idConta,
@@ -87,7 +107,7 @@ export const transacoesRepository = {
     }>
   ): Promise<Transacao> {
     if (mudancas.valor !== undefined && mudancas.valor <= 0) {
-      throw new Error('O valor precisa ser positivo. Use tipo Saida para debitos.');
+      throw new Error('O valor precisa ser positivo. Use o tipo Saída para débitos.');
     }
     const payload: Record<string, unknown> = {};
     if (mudancas.idConta !== undefined) payload.id_conta = mudancas.idConta;
@@ -366,7 +386,7 @@ export const perfilRepository = {
   },
 
   renomear(nomeCompleto: string): Promise<Usuario | null> {
-    if (!nomeCompleto.trim()) throw new Error('O nome nao pode estar vazio.');
+    if (!nomeCompleto.trim()) throw new Error('O nome não pode estar vazio.');
     return api.perfil.update({ nome_completo: nomeCompleto.trim() });
   },
 };
@@ -376,6 +396,7 @@ export const perfilRepository = {
 // ============================================================================
 
 export const repositories = {
+  dashboard: dashboardRepository,
   transacoes: transacoesRepository,
   contas: contasRepository,
   metas: metasRepository,

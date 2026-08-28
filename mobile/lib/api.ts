@@ -29,6 +29,7 @@ import type {
   Notificacao,
   NotificacaoInput,
   Perfil,
+  ResumoDashboard,
   Transacao,
   TransacaoInput,
 } from '@/types/database';
@@ -56,11 +57,30 @@ function qs(params?: Record<string, string | number | boolean | undefined>) {
   return pares.length ? `?${pares.join('&')}` : '';
 }
 
+/**
+ * A sessao ficou invalida: derruba o login para o porteiro do _layout levar
+ * a pessoa de volta ao /login.
+ *
+ * Sem isso, um token velho no AsyncStorage (a sessao sobrevive a
+ * reinstalacoes do app) faz todas as telas mostrarem "nao autenticado" com
+ * os valores zerados — parece defeito, mas e so falta de login.
+ */
+async function encerrarSessao() {
+  try {
+    await supabase.auth.signOut();
+  } catch {
+    // Sem rede o signOut falha; a sessao local ja foi descartada assim mesmo.
+  }
+}
+
 async function apiFetch<T>(caminho: string, init: RequestInit = {}): Promise<T> {
   const { data } = await supabase.auth.getSession();
   const token = data.session?.access_token;
 
-  if (!token) throw new ApiError('Sessao expirada. Entre novamente.', 401);
+  if (!token) {
+    await encerrarSessao();
+    throw new ApiError('Sua sessão expirou. Entre novamente.', 401);
+  }
 
   let resposta: Response;
   try {
@@ -75,7 +95,7 @@ async function apiFetch<T>(caminho: string, init: RequestInit = {}): Promise<T> 
     });
   } catch {
     // fetch so rejeita por falha de rede — vale avisar o usuario disso.
-    throw new ApiError('Sem conexao com o servidor. Verifique a internet.', 0);
+    throw new ApiError('Sem conexão com o servidor. Verifique a internet.', 0);
   }
 
   // 204 (DELETE) nao tem corpo.
@@ -84,6 +104,12 @@ async function apiFetch<T>(caminho: string, init: RequestInit = {}): Promise<T> 
   const corpo = await resposta.json().catch(() => null);
 
   if (!resposta.ok) {
+    // 401 aqui significa que a API recusou o token — expirado, ou de um
+    // usuario que a base nao reconhece mais. Nao adianta tentar de novo.
+    if (resposta.status === 401) {
+      await encerrarSessao();
+      throw new ApiError('Sua sessão expirou. Entre novamente.', 401);
+    }
     throw new ApiError(corpo?.error ?? `Erro ${resposta.status}.`, resposta.status);
   }
 
@@ -104,9 +130,19 @@ export const api = {
   // Verbos crus, para chamadas pontuais.
   ...verbos,
 
+  /** Resumo pronto do painel — uma chamada no lugar de quatro. */
+  dashboard: {
+    get: () => verbos.get<ResumoDashboard>('/dashboard'),
+  },
+
   transacoes: {
-    list: (filtros?: { id_conta?: number; tipo?: 'Entrada' | 'Saida'; limit?: number }) =>
-      verbos.get<Transacao[]>(`/transacoes${qs(filtros)}`),
+    list: (filtros?: {
+      id_conta?: number;
+      tipo?: 'Entrada' | 'Saida';
+      de?: string;
+      ate?: string;
+      limit?: number;
+    }) => verbos.get<Transacao[]>(`/transacoes${qs(filtros)}`),
     get: (id: number) => verbos.get<Transacao>(`/transacoes/${id}`),
     create: (corpo: TransacaoInput) => verbos.post<Transacao>('/transacoes', corpo),
     update: (id: number, corpo: Partial<TransacaoInput>) =>

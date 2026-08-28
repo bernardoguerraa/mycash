@@ -18,6 +18,7 @@ import { TipoTransacao } from '@/types/database'
 import TransacaoModal from './TransacaoModal'
 import DeleteConfirmModal from './DeleteConfirmModal'
 import { api } from '@/lib/api/client'
+import { rotuloCategoria } from '@/lib/labels'
 import { useRouter } from 'next/navigation'
 
 interface Transacao {
@@ -275,7 +276,7 @@ export default function TransacoesClient({ initialTransacoes, contas }: Props) {
             <option value="All">Todas as Categorias</option>
             {allCategories.map((cat) => (
               <option key={cat} value={cat}>
-                {cat}
+                {rotuloCategoria(cat)}
               </option>
             ))}
           </select>
@@ -405,7 +406,7 @@ export default function TransacoesClient({ initialTransacoes, contas }: Props) {
                           {t.tipo === 'Entrada' ? 'Entrada' : 'Saída'}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-zinc-300">{t.categoria}</td>
+                      <td className="px-4 py-3 text-zinc-300">{rotuloCategoria(t.categoria)}</td>
                       <td className="px-4 py-3 text-zinc-100 max-w-[200px] truncate">
                         {t.descricao}
                       </td>
@@ -475,7 +476,7 @@ export default function TransacoesClient({ initialTransacoes, contas }: Props) {
                   <p className="text-sm font-medium text-zinc-100">{t.descricao}</p>
                   <div className="flex items-center justify-between text-xs text-zinc-500">
                     <span>
-                      {t.categoria} &middot; {formatDate(t.data_transacao)}
+                      {rotuloCategoria(t.categoria)} &middot; {formatDate(t.data_transacao)}
                     </span>
                     <div className="flex items-center gap-1">
                       <button

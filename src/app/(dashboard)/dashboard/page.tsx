@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { rotuloCategoria } from '@/lib/labels'
 import {
   Wallet,
   TrendingUp,
@@ -337,7 +338,7 @@ export default async function DashboardPage() {
                       {t.descricao}
                     </p>
                     <p className="text-xs text-zinc-500">
-                      {t.categoria} &middot; {formatDate(t.data_transacao)}
+                      {rotuloCategoria(t.categoria)} &middot; {formatDate(t.data_transacao)}
                     </p>
                   </div>
                 </div>
