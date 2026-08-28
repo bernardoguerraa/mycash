@@ -203,18 +203,6 @@ export function parseValor(entrada: string): number {
 /** Mantem no campo so o que pode compor um numero. */
 export const sanitizarValor = (bruto: string) => bruto.replace(/[^0-9.,-]/g, '');
 
-/**
- * Formata a data enquanto se digita: so os digitos importam e os hifens
- * entram sozinhos. Sem isso o usuario teria que acertar "2026-09-15" na
- * unha, e no Android o teclado numerico nem mostra o hifen.
- */
-export function sanitizarData(bruto: string): string {
-  const digitos = bruto.replace(/\D/g, '').slice(0, 8);
-  if (digitos.length <= 4) return digitos;
-  if (digitos.length <= 6) return `${digitos.slice(0, 4)}-${digitos.slice(4)}`;
-  return `${digitos.slice(0, 4)}-${digitos.slice(4, 6)}-${digitos.slice(6)}`;
-}
-
 /** Valida o formato YYYY-MM-DD e se a data existe de fato. */
 export function dataValida(entrada: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(entrada)) return false;

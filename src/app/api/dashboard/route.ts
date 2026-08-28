@@ -35,7 +35,7 @@ const SEM_CACHE = { 'Cache-Control': 'no-store, no-cache, must-revalidate' }
 export async function GET(req: NextRequest) {
   const supabase = createClientFromRequest(req)
   const idUsuario = await getCurrentIdUsuario(supabase)
-  if (!idUsuario) return NextResponse.json({ error: 'nao autenticado' }, { status: 401 })
+  if (!idUsuario) return NextResponse.json({ error: 'nao autenticado' }, { status: 401, headers: SEM_CACHE })
 
   const agora = new Date()
   // A serie cobre os seis meses que terminam no atual, entao a janela comeca
@@ -70,7 +70,7 @@ export async function GET(req: NextRequest) {
   ])
 
   const falha = contas.error ?? seisMeses.error ?? recentes.error ?? lembretes.error
-  if (falha) return NextResponse.json({ error: falha.message }, { status: 500 })
+  if (falha) return NextResponse.json({ error: falha.message }, { status: 500, headers: SEM_CACHE })
 
   const saldoTotal = (contas.data ?? []).reduce((soma, c) => soma + (c.saldo_atual || 0), 0)
 

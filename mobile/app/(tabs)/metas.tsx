@@ -9,6 +9,7 @@ import {
   BotaoIcone,
   Cabecalho,
   Campo,
+  CampoData,
   Carregando,
   Cartao,
   CartaoEstatistica,
@@ -26,7 +27,6 @@ import {
   formatDateLong,
   hojeISO,
   parseValor,
-  sanitizarData,
   sanitizarValor,
 } from '@/constants/mycash';
 import type { Cores } from '@/constants/mycash';
@@ -368,22 +368,16 @@ export default function MetasScreen() {
             keyboardType="decimal-pad"
           />
 
-          <Campo
+          <CampoData
             rotulo="Data de início"
-            value={form.inicio}
-            onChangeText={(inicio) => setForm({ ...form, inicio: sanitizarData(inicio) })}
-            placeholder="AAAA-MM-DD"
-            keyboardType="numeric"
-            maxLength={10}
+            valor={form.inicio}
+            aoMudar={(inicio) => setForm({ ...form, inicio })}
           />
 
-          <Campo
+          <CampoData
             rotulo="Data limite"
-            value={form.limite}
-            onChangeText={(limite) => setForm({ ...form, limite: sanitizarData(limite) })}
-            placeholder="AAAA-MM-DD"
-            keyboardType="numeric"
-            maxLength={10}
+            valor={form.limite}
+            aoMudar={(limite) => setForm({ ...form, limite })}
           />
 
           {editando ? (

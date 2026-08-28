@@ -8,6 +8,7 @@ import {
   BotaoIcone,
   Cabecalho,
   Campo,
+  CampoData,
   Carregando,
   Cartao,
   CartaoEstatistica,
@@ -23,7 +24,6 @@ import {
   formatCurrency,
   formatDateLong,
   parseValor,
-  sanitizarData,
   sanitizarValor,
 } from '@/constants/mycash';
 import type { Cores } from '@/constants/mycash';
@@ -362,13 +362,10 @@ export default function LembretesScreen() {
             keyboardType="decimal-pad"
           />
 
-          <Campo
+          <CampoData
             rotulo="Data de vencimento"
-            value={form.vencimento}
-            onChangeText={(vencimento) => setForm({ ...form, vencimento: sanitizarData(vencimento) })}
-            placeholder="AAAA-MM-DD"
-            keyboardType="numeric"
-            maxLength={10}
+            valor={form.vencimento}
+            aoMudar={(vencimento) => setForm({ ...form, vencimento })}
           />
 
           <View style={proprios.switchCampo}>

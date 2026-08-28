@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'nao autenticado' }, { status: 401 })
+  if (!user) return NextResponse.json({ error: 'nao autenticado' }, { status: 401, headers: SEM_CACHE })
 
   const [perfil, contas, transacoes, metas] = await Promise.all([
     supabase.from('usuarios').select('*').eq('auth_user_id', user.id).maybeSingle(),
@@ -63,7 +63,7 @@ export async function GET(req: NextRequest) {
   ])
 
   if (perfil.error) {
-    return NextResponse.json({ error: perfil.error.message }, { status: 500 })
+    return NextResponse.json({ error: perfil.error.message }, { status: 500, headers: SEM_CACHE })
   }
 
   // Cadastros anteriores a migration 20260619 podem estar sem auth_user_id.
@@ -104,14 +104,14 @@ export async function GET(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   const supabase = createClientFromRequest(req)
   const idUsuario = await getCurrentIdUsuario(supabase)
-  if (!idUsuario) return NextResponse.json({ error: 'nao autenticado' }, { status: 401 })
+  if (!idUsuario) return NextResponse.json({ error: 'nao autenticado' }, { status: 401, headers: SEM_CACHE })
 
   const body = await req.json().catch(() => null)
-  if (!body) return NextResponse.json({ error: 'body invalido' }, { status: 400 })
+  if (!body) return NextResponse.json({ error: 'body invalido' }, { status: 400, headers: SEM_CACHE })
 
   const nome = typeof body.nome_completo === 'string' ? body.nome_completo.trim() : ''
   if (!nome) {
-    return NextResponse.json({ error: 'campo obrigatorio: nome_completo' }, { status: 400 })
+    return NextResponse.json({ error: 'campo obrigatorio: nome_completo' }, { status: 400, headers: SEM_CACHE })
   }
 
   const { data, error } = await supabase
@@ -121,7 +121,7 @@ export async function PATCH(req: NextRequest) {
     .select()
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+  if (error) return NextResponse.json({ error: error.message }, { status: 400, headers: SEM_CACHE })
 
   return NextResponse.json({ data: usuarioPublico(data) }, { headers: SEM_CACHE })
 }

@@ -23,7 +23,7 @@ export async function GET(
 ) {
   const supabase = createClientFromRequest(req)
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'nao autenticado' }, { status: 401 })
+  if (!user) return NextResponse.json({ error: 'nao autenticado' }, { status: 401, headers: SEM_CACHE })
 
   const { data, error } = await supabase
     .from('transacoes')
@@ -31,8 +31,8 @@ export async function GET(
     .eq('id_transacao', Number(params.id))
     .maybeSingle()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  if (!data) return NextResponse.json({ error: 'nao encontrada' }, { status: 404 })
+  if (error) return NextResponse.json({ error: error.message }, { status: 500, headers: SEM_CACHE })
+  if (!data) return NextResponse.json({ error: 'nao encontrada' }, { status: 404, headers: SEM_CACHE })
   return NextResponse.json({ data }, { headers: SEM_CACHE })
 }
 
@@ -43,10 +43,10 @@ export async function PATCH(
 ) {
   const supabase = createClientFromRequest(req)
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'nao autenticado' }, { status: 401 })
+  if (!user) return NextResponse.json({ error: 'nao autenticado' }, { status: 401, headers: SEM_CACHE })
 
   const body = await req.json().catch(() => null)
-  if (!body) return NextResponse.json({ error: 'body invalido' }, { status: 400 })
+  if (!body) return NextResponse.json({ error: 'body invalido' }, { status: 400, headers: SEM_CACHE })
 
   // Guarda o estado anterior para desfazer o efeito antigo no saldo.
   const { data: antes } = await supabase
@@ -62,7 +62,7 @@ export async function PATCH(
     .select()
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+  if (error) return NextResponse.json({ error: error.message }, { status: 400, headers: SEM_CACHE })
 
   if (antes) {
     await trocarEfeito(supabase, antes, {
@@ -82,7 +82,7 @@ export async function DELETE(
 ) {
   const supabase = createClientFromRequest(req)
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'nao autenticado' }, { status: 401 })
+  if (!user) return NextResponse.json({ error: 'nao autenticado' }, { status: 401, headers: SEM_CACHE })
 
   // Le antes de apagar: depois do delete nao ha como saber quanto devolver.
   const { data: antes } = await supabase
@@ -96,11 +96,11 @@ export async function DELETE(
     .delete()
     .eq('id_transacao', Number(params.id))
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+  if (error) return NextResponse.json({ error: error.message }, { status: 400, headers: SEM_CACHE })
 
   if (antes) {
     await ajustarSaldo(supabase, antes.id_conta, -efeitoNoSaldo(antes.tipo, antes.valor))
   }
 
-  return new NextResponse(null, { status: 204 })
+  return new NextResponse(null, { status: 204, headers: SEM_CACHE })
 }

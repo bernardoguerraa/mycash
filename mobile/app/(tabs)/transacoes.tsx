@@ -8,6 +8,7 @@ import {
   BotaoIcone,
   Cabecalho,
   Campo,
+  CampoData,
   Carregando,
   CartaoEstatistica,
   EstadoVazio,
@@ -26,7 +27,6 @@ import {
   parseValor,
   rotuloCategoria,
   rotuloTipoConta,
-  sanitizarData,
   sanitizarValor,
 } from '@/constants/mycash';
 import type { Cores } from '@/constants/mycash';
@@ -330,24 +330,10 @@ export default function TransacoesScreen() {
 
       <View style={proprios.periodo}>
         <View style={ui.flex1}>
-          <Campo
-            rotulo="De"
-            value={de}
-            onChangeText={(v) => setDe(sanitizarData(v))}
-            placeholder="AAAA-MM-DD"
-            keyboardType="numeric"
-            maxLength={10}
-          />
+          <CampoData rotulo="De" valor={de} aoMudar={setDe} placeholder="Início" />
         </View>
         <View style={ui.flex1}>
-          <Campo
-            rotulo="Até"
-            value={ate}
-            onChangeText={(v) => setAte(sanitizarData(v))}
-            placeholder="AAAA-MM-DD"
-            keyboardType="numeric"
-            maxLength={10}
-          />
+          <CampoData rotulo="Até" valor={ate} aoMudar={setAte} placeholder="Fim" />
         </View>
       </View>
 
@@ -528,13 +514,10 @@ export default function TransacoesScreen() {
             keyboardType="decimal-pad"
           />
 
-          <Campo
+          <CampoData
             rotulo="Data"
-            value={form.data}
-            onChangeText={(data) => setForm({ ...form, data: sanitizarData(data) })}
-            placeholder="AAAA-MM-DD"
-            keyboardType="numeric"
-            maxLength={10}
+            valor={form.data}
+            aoMudar={(data) => setForm({ ...form, data })}
           />
         </ModalFormulario>
       ) : null}

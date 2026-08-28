@@ -20,7 +20,7 @@ const SEM_CACHE = { 'Cache-Control': 'no-store, no-cache, must-revalidate' }
 export async function GET(req: NextRequest) {
   const supabase = createClientFromRequest(req)
   const idUsuario = await getCurrentIdUsuario(supabase)
-  if (!idUsuario) return NextResponse.json({ error: 'nao autenticado' }, { status: 401 })
+  if (!idUsuario) return NextResponse.json({ error: 'nao autenticado' }, { status: 401, headers: SEM_CACHE })
 
   const { searchParams } = new URL(req.url)
   const lida = searchParams.get('lida')
@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
   if (lida === 'false') query = query.eq('lida', false)
 
   const { data, error } = await query
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return NextResponse.json({ error: error.message }, { status: 500, headers: SEM_CACHE })
   return NextResponse.json({ data }, { headers: SEM_CACHE })
 }
 
@@ -43,10 +43,10 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const supabase = createClientFromRequest(req)
   const idUsuario = await getCurrentIdUsuario(supabase)
-  if (!idUsuario) return NextResponse.json({ error: 'nao autenticado' }, { status: 401 })
+  if (!idUsuario) return NextResponse.json({ error: 'nao autenticado' }, { status: 401, headers: SEM_CACHE })
 
   const body = await req.json().catch(() => null)
-  if (!body) return NextResponse.json({ error: 'body invalido' }, { status: 400 })
+  if (!body) return NextResponse.json({ error: 'body invalido' }, { status: 400, headers: SEM_CACHE })
 
   const { mensagem, tipo, lida } = body
   if (!mensagem || !tipo) {
@@ -67,6 +67,6 @@ export async function POST(req: NextRequest) {
     .select()
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+  if (error) return NextResponse.json({ error: error.message }, { status: 400, headers: SEM_CACHE })
   return NextResponse.json({ data }, { status: 201, headers: SEM_CACHE })
 }

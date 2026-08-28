@@ -10,9 +10,10 @@
  * tempo de render (variantes de botao, tons de aviso).
  */
 
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, type ComponentProps, type ReactNode } from 'react';
+import { useCallback, useState, type ComponentProps, type ReactNode } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -30,6 +31,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { Cores } from '@/constants/mycash';
+import { formatDateLong } from '@/constants/mycash';
 import { criarUseEstilos } from '@/lib/estilos';
 import { useNotificacoes } from '@/lib/notificacoes-contexto';
 import { useTema } from '@/lib/tema';
@@ -390,6 +392,83 @@ export function Campo({
   );
 }
 
+/**
+ * Data por calendario nativo, no lugar de digitar AAAA-MM-DD.
+ *
+ * O valor continua trafegando como 'YYYY-MM-DD', que e o que a API espera —
+ * o calendario e so a forma de escolher. A data e montada com os componentes
+ * locais (getFullYear/getMonth/getDate) em vez de toISOString, senao no
+ * Brasil a conversao para UTC devolve o dia anterior.
+ */
+export function CampoData({
+  rotulo,
+  valor,
+  aoMudar,
+  erro,
+  placeholder = 'Escolher data',
+}: {
+  rotulo: string;
+  valor: string;
+  aoMudar: (iso: string) => void;
+  erro?: string;
+  placeholder?: string;
+}) {
+  const estilos = useEstilos();
+  const { cores } = useTema();
+  const [aberto, setAberto] = useState(false);
+
+  const paraISO = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
+      d.getDate()
+    ).padStart(2, '0')}`;
+
+  // Sem data escolhida o calendario abre em hoje, que e o palpite mais util.
+  const inicial = /^\d{4}-\d{2}-\d{2}$/.test(valor)
+    ? new Date(`${valor}T00:00:00`)
+    : new Date();
+
+  return (
+    <View style={estilos.campo}>
+      <Text style={estilos.rotulo}>{rotulo}</Text>
+
+      <Pressable
+        onPress={() => setAberto(true)}
+        style={({ pressed }) => [
+          estilos.input,
+          estilos.campoData,
+          !!erro && { borderColor: cores.danger },
+          pressed && { opacity: 0.7 },
+        ]}>
+        <Text style={[estilos.campoDataTexto, !valor && { color: cores.textMute }]}>
+          {valor ? formatDateLong(valor) : placeholder}
+        </Text>
+        <Ionicons name="calendar-outline" size={17} color={cores.textDim} />
+      </Pressable>
+
+      {valor ? (
+        <Pressable onPress={() => aoMudar('')} hitSlop={6}>
+          <Text style={estilos.campoDataLimpar}>Limpar data</Text>
+        </Pressable>
+      ) : null}
+
+      {aberto ? (
+        <DateTimePicker
+          value={inicial}
+          mode="date"
+          display="calendar"
+          onChange={(evento, escolhida) => {
+            // No Android o dialogo se fecha sozinho; 'dismissed' e cancelar.
+            setAberto(false);
+            if (evento.type === 'set' && escolhida) aoMudar(paraISO(escolhida));
+          }}
+        />
+      ) : null}
+
+      {erro ? <Text style={estilos.campoErro}>{erro}</Text> : null}
+    </View>
+  );
+}
+
 /** Escolha entre poucas opcoes — substitui o <select> do web. */
 export function Seletor<T extends string | number>({
   rotulo,
@@ -667,6 +746,9 @@ export const useEstilos = criarUseEstilos((c: Cores) =>
       color: c.text,
     },
     campoErro: { fontSize: 12, color: c.danger },
+    campoData: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    campoDataTexto: { fontSize: 15.5, color: c.text },
+    campoDataLimpar: { fontSize: 12, color: c.textMute, alignSelf: 'flex-start' },
 
     chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 7 },
     chip: {

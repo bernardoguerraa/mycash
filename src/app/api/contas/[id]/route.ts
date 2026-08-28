@@ -21,7 +21,7 @@ export async function GET(
 ) {
   const supabase = createClientFromRequest(req)
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'nao autenticado' }, { status: 401 })
+  if (!user) return NextResponse.json({ error: 'nao autenticado' }, { status: 401, headers: SEM_CACHE })
 
   const { data, error } = await supabase
     .from('contas_bancarias')
@@ -29,8 +29,8 @@ export async function GET(
     .eq('id_conta', Number(params.id))
     .maybeSingle()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  if (!data) return NextResponse.json({ error: 'nao encontrada' }, { status: 404 })
+  if (error) return NextResponse.json({ error: error.message }, { status: 500, headers: SEM_CACHE })
+  if (!data) return NextResponse.json({ error: 'nao encontrada' }, { status: 404, headers: SEM_CACHE })
   return NextResponse.json({ data }, { headers: SEM_CACHE })
 }
 
@@ -40,10 +40,10 @@ export async function PATCH(
 ) {
   const supabase = createClientFromRequest(req)
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'nao autenticado' }, { status: 401 })
+  if (!user) return NextResponse.json({ error: 'nao autenticado' }, { status: 401, headers: SEM_CACHE })
 
   const body = await req.json().catch(() => null)
-  if (!body) return NextResponse.json({ error: 'body invalido' }, { status: 400 })
+  if (!body) return NextResponse.json({ error: 'body invalido' }, { status: 400, headers: SEM_CACHE })
 
   const { data, error } = await supabase
     .from('contas_bancarias')
@@ -52,7 +52,7 @@ export async function PATCH(
     .select()
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+  if (error) return NextResponse.json({ error: error.message }, { status: 400, headers: SEM_CACHE })
   return NextResponse.json({ data }, { headers: SEM_CACHE })
 }
 
@@ -62,13 +62,13 @@ export async function DELETE(
 ) {
   const supabase = createClientFromRequest(req)
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'nao autenticado' }, { status: 401 })
+  if (!user) return NextResponse.json({ error: 'nao autenticado' }, { status: 401, headers: SEM_CACHE })
 
   const { error } = await supabase
     .from('contas_bancarias')
     .delete()
     .eq('id_conta', Number(params.id))
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 })
-  return new NextResponse(null, { status: 204 })
+  if (error) return NextResponse.json({ error: error.message }, { status: 400, headers: SEM_CACHE })
+  return new NextResponse(null, { status: 204, headers: SEM_CACHE })
 }

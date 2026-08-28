@@ -20,14 +20,14 @@ const SEM_CACHE = { 'Cache-Control': 'no-store, no-cache, must-revalidate' }
 export async function GET(req: NextRequest) {
   const supabase = createClientFromRequest(req)
   const idUsuario = await getCurrentIdUsuario(supabase)
-  if (!idUsuario) return NextResponse.json({ error: 'nao autenticado' }, { status: 401 })
+  if (!idUsuario) return NextResponse.json({ error: 'nao autenticado' }, { status: 401, headers: SEM_CACHE })
 
   const { data, error } = await supabase
     .from('contas_bancarias')
     .select('*')
     .order('id_conta', { ascending: true })
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return NextResponse.json({ error: error.message }, { status: 500, headers: SEM_CACHE })
   return NextResponse.json({ data }, { headers: SEM_CACHE })
 }
 
@@ -36,10 +36,10 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const supabase = createClientFromRequest(req)
   const idUsuario = await getCurrentIdUsuario(supabase)
-  if (!idUsuario) return NextResponse.json({ error: 'nao autenticado' }, { status: 401 })
+  if (!idUsuario) return NextResponse.json({ error: 'nao autenticado' }, { status: 401, headers: SEM_CACHE })
 
   const body = await req.json().catch(() => null)
-  if (!body) return NextResponse.json({ error: 'body invalido' }, { status: 400 })
+  if (!body) return NextResponse.json({ error: 'body invalido' }, { status: 400, headers: SEM_CACHE })
 
   const { instituicao, numero_conta, tipo_conta, saldo_atual } = body
   if (!instituicao || !numero_conta || !tipo_conta) {
@@ -62,6 +62,6 @@ export async function POST(req: NextRequest) {
     .select()
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+  if (error) return NextResponse.json({ error: error.message }, { status: 400, headers: SEM_CACHE })
   return NextResponse.json({ data }, { status: 201, headers: SEM_CACHE })
 }
