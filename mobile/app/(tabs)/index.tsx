@@ -1,27 +1,32 @@
-import { useCallback, useEffect, useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+
 import {
-  ActivityIndicator,
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-
-import { MyCash, formatCurrency, formatDate, getGreeting } from '@/constants/mycash';
+  Aviso,
+  Carregando,
+  Cartao,
+  CartaoEstatistica,
+  EstadoVazio,
+  Tela,
+  estilos as ui,
+} from '@/components/ui/kit';
+import {
+  MyCash,
+  formatCurrency,
+  formatDate,
+  formatDateLong,
+  getGreeting,
+} from '@/constants/mycash';
+import { useRecurso } from '@/hooks/use-recurso';
 import { useAuth } from '@/lib/auth';
-import { supabase } from '@/lib/supabase';
-
-type Transacao = {
-  id_transacao: number;
-  descricao: string | null;
-  valor: number | null;
-  tipo: string | null;
-  data_transacao: string;
-  categoria: string | null;
-};
+import {
+  contasRepository,
+  lembretesRepository,
+  metasRepository,
+  transacoesRepository,
+} from '@/lib/repositories';
+import type { Lembrete, Transacao } from '@/types/database';
 
 type Resumo = {
   saldoTotal: number;
@@ -29,6 +34,7 @@ type Resumo = {
   saidas: number;
   metasAtivas: number;
   recentes: Transacao[];
+  proximosLembretes: Lembrete[];
 };
 
 const VAZIO: Resumo = {
@@ -37,80 +43,53 @@ const VAZIO: Resumo = {
   saidas: 0,
   metasAtivas: 0,
   recentes: [],
+  proximosLembretes: [],
 };
 
 /**
- * Mesmas queries do dashboard web (src/app/(dashboard)/dashboard/page.tsx),
- * so que direto do app. A RLS filtra por usuario no banco — nao ha
- * `.eq('id_usuario', ...)` aqui de proposito.
+ * Mesmo painel do dashboard web (src/app/(dashboard)/dashboard/page.tsx),
+ * so que montado a partir da API REST em vez de consultas diretas ao banco.
+ *
+ * A API nao filtra transacao por intervalo de data, entao o recorte do mes e
+ * o corte das cinco mais recentes acontecem aqui — o volume que uma pessoa
+ * fisica gera cabe no limite padrao da rota.
  */
 async function carregarResumo(): Promise<Resumo> {
-  const agora = new Date();
-  const primeiroDia = new Date(agora.getFullYear(), agora.getMonth(), 1).toISOString();
-  const ultimoDia = new Date(agora.getFullYear(), agora.getMonth() + 1, 0).toISOString();
-
-  const [contas, doMes, metas, recentes] = await Promise.all([
-    supabase.from('contas_bancarias').select('saldo_atual'),
-    supabase
-      .from('transacoes')
-      .select('valor, tipo')
-      .gte('data_transacao', primeiroDia)
-      .lte('data_transacao', ultimoDia),
-    supabase
-      .from('metas_financeiras')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'EmAndamento'),
-    supabase
-      .from('transacoes')
-      .select('id_transacao, descricao, valor, tipo, data_transacao, categoria')
-      .order('data_transacao', { ascending: false })
-      .limit(5),
+  const [contas, transacoes, metasAtivas, lembretes] = await Promise.all([
+    contasRepository.listar(),
+    transacoesRepository.listar(),
+    metasRepository.listar({ status: 'EmAndamento' }),
+    lembretesRepository.listar({ ativo: true }),
   ]);
 
-  const saldoTotal = (contas.data ?? []).reduce((s, c) => s + (c.saldo_atual || 0), 0);
+  const agora = new Date();
+  const doMes = transacoes.filter((t) => {
+    const data = new Date(t.data_transacao);
+    return data.getMonth() === agora.getMonth() && data.getFullYear() === agora.getFullYear();
+  });
 
-  const entradas = (doMes.data ?? [])
-    .filter((t) => t.tipo === 'Entrada')
-    .reduce((s, t) => s + (t.valor || 0), 0);
+  const somar = (lista: Transacao[]) =>
+    lista.reduce((total, t) => total + Math.abs(t.valor || 0), 0);
 
-  const saidas = (doMes.data ?? [])
-    .filter((t) => t.tipo === 'Saida')
-    .reduce((s, t) => s + Math.abs(t.valor || 0), 0);
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
 
   return {
-    saldoTotal,
-    entradas,
-    saidas,
-    metasAtivas: metas.count ?? 0,
-    recentes: (recentes.data as Transacao[]) ?? [],
+    saldoTotal: contasRepository.saldoConsolidado(contas),
+    entradas: somar(doMes.filter((t) => t.tipo === 'Entrada')),
+    saidas: somar(doMes.filter((t) => t.tipo === 'Saida')),
+    metasAtivas: metasAtivas.length,
+    recentes: transacoes.slice(0, 5),
+    proximosLembretes: lembretes
+      .filter((l) => new Date(`${l.data_vencimento.slice(0, 10)}T00:00:00`) >= hoje)
+      .slice(0, 4),
   };
 }
 
 export default function DashboardScreen() {
   const { session } = useAuth();
-  const [resumo, setResumo] = useState<Resumo>(VAZIO);
-  const [carregando, setCarregando] = useState(true);
-  const [atualizando, setAtualizando] = useState(false);
-  const [erro, setErro] = useState<string | null>(null);
-
-  const buscar = useCallback(async () => {
-    try {
-      setErro(null);
-      setResumo(await carregarResumo());
-    } catch (e) {
-      setErro(e instanceof Error ? e.message : 'Falha ao carregar os dados.');
-    }
-  }, []);
-
-  useEffect(() => {
-    buscar().finally(() => setCarregando(false));
-  }, [buscar]);
-
-  const aoPuxar = useCallback(async () => {
-    setAtualizando(true);
-    await buscar();
-    setAtualizando(false);
-  }, [buscar]);
+  const router = useRouter();
+  const { dados, carregando, atualizando, erro, aoPuxar } = useRecurso(carregarResumo, VAZIO);
 
   const nome =
     (session?.user.user_metadata?.full_name as string | undefined) ||
@@ -118,142 +97,182 @@ export default function DashboardScreen() {
     session?.user.email?.split('@')[0] ||
     'Usuário';
 
-  if (carregando) {
-    return (
-      <SafeAreaView style={[styles.safe, styles.centro]}>
-        <ActivityIndicator color={MyCash.accent} size="large" />
-      </SafeAreaView>
-    );
-  }
+  if (carregando) return <Carregando />;
+
+  const saldoNegativo = dados.saldoTotal < 0;
+  const saldoMes = dados.entradas - dados.saidas;
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        refreshControl={
-          <RefreshControl
-            refreshing={atualizando}
-            onRefresh={aoPuxar}
-            tintColor={MyCash.accent}
-          />
-        }>
-        <View style={styles.cabecalho}>
-          <Text style={styles.saudacao}>{getGreeting()},</Text>
-          <Text style={styles.nome}>{nome}</Text>
+    <Tela atualizando={atualizando} aoPuxar={aoPuxar}>
+      <View>
+        <Text style={proprios.saudacao}>{getGreeting()},</Text>
+        <Text style={proprios.nome}>{nome}</Text>
+      </View>
+
+      {erro ? <Aviso texto={erro} /> : null}
+
+      <View
+        style={[
+          proprios.saldoCartao,
+          saldoNegativo && { backgroundColor: MyCash.dangerMuted, borderColor: MyCash.danger },
+        ]}>
+        <Text style={[proprios.saldoRotulo, saldoNegativo && { color: MyCash.danger }]}>
+          Saldo consolidado
+        </Text>
+        <Text style={proprios.saldoValor}>{formatCurrency(dados.saldoTotal)}</Text>
+      </View>
+
+      <View style={ui.linha}>
+        <CartaoEstatistica
+          rotulo="Entradas do mês"
+          valor={formatCurrency(dados.entradas)}
+          icone="arrow-down-circle-outline"
+          cor={MyCash.accentLight}
+        />
+        <CartaoEstatistica
+          rotulo="Saídas do mês"
+          valor={formatCurrency(dados.saidas)}
+          icone="arrow-up-circle-outline"
+          cor={MyCash.danger}
+        />
+      </View>
+
+      <View style={ui.linha}>
+        <CartaoEstatistica
+          rotulo="Metas em andamento"
+          valor={String(dados.metasAtivas)}
+          icone="flag-outline"
+          cor={MyCash.info}
+        />
+        <CartaoEstatistica
+          rotulo="Saldo do mês"
+          valor={formatCurrency(saldoMes)}
+          icone="trending-up-outline"
+          cor={saldoMes >= 0 ? MyCash.accentLight : MyCash.danger}
+        />
+      </View>
+
+      <Secao
+        titulo="Transações recentes"
+        acao="Ver todas"
+        aoTocarAcao={() => router.push('/(tabs)/transacoes')}
+      />
+
+      {dados.recentes.length === 0 ? (
+        <EstadoVazio
+          icone="receipt-outline"
+          titulo="Nenhuma transação por aqui ainda"
+          descricao="Cadastre a primeira na aba Transações."
+        />
+      ) : (
+        <View style={proprios.lista}>
+          {dados.recentes.map((t) => {
+            const entrada = t.tipo === 'Entrada';
+            return (
+              <View key={t.id_transacao} style={proprios.item}>
+                <View
+                  style={[
+                    proprios.itemIcone,
+                    { backgroundColor: entrada ? MyCash.accentMuted : MyCash.dangerMuted },
+                  ]}>
+                  <Ionicons
+                    name={entrada ? 'arrow-down' : 'arrow-up'}
+                    size={16}
+                    color={entrada ? MyCash.accentLight : MyCash.danger}
+                  />
+                </View>
+
+                <View style={ui.flex1}>
+                  <Text style={proprios.itemTitulo} numberOfLines={1}>
+                    {t.descricao || 'Sem descrição'}
+                  </Text>
+                  <Text style={proprios.itemMeta}>
+                    {t.categoria || 'Sem categoria'} · {formatDate(t.data_transacao)}
+                  </Text>
+                </View>
+
+                <Text
+                  style={[
+                    proprios.itemValor,
+                    { color: entrada ? MyCash.accentLight : MyCash.danger },
+                  ]}>
+                  {entrada ? '+' : '−'}
+                  {formatCurrency(Math.abs(t.valor || 0))}
+                </Text>
+              </View>
+            );
+          })}
         </View>
+      )}
 
-        {erro && (
-          <View style={styles.erroBox}>
-            <Text style={styles.erroTexto}>{erro}</Text>
-          </View>
-        )}
+      <Secao
+        titulo="Próximos lembretes"
+        acao="Ver todos"
+        aoTocarAcao={() => router.push('/(tabs)/lembretes')}
+      />
 
-        <View style={styles.saldoCard}>
-          <Text style={styles.saldoLabel}>Saldo consolidado</Text>
-          <Text style={styles.saldoValor}>{formatCurrency(resumo.saldoTotal)}</Text>
+      {dados.proximosLembretes.length === 0 ? (
+        <EstadoVazio
+          icone="notifications-outline"
+          titulo="Nenhum lembrete ativo"
+          descricao="Contas a pagar e a receber aparecem aqui."
+        />
+      ) : (
+        <View style={proprios.lista}>
+          {dados.proximosLembretes.map((l) => {
+            const receber = l.tipo === 'ContaReceber';
+            return (
+              <Cartao key={l.id_lembrete} style={proprios.lembreteCartao}>
+                <View style={ui.flex1}>
+                  <Text style={proprios.itemTitulo} numberOfLines={1}>
+                    {l.descricao}
+                  </Text>
+                  <Text style={proprios.itemMeta}>
+                    Vence em {formatDateLong(l.data_vencimento)}
+                  </Text>
+                </View>
+                <Text
+                  style={[
+                    proprios.itemValor,
+                    { color: receber ? MyCash.accentLight : MyCash.warn },
+                  ]}>
+                  {formatCurrency(l.valor_previsto)}
+                </Text>
+              </Cartao>
+            );
+          })}
         </View>
-
-        <View style={styles.linha}>
-          <View style={[styles.statCard, styles.flex1]}>
-            <Text style={styles.statLabel}>Entradas do mês</Text>
-            <Text style={[styles.statValor, { color: MyCash.accentLight }]}>
-              {formatCurrency(resumo.entradas)}
-            </Text>
-          </View>
-          <View style={[styles.statCard, styles.flex1]}>
-            <Text style={styles.statLabel}>Saídas do mês</Text>
-            <Text style={[styles.statValor, { color: MyCash.danger }]}>
-              {formatCurrency(resumo.saidas)}
-            </Text>
-          </View>
-        </View>
-
-        <View style={styles.statCard}>
-          <Text style={styles.statLabel}>Metas em andamento</Text>
-          <Text style={styles.statValor}>{resumo.metasAtivas}</Text>
-        </View>
-
-        <View style={styles.secao}>
-          <Text style={styles.secaoTitulo}>Transações recentes</Text>
-
-          {resumo.recentes.length === 0 ? (
-            <View style={styles.vazio}>
-              <Text style={styles.vazioTexto}>Nenhuma transação por aqui ainda.</Text>
-            </View>
-          ) : (
-            <View style={styles.lista}>
-              {resumo.recentes.map((t) => {
-                const entrada = t.tipo === 'Entrada';
-                return (
-                  <View key={t.id_transacao} style={styles.item}>
-                    <View
-                      style={[
-                        styles.itemIcone,
-                        { backgroundColor: entrada ? MyCash.accentMuted : MyCash.dangerMuted },
-                      ]}>
-                      <Text
-                        style={{
-                          color: entrada ? MyCash.accentLight : MyCash.danger,
-                          fontWeight: '700',
-                        }}>
-                        {entrada ? '↓' : '↑'}
-                      </Text>
-                    </View>
-
-                    <View style={styles.flex1}>
-                      <Text style={styles.itemTitulo} numberOfLines={1}>
-                        {t.descricao || 'Sem descrição'}
-                      </Text>
-                      <Text style={styles.itemMeta}>
-                        {t.categoria || 'Sem categoria'} · {formatDate(t.data_transacao)}
-                      </Text>
-                    </View>
-
-                    <Text
-                      style={[
-                        styles.itemValor,
-                        { color: entrada ? MyCash.accentLight : MyCash.danger },
-                      ]}>
-                      {entrada ? '+' : '−'}
-                      {formatCurrency(Math.abs(t.valor || 0))}
-                    </Text>
-                  </View>
-                );
-              })}
-            </View>
-          )}
-        </View>
-
-        <Pressable
-          style={({ pressed }) => [styles.sair, pressed && { opacity: 0.6 }]}
-          onPress={() => supabase.auth.signOut()}>
-          <Text style={styles.sairTexto}>Sair da conta</Text>
-        </Pressable>
-      </ScrollView>
-    </SafeAreaView>
+      )}
+    </Tela>
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: MyCash.surface0 },
-  centro: { justifyContent: 'center', alignItems: 'center' },
-  scroll: { padding: 20, gap: 14, paddingBottom: 40 },
-  flex1: { flex: 1 },
+function Secao({
+  titulo,
+  acao,
+  aoTocarAcao,
+}: {
+  titulo: string;
+  acao?: string;
+  aoTocarAcao?: () => void;
+}) {
+  return (
+    <View style={proprios.secao}>
+      <Text style={proprios.secaoTitulo}>{titulo}</Text>
+      {acao ? (
+        <Pressable onPress={aoTocarAcao} hitSlop={8}>
+          <Text style={proprios.secaoAcao}>{acao}</Text>
+        </Pressable>
+      ) : null}
+    </View>
+  );
+}
 
-  cabecalho: { marginBottom: 2 },
+const proprios = StyleSheet.create({
   saudacao: { fontSize: 15, color: MyCash.textDim },
   nome: { fontSize: 26, fontWeight: '700', color: MyCash.text, letterSpacing: -0.4 },
 
-  erroBox: {
-    backgroundColor: MyCash.dangerMuted,
-    borderWidth: 1,
-    borderColor: MyCash.danger,
-    borderRadius: 10,
-    padding: 12,
-  },
-  erroTexto: { color: MyCash.danger, fontSize: 13 },
-
-  saldoCard: {
+  saldoCartao: {
     backgroundColor: MyCash.accentMuted,
     borderWidth: 1,
     borderColor: 'rgba(16,185,129,0.35)',
@@ -261,23 +280,17 @@ const styles = StyleSheet.create({
     padding: 20,
     gap: 6,
   },
-  saldoLabel: { fontSize: 13, color: MyCash.accentLight, fontWeight: '600' },
-  saldoValor: { fontSize: 32, fontWeight: '700', color: MyCash.text, letterSpacing: -1 },
+  saldoRotulo: { fontSize: 13, color: MyCash.accentLight, fontWeight: '600' },
+  saldoValor: { fontSize: 31, fontWeight: '700', color: MyCash.text, letterSpacing: -1 },
 
-  linha: { flexDirection: 'row', gap: 12 },
-  statCard: {
-    backgroundColor: MyCash.surface2,
-    borderWidth: 1,
-    borderColor: MyCash.edge1,
-    borderRadius: 14,
-    padding: 16,
-    gap: 5,
+  secao: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 8,
   },
-  statLabel: { fontSize: 12.5, color: MyCash.textDim },
-  statValor: { fontSize: 19, fontWeight: '700', color: MyCash.text },
-
-  secao: { gap: 10, marginTop: 6 },
   secaoTitulo: { fontSize: 16, fontWeight: '600', color: MyCash.text },
+  secaoAcao: { fontSize: 13, fontWeight: '600', color: MyCash.accentLight },
 
   lista: { gap: 8 },
   item: {
@@ -290,21 +303,16 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 13,
   },
-  itemIcone: { width: 34, height: 34, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
+  itemIcone: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   itemTitulo: { fontSize: 14.5, color: MyCash.text, fontWeight: '600' },
   itemMeta: { fontSize: 12, color: MyCash.textMute, marginTop: 2 },
   itemValor: { fontSize: 14.5, fontWeight: '700' },
 
-  vazio: {
-    backgroundColor: MyCash.surface2,
-    borderWidth: 1,
-    borderColor: MyCash.edge1,
-    borderRadius: 12,
-    padding: 24,
-    alignItems: 'center',
-  },
-  vazioTexto: { color: MyCash.textMute, fontSize: 13.5 },
-
-  sair: { alignItems: 'center', paddingVertical: 16, marginTop: 8 },
-  sairTexto: { color: MyCash.textMute, fontSize: 14, fontWeight: '600' },
+  lembreteCartao: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 13 },
 });
