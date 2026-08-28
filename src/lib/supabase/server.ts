@@ -54,7 +54,16 @@ export function createClientFromRequest(req: Request) {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
-      global: { headers: { Authorization: authorization } },
+      global: {
+        headers: { Authorization: authorization },
+        // O supabase-js chama `fetch` por baixo, e o App Router do Next
+        // guarda respostas de fetch por padrao (Data Cache). Cada URL do
+        // PostgREST vira uma chave, entao as consultas congelavam em momentos
+        // diferentes: o painel voltava com o saldo e a contagem de metas de
+        // minutos antes enquanto /api/contas e /api/metas ja traziam o valor
+        // novo — a mesma tabela, respostas diferentes.
+        fetch: (entrada, init) => fetch(entrada, { ...init, cache: 'no-store' }),
+      },
       auth: { persistSession: false, autoRefreshToken: false },
     }
   );
