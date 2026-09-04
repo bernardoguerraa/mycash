@@ -34,6 +34,12 @@ describe('paraDataLocal', () => {
     expect(data.getMinutes()).toBe(30)
   })
 
+  it('paraDataLocal_textoComLixoAntesDaData_naoEIdentificadoComoDataSimples', () => {
+    // A regex precisa da ancora `^`: sem ela, "lixo2026-09-01" seria tratado
+    // como data pura e viraria "lixo2026-09-01T00:00:00".
+    expect(Number.isNaN(paraDataLocal('lixo2026-09-01').getTime())).toBe(true)
+  })
+
   it('paraDataLocal_textoInvalido_retornaDataInvalida', () => {
     expect(Number.isNaN(paraDataLocal('nao-e-data').getTime())).toBe(true)
   })

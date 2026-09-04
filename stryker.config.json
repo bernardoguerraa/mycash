@@ -1,0 +1,26 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "_comment": "Teste de mutacao da camada de dominio. Injeta defeitos artificiais no codigo de producao e verifica se a suite tem assercoes capazes de detecta-los. Limitado a src/domain porque so ali o codigo e puro: mutar um adaptador exigiria banco e rede, e o resultado diria mais sobre a infraestrutura do que sobre as assercoes. Rodar sob demanda (npm run test:mutation), nao a cada commit — a suite roda uma vez por mutante.",
+  "packageManager": "npm",
+  "testRunner": "vitest",
+  "vitest": {
+    "configFile": "vitest.dominio.config.ts"
+  },
+  "mutate": [
+    "src/domain/**/*.ts",
+    "!src/domain/**/*.test.ts",
+    "!src/domain/portas.ts",
+    "!src/domain/erros.ts"
+  ],
+  "reporters": [
+    "html",
+    "clear-text",
+    "progress"
+  ],
+  "htmlReporter": {
+    "fileName": "reports/mutation/index.html"
+  },
+  "coverageAnalysis": "perTest",
+  "timeoutMS": 30000,
+  "concurrency": 4
+}

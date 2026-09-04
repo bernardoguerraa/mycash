@@ -41,6 +41,14 @@ describe('parseValor', () => {
     expect(parseValor('abc')).toBeNaN()
   })
 
+  it('parseValor_entradaNulaOuIndefinida_retornaNaNSemQuebrar', () => {
+    // A guarda de tipo protege de `undefined.replace(...)`: o valor pode
+    // chegar de um formulario ainda nao inicializado.
+    expect(parseValor(undefined as unknown as string)).toBeNaN()
+    expect(parseValor(null as unknown as string)).toBeNaN()
+    expect(parseValor(123 as unknown as string)).toBeNaN()
+  })
+
   it('parseValor_valorNegativo_preservaOSinal', () => {
     // Quem decide se negativo e aceitavel e exigirValorPositivo, nao o parse.
     expect(parseValor('-50')).toBe(-50)

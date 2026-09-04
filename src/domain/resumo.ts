@@ -60,10 +60,12 @@ export function serieMensal(lancamentos: LancamentoResumo[], referencia: Date): 
 
   for (const lancamento of lancamentos) {
     // paraDataLocal e obrigatorio aqui: com `new Date` cru, todo lancamento do
-    // primeiro dia do mes caía no balde do mes anterior.
+    // primeiro dia do mes caia no balde do mes anterior.
     const data = paraDataLocal(lancamento.data_transacao)
-    if (Number.isNaN(data.getTime())) continue
 
+    // Data invalida produz chave NaN, que nao existe no Map — o proprio
+    // `!balde` descarta o lancamento. Um guard explicito de NaN aqui seria
+    // codigo inalcancavel (o teste de mutacao o apontou como sobrevivente).
     const balde = porChave.get(chaveDoMes(data.getFullYear(), data.getMonth()))
     if (!balde) continue
 

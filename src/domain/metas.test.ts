@@ -151,6 +151,15 @@ describe('estaAtrasada', () => {
   it('estaAtrasada_prazoNoFuturo_retornaFalso', () => {
     expect(estaAtrasada(META_BASE, HOJE)).toBe(false)
   })
+
+  it('estaAtrasada_venceHoje_aindaNaoEstaAtrasada', () => {
+    // Fronteira exata: quem tem ate hoje para bater a meta ainda esta no
+    // prazo. Sem este caso, trocar `< 0` por `<= 0` passaria despercebido —
+    // foi um mutante sobrevivente ate ele existir.
+    const meta: Meta = { ...META_BASE, data_limite: '2026-09-04' }
+
+    expect(estaAtrasada(meta, HOJE)).toBe(false)
+  })
 })
 
 describe('validarPrazo', () => {

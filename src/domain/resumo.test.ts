@@ -107,6 +107,22 @@ describe('serieMensal', () => {
     expect(serie[5]).toMatchObject({ mes: 'Fev', ano: 2026 })
   })
 
+  it('serieMensal_viradaDeAno_separaMesesDeAnosDiferentes', () => {
+    // Dezembro/2025 e janeiro/2026 nao podem cair no mesmo balde. O teste
+    // anterior de virada de ano usava lista vazia, entao a chave do mes
+    // nunca era exercitada de verdade.
+    const fevereiro = new Date(2026, 1, 10)
+    const lancamentos = [
+      lancamento('Entrada', 1000, '2025-12-20'),
+      lancamento('Entrada', 2000, '2026-01-20'),
+    ]
+
+    const serie = serieMensal(lancamentos, fevereiro)
+
+    expect(serie[3]).toMatchObject({ mes: 'Dez', ano: 2025, entradas: 1000 })
+    expect(serie[4]).toMatchObject({ mes: 'Jan', ano: 2026, entradas: 2000 })
+  })
+
   it('serieMensal_dataInvalida_eIgnoradaSemQuebrar', () => {
     const lancamentos = [
       { tipo: 'Entrada' as const, valor: 100, data_transacao: 'sem-data' },

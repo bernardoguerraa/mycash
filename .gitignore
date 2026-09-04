@@ -56,3 +56,5 @@ EstruturaDoProjeto/
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+reports/
+.stryker-tmp/

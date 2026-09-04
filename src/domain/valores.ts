@@ -19,7 +19,9 @@ import { ValorInvalidoError } from './erros'
 export function parseValor(entrada: string): number {
   if (typeof entrada !== 'string') return NaN
 
-  const limpo = entrada.trim().replace(/\s/g, '')
+  // replace(/\s/g) ja remove os espacos das bordas: um trim() antes seria
+  // redundante (o teste de mutacao o apontou como sobrevivente).
+  const limpo = entrada.replace(/\s/g, '')
   if (!limpo) return NaN
 
   // Com virgula presente, ela e o separador decimal e o ponto e milhar
