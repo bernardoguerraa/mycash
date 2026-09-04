@@ -1,37 +1,33 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Database, TipoTransacao } from '@/types/database'
+
+import { aplicarDelta, deltaDaExclusao, deltasDaEdicao, efeitoNoSaldo } from '@/domain/saldo'
+import type { Lancamento } from '@/domain/saldo'
+import type { Database } from '@/types/database'
 
 /**
- * Movimentacao do saldo da conta a cada lancamento.
+ * Adaptador de persistencia do saldo.
  *
- * Ate aqui `contas_bancarias.saldo_atual` era um numero digitado a mao que
- * nunca acompanhava as transacoes: dava para lancar R$ 20 mil de entrada e o
- * saldo continuar no valor do cadastro. Agora toda escrita em /api/transacoes
- * corrige a conta afetada.
+ * A regra de quanto o saldo muda vive em `src/domain/saldo.ts`, que e puro e
+ * testado sem banco. Este arquivo so faz o I/O: le a linha, chama a funcao de
+ * dominio e grava o resultado. Se o Postgres for trocado, o dominio nao muda.
  *
- * Fica no servidor de proposito — web e mobile chamam as mesmas rotas, entao
- * a regra vale para os dois sem ser reescrita de cada lado.
- *
- * Limitacao conhecida: Postgres nao esta sendo usado em transacao unica aqui,
- * porque as tabelas centrais nao tem migration versionada e um trigger nao
- * poderia ser revisado no repositorio. Se o ajuste do saldo falhar depois do
- * insert, a conta fica defasada ate o proximo lancamento naquela conta. O
- * caminho definitivo e um trigger em `transacoes`, junto com a migration que
- * falta para as seis tabelas centrais.
+ * Limitacao conhecida: as duas etapas nao correm numa transacao unica, porque
+ * as tabelas centrais nao tem migration versionada e um trigger nao poderia
+ * ser revisado no repositorio. Se o ajuste falhar depois do insert, a conta
+ * fica defasada ate o proximo lancamento nela. O caminho definitivo e um
+ * trigger em `transacoes`, junto da migration que falta.
  */
 
 type Cliente = SupabaseClient<Database>
 
-/** Entrada soma, saida subtrai. */
-export function efeitoNoSaldo(tipo: TipoTransacao, valor: number): number {
-  const modulo = Math.abs(Number(valor) || 0)
-  return tipo === 'Entrada' ? modulo : -modulo
-}
+export type { Lancamento }
+export { efeitoNoSaldo }
 
 /**
- * Soma `delta` ao saldo da conta. Le e escreve em duas etapas porque o
- * PostgREST nao expoe incremento atomico; a RLS garante que so o dono chega
- * aqui.
+ * Soma `delta` ao saldo da conta.
+ *
+ * Le e escreve em duas etapas porque o PostgREST nao expoe incremento
+ * atomico; a RLS garante que so o dono da conta chega aqui.
  */
 export async function ajustarSaldo(
   supabase: Cliente,
@@ -50,27 +46,30 @@ export async function ajustarSaldo(
 
   await supabase
     .from('contas_bancarias')
-    .update({ saldo_atual: Number((conta.saldo_atual + delta).toFixed(2)) })
+    .update({ saldo_atual: aplicarDelta(conta.saldo_atual, delta) })
     .eq('id_conta', idConta)
 }
 
 /**
- * Troca o efeito de uma transacao pelo de outra, cobrindo o caso de a edicao
- * mudar de conta: devolve o valor para a conta antiga e desconta na nova.
+ * Reconcilia o saldo apos uma edicao.
+ *
+ * O dominio decide os deltas (podem ser dois, quando a conta muda); aqui so
+ * aplicamos cada um.
  */
 export async function trocarEfeito(
   supabase: Cliente,
-  antes: { id_conta: number; tipo: TipoTransacao; valor: number },
-  depois: { id_conta: number; tipo: TipoTransacao; valor: number }
+  antes: Lancamento,
+  depois: Lancamento
 ): Promise<void> {
-  const efeitoAntes = efeitoNoSaldo(antes.tipo, antes.valor)
-  const efeitoDepois = efeitoNoSaldo(depois.tipo, depois.valor)
-
-  if (antes.id_conta === depois.id_conta) {
-    await ajustarSaldo(supabase, antes.id_conta, efeitoDepois - efeitoAntes)
-    return
+  for (const { idConta, delta } of deltasDaEdicao(antes, depois)) {
+    await ajustarSaldo(supabase, idConta, delta)
   }
+}
 
-  await ajustarSaldo(supabase, antes.id_conta, -efeitoAntes)
-  await ajustarSaldo(supabase, depois.id_conta, efeitoDepois)
+/** Desfaz o efeito de um lancamento excluido. */
+export async function reverterEfeito(
+  supabase: Cliente,
+  lancamento: Lancamento
+): Promise<void> {
+  await ajustarSaldo(supabase, lancamento.idConta, deltaDaExclusao(lancamento))
 }

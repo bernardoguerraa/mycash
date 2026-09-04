@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClientFromRequest } from '@/lib/supabase/server'
-import { ajustarSaldo, efeitoNoSaldo, trocarEfeito } from '@/lib/api/saldo'
+import { reverterEfeito, trocarEfeito } from '@/lib/api/saldo'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -65,11 +65,11 @@ export async function PATCH(
   if (error) return NextResponse.json({ error: error.message }, { status: 400, headers: SEM_CACHE })
 
   if (antes) {
-    await trocarEfeito(supabase, antes, {
-      id_conta: data.id_conta,
-      tipo: data.tipo,
-      valor: data.valor,
-    })
+    await trocarEfeito(
+      supabase,
+      { idConta: antes.id_conta, tipo: antes.tipo, valor: antes.valor },
+      { idConta: data.id_conta, tipo: data.tipo, valor: data.valor }
+    )
   }
 
   return NextResponse.json({ data }, { headers: SEM_CACHE })
@@ -99,7 +99,11 @@ export async function DELETE(
   if (error) return NextResponse.json({ error: error.message }, { status: 400, headers: SEM_CACHE })
 
   if (antes) {
-    await ajustarSaldo(supabase, antes.id_conta, -efeitoNoSaldo(antes.tipo, antes.valor))
+    await reverterEfeito(supabase, {
+      idConta: antes.id_conta,
+      tipo: antes.tipo,
+      valor: antes.valor,
+    })
   }
 
   return new NextResponse(null, { status: 204, headers: SEM_CACHE })

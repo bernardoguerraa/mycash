@@ -87,7 +87,11 @@ export async function POST(req: NextRequest) {
   if (error) return NextResponse.json({ error: error.message }, { status: 400, headers: SEM_CACHE })
 
   // O saldo da conta acompanha o lancamento.
-  await ajustarSaldo(supabase, Number(id_conta), efeitoNoSaldo(tipo, Number(valor)))
+  await ajustarSaldo(
+    supabase,
+    Number(id_conta),
+    efeitoNoSaldo({ idConta: Number(id_conta), tipo, valor: Number(valor) })
+  )
 
   return NextResponse.json({ data }, { status: 201, headers: SEM_CACHE })
 }

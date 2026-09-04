@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClientFromRequest } from '@/lib/supabase/server'
 import { getCurrentIdUsuario } from '@/lib/api/auth'
+import { saldoConsolidado } from '@/domain/saldo'
+import { serieMensal, totalPorTipo } from '@/domain/resumo'
+import { paraDataLocal } from '@/domain/datas'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -72,37 +75,19 @@ export async function GET(req: NextRequest) {
   const falha = contas.error ?? seisMeses.error ?? recentes.error ?? lembretes.error
   if (falha) return NextResponse.json({ error: falha.message }, { status: 500, headers: SEM_CACHE })
 
-  const saldoTotal = (contas.data ?? []).reduce((soma, c) => soma + (c.saldo_atual || 0), 0)
+  // As agregacoes vivem em src/domain/resumo.ts, testadas sem banco. Esta
+  // rota so busca as linhas e entrega o resultado.
+  const saldoTotal = saldoConsolidado(contas.data ?? [])
+  const lancamentos = seisMeses.data ?? []
 
-  // Seis baldes, do mais antigo ao mes corrente. Meses sem lancamento ficam
-  // zerados de proposito: o grafico do web preenche os meses anteriores com
-  // uma aproximacao do mes atual, o que desenha movimento que nao existiu.
-  const MESES = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
-
-  const serieMensal = Array.from({ length: 6 }, (_, i) => {
-    const ref = new Date(agora.getFullYear(), agora.getMonth() - (5 - i), 1)
-    return {
-      mes: MESES[ref.getMonth()],
-      ano: ref.getFullYear(),
-      indice: ref.getFullYear() * 12 + ref.getMonth(),
-      entradas: 0,
-      saidas: 0,
-    }
+  const serie = serieMensal(lancamentos, agora)
+  const doMesCorrente = lancamentos.filter((t) => {
+    const data = paraDataLocal(t.data_transacao)
+    return data.getFullYear() === agora.getFullYear() && data.getMonth() === agora.getMonth()
   })
 
-  const porIndice = new Map(serieMensal.map((m) => [m.indice, m]))
-
-  for (const t of seisMeses.data ?? []) {
-    const data = new Date(t.data_transacao)
-    const balde = porIndice.get(data.getFullYear() * 12 + data.getMonth())
-    if (!balde) continue
-    if (t.tipo === 'Entrada') balde.entradas += Math.abs(t.valor || 0)
-    else if (t.tipo === 'Saida') balde.saidas += Math.abs(t.valor || 0)
-  }
-
-  const mesCorrente = serieMensal[serieMensal.length - 1]
-  const entradas = mesCorrente.entradas
-  const saidas = mesCorrente.saidas
+  const entradas = totalPorTipo(doMesCorrente, 'Entrada')
+  const saidas = totalPorTipo(doMesCorrente, 'Saida')
 
   return NextResponse.json(
     {
@@ -116,12 +101,7 @@ export async function GET(req: NextRequest) {
         saidas,
         saldoMes: entradas - saidas,
         metasAtivas: metasAtivas.count ?? 0,
-        serieMensal: serieMensal.map(({ mes, ano, entradas: e, saidas: sa }) => ({
-          mes,
-          ano,
-          entradas: e,
-          saidas: sa,
-        })),
+        serieMensal: serie,
         recentes: recentes.data ?? [],
         proximosLembretes: lembretes.data ?? [],
       },
