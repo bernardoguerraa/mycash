@@ -1,6 +1,6 @@
 import { ContaBloqueadaError } from './erros'
 import { emCentavos, exigirValorPositivo } from './valores'
-import type { StatusConta, TipoTransacao } from '@/types/database'
+import type { StatusConta, TipoTransacao } from './tipos'
 
 /**
  * Regras de saldo — o nucleo do dominio do MyCash.

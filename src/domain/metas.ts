@@ -1,7 +1,7 @@
 import { diferencaEmDias, paraDataLocal } from './datas'
 import { DataInvalidaError, ValorInvalidoError } from './erros'
 import { emCentavos, exigirValorPositivo } from './valores'
-import type { StatusMeta } from '@/types/database'
+import type { StatusMeta } from './tipos'
 
 /**
  * Regras das metas financeiras.

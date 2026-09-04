@@ -16,8 +16,17 @@
  *
  * Convencao: `listar`, `porId`, `criar`, `atualizar`, `remover`. Metodos
  * extras aparecem quando o dominio pede.
+ *
+ * Os metodos que validam sao `async` de proposito: assim a recusa vira uma
+ * Promise rejeitada, e nao uma excecao sincrona. Quem chamasse com `.catch()`
+ * em vez de `try/await` deixaria o erro escapar — o teste unitario apontou a
+ * inconsistencia.
  */
 
+import { aportar as aportarNaMeta, diasRestantes as diasAteOLimite, progresso as progressoDaMeta } from '@dominio/metas';
+import { grupoDeVencimento, type GrupoVencimento } from '@dominio/resumo';
+import { saldoConsolidado as somarSaldos } from '@dominio/saldo';
+import { exigirValorPositivo } from '@dominio/valores';
 import { api } from './api';
 import type {
   Conta,
@@ -74,7 +83,7 @@ export const transacoesRepository = {
     return api.transacoes.get(id);
   },
 
-  criar(input: {
+  async criar(input: {
     idConta: number;
     dataTransacao?: string;
     tipo: TipoTransacao;
@@ -82,9 +91,7 @@ export const transacoesRepository = {
     descricao: string;
     valor: number;
   }): Promise<Transacao> {
-    if (input.valor <= 0) {
-      throw new Error('O valor precisa ser positivo. Use o tipo Saída para débitos.');
-    }
+    exigirValorPositivo(input.valor);
     return api.transacoes.create({
       id_conta: input.idConta,
       data_transacao: input.dataTransacao,
@@ -95,7 +102,7 @@ export const transacoesRepository = {
     });
   },
 
-  atualizar(
+  async atualizar(
     id: number,
     mudancas: Partial<{
       idConta: number;
@@ -106,9 +113,7 @@ export const transacoesRepository = {
       valor: number;
     }>
   ): Promise<Transacao> {
-    if (mudancas.valor !== undefined && mudancas.valor <= 0) {
-      throw new Error('O valor precisa ser positivo. Use o tipo Saída para débitos.');
-    }
+    if (mudancas.valor !== undefined) exigirValorPositivo(mudancas.valor);
     const payload: Record<string, unknown> = {};
     if (mudancas.idConta !== undefined) payload.id_conta = mudancas.idConta;
     if (mudancas.dataTransacao !== undefined) payload.data_transacao = mudancas.dataTransacao;
@@ -172,9 +177,9 @@ export const contasRepository = {
     return api.contas.delete(id);
   },
 
-  /** Regra de tela: o saldo consolidado e a soma das contas. */
+  /** Saldo consolidado — a regra vive em @dominio/saldo, testada sem rede. */
   saldoConsolidado(contas: Conta[]): number {
-    return contas.reduce((total, c) => total + (c.saldo_atual || 0), 0);
+    return somarSaldos(contas);
   },
 };
 
@@ -191,16 +196,14 @@ export const metasRepository = {
     return api.metas.get(id);
   },
 
-  criar(input: {
+  async criar(input: {
     titulo: string;
     valorObjetivo: number;
     valorAtual?: number;
     dataInicio?: string;
     dataLimite: string;
   }): Promise<Meta> {
-    if (input.valorObjetivo <= 0) {
-      throw new Error('O valor objetivo precisa ser positivo.');
-    }
+    exigirValorPositivo(input.valorObjetivo, 'valor objetivo');
     return api.metas.create({
       titulo: input.titulo.trim(),
       valor_objetivo: input.valorObjetivo,
@@ -236,13 +239,12 @@ export const metasRepository = {
    * Aporta um valor na meta e conclui automaticamente ao bater o objetivo.
    * Regra de dominio — a mesma do AddValorModal do web.
    */
-  aportar(meta: Meta, valor: number): Promise<Meta> {
-    if (valor <= 0) throw new Error('Valor de aporte precisa ser positivo.');
-    const novoTotal = meta.valor_atual + valor;
-    return this.atualizar(meta.id_meta, {
-      valorAtual: novoTotal,
-      status: novoTotal >= meta.valor_objetivo ? 'Concluida' : undefined,
-    });
+  async aportar(meta: Meta, valor: number): Promise<Meta> {
+    // A decisao (quanto fica, e se a meta conclui) vem do dominio; aqui so
+    // resta persistir. Antes esta funcao tinha copia propria da regra, que
+    // aceitava aporte em meta ja concluida e somava sem arredondar centavos.
+    const { valor_atual, status } = aportarNaMeta(meta, valor);
+    return this.atualizar(meta.id_meta, { valorAtual: valor_atual, status });
   },
 
   remover(id: number): Promise<null> {
@@ -251,17 +253,12 @@ export const metasRepository = {
 
   /** Percentual concluido, travado em 100. */
   progresso(meta: Meta): number {
-    if (meta.valor_objetivo <= 0) return 0;
-    return Math.min((meta.valor_atual / meta.valor_objetivo) * 100, 100);
+    return progressoDaMeta(meta);
   },
 
   /** Dias que faltam ate a data limite (negativo quando ja passou). */
   diasRestantes(meta: Meta): number {
-    const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
-    const limite = new Date(`${meta.data_limite.slice(0, 10)}T00:00:00`);
-    limite.setHours(0, 0, 0, 0);
-    return Math.ceil((limite.getTime() - hoje.getTime()) / 86400000);
+    return diasAteOLimite(meta.data_limite, new Date());
   },
 };
 
@@ -269,7 +266,7 @@ export const metasRepository = {
 // Lembretes
 // ============================================================================
 
-export type GrupoVencimento = 'vencidos' | 'proximos' | 'futuros';
+export type { GrupoVencimento };
 
 export const lembretesRepository = {
   listar(filtros?: { ativo?: boolean; tipo?: TipoLembrete }): Promise<Lembrete[]> {
@@ -280,14 +277,14 @@ export const lembretesRepository = {
     return api.lembretes.get(id);
   },
 
-  criar(input: {
+  async criar(input: {
     descricao: string;
     dataVencimento: string;
     valorPrevisto: number;
     tipo: TipoLembrete;
     ativo?: boolean;
   }): Promise<Lembrete> {
-    if (input.valorPrevisto <= 0) throw new Error('Valor deve ser maior que zero.');
+    exigirValorPositivo(input.valorPrevisto, 'valor previsto');
     return api.lembretes.create({
       descricao: input.descricao.trim(),
       data_vencimento: input.dataVencimento,
@@ -324,17 +321,9 @@ export const lembretesRepository = {
     return api.lembretes.delete(id);
   },
 
-  /** Vencido, proximo (ate 7 dias) ou futuro — mesma regra do web. */
+  /** Vencido, proximo (ate 7 dias) ou futuro. */
   grupoDe(dataVencimento: string): GrupoVencimento {
-    const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
-    const vencimento = new Date(`${dataVencimento.slice(0, 10)}T00:00:00`);
-    vencimento.setHours(0, 0, 0, 0);
-
-    const dias = (vencimento.getTime() - hoje.getTime()) / 86400000;
-    if (dias < 0) return 'vencidos';
-    if (dias <= 7) return 'proximos';
-    return 'futuros';
+    return grupoDeVencimento(dataVencimento, new Date());
   },
 };
 
@@ -385,7 +374,7 @@ export const perfilRepository = {
     return api.perfil.get();
   },
 
-  renomear(nomeCompleto: string): Promise<Usuario | null> {
+  async renomear(nomeCompleto: string): Promise<Usuario | null> {
     if (!nomeCompleto.trim()) throw new Error('O nome não pode estar vazio.');
     return api.perfil.update({ nome_completo: nomeCompleto.trim() });
   },

@@ -1,4 +1,4 @@
-import type { StatusConta, TipoTransacao } from '@/types/database'
+import type { StatusConta, TipoTransacao } from './tipos'
 
 /**
  * Portas do dominio (Inversao de Dependencia).

@@ -187,18 +187,14 @@ export const hojeISO = () => {
 // ============================================================================
 
 /**
- * Le o que o usuario digitou como valor. Aceita "1.234,56" e "1234.56",
- * porque o teclado numerico do Android e do iOS discordam do separador.
+ * Reexporta a leitura de valor do dominio compartilhado (@dominio/valores).
+ *
+ * A copia que existia aqui usava `parseFloat`, que aceita "12abc" e devolve
+ * 12 — o web usa `Number`, que devolve NaN. Duas telas do mesmo produto
+ * discordando sobre o que e um valor valido e o tipo de divergencia que copia
+ * de regra sempre produz.
  */
-export function parseValor(entrada: string): number {
-  if (!entrada) return NaN;
-  const limpo = entrada.trim().replace(/\s/g, '');
-  // Se tem virgula, ela e o separador decimal e o ponto e milhar.
-  const normalizado = limpo.includes(',')
-    ? limpo.replace(/\./g, '').replace(',', '.')
-    : limpo;
-  return parseFloat(normalizado);
-}
+export { parseValor } from '@dominio/valores';
 
 /** Mantem no campo so o que pode compor um numero. */
 export const sanitizarValor = (bruto: string) => bruto.replace(/[^0-9.,-]/g, '');

@@ -6,9 +6,12 @@ on:
   pull_request:
     branches: [master]
 
+# Dois jobs separados de proposito: web e mobile tem arvores de dependencias
+# incompativeis (React 18.3.1 no Next, 19.1.0 no Expo) e cada um instala as
+# suas. Rodam em paralelo, entao separar nao custa tempo de pipeline.
 jobs:
-  typecheck:
-    name: TypeScript typecheck
+  web:
+    name: Web (typecheck, lint, testes)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -30,4 +33,36 @@ jobs:
         run: npm run lint
 
       - name: Run tests (Vitest)
+        run: npm test
+
+  mobile:
+    name: Mobile (typecheck, lint, testes)
+    runs-on: ubuntu-latest
+    steps:
+      # O app importa a camada de dominio de ../src/domain, entao o checkout
+      # precisa do repositorio inteiro — nao daria para clonar so mobile/.
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: mobile/package-lock.json
+
+      - name: Install dependencies
+        working-directory: mobile
+        run: npm ci
+
+      - name: Run TypeScript typecheck
+        working-directory: mobile
+        run: npx tsc --noEmit
+
+      - name: Run ESLint
+        working-directory: mobile
+        run: npm run lint
+
+      - name: Run tests (Vitest)
+        working-directory: mobile
         run: npm test

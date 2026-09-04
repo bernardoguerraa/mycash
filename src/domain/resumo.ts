@@ -1,6 +1,6 @@
 import { diferencaEmDias, paraDataLocal } from './datas'
 import { emCentavos } from './valores'
-import type { TipoLembrete, TipoTransacao } from '@/types/database'
+import type { TipoLembrete, TipoTransacao } from './tipos'
 
 /**
  * Agregacoes do painel: totais do mes, serie de seis meses e agrupamento de
