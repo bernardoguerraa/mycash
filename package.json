@@ -10,6 +10,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:cov": "vitest run --coverage",
+    "test:integracao": "vitest run --config vitest.integracao.config.ts",
     "test:mutation": "stryker run"
   },
   "dependencies": {

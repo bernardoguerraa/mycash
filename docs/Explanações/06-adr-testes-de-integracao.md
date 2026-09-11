@@ -138,10 +138,16 @@ adicionados a qualquer momento sem quebrar cliente antigo:
 |---|---|
 | Migration do schema base | ✅ `supabase/migrations/20260911_schema_base.sql` |
 | Script de conferência contra produção | ✅ `supabase/verificacao-schema.sql` |
-| Testcontainers + Postgres efêmero | ⏳ bloqueado: Docker Desktop exige WSL2, ainda não instalado |
-| Testes de integração das rotas | ⏳ depende do anterior |
-| Job de integração no GitHub Actions | ⏳ depende do anterior |
+| Testcontainers + Postgres efêmero | ✅ `tests/integracao/banco-efemero.ts` |
+| Testes de integração | ✅ 24 casos em 10s, 4 workers paralelos |
+| Job de integração no GitHub Actions | ✅ job `integracao` no `ci.yml` |
 | Contratos Pact | ⏳ fora do milestone desta aula (é o laboratório em dupla) |
+
+A estratégia descrita acima não ficou só no papel: a primeira execução da
+suíte falhou em 5 dos 12 casos com `duplicate key value violates unique
+constraint`, porque o `truncate` tinha sido escrito mas não ligado ao
+`beforeEach`. O sintoma foi exatamente o que esta seção previa — teste
+herdando o estado do anterior.
 
 **A migration é o caminho crítico**, e não uma tarefa paralela: o
 Testcontainers sobe um Postgres vazio, então sem schema versionado não há o

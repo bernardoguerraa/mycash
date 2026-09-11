@@ -6,9 +6,11 @@ on:
   pull_request:
     branches: [master]
 
-# Dois jobs separados de proposito: web e mobile tem arvores de dependencias
-# incompativeis (React 18.3.1 no Next, 19.1.0 no Expo) e cada um instala as
-# suas. Rodam em paralelo, entao separar nao custa tempo de pipeline.
+# Tres jobs em paralelo. Web e mobile ficam separados porque tem arvores de
+# dependencias incompativeis (React 18.3.1 no Next, 19.1.0 no Expo) e cada um
+# instala as suas. A integracao e separada por custo: sobe um container
+# PostgreSQL, entao nao faz sentido segurar o feedback de lint e unidade
+# esperando por ela.
 jobs:
   web:
     name: Web (typecheck, lint, testes)
@@ -66,3 +68,27 @@ jobs:
       - name: Run tests (Vitest)
         working-directory: mobile
         run: npm test
+
+  integracao:
+    name: Integração (Testcontainers + PostgreSQL)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # O runner do GitHub Actions ja traz Docker instalado e rodando, entao
+      # o Testcontainers sobe o PostgreSQL sem passo extra. Nao usamos
+      # `services:` de proposito: o container tem de ser provisionado pelo
+      # proprio teste, que e o que o Testcontainers garante — o mesmo codigo
+      # roda igual aqui e na maquina de quem desenvolve.
+      - name: Run integration tests
+        run: npm run test:integracao

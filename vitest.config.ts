@@ -36,7 +36,9 @@ export default defineConfig({
           globals: true,
           environment: 'happy-dom',
           include: ['src/**/*.{test,spec}.{ts,tsx}', 'tests/**/*.{test,spec}.{ts,tsx}'],
-          exclude: ['src/domain/**', 'node_modules/**'],
+          // tests/integracao tem config propria e exige Docker; `npm test`
+          // precisa continuar rodando em milissegundos e sem container.
+          exclude: ['src/domain/**', 'tests/integracao/**', 'node_modules/**'],
         },
       },
     ],
