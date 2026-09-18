@@ -6,6 +6,13 @@ on:
   pull_request:
     branches: [master]
 
+# Node 22 nos tres jobs, igual ao que se usa no desenvolvimento.
+# Com Node 20 o job de integracao quebrava em
+# `webidl.util.markAsUncloneable is not a function`: o undici que vem junto do
+# testcontainers usa uma API que so existe a partir do Node 22. O sintoma era
+# enganoso — o Vitest morria ao carregar o globalSetup e reportava
+# "No test files found", como se o problema fosse o padrao de inclusao.
+#
 # Tres jobs em paralelo. Web e mobile ficam separados porque tem arvores de
 # dependencias incompativeis (React 18.3.1 no Next, 19.1.0 no Expo) e cada um
 # instala as suas. A integracao e separada por custo: sobe um container
@@ -22,7 +29,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
@@ -49,7 +56,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
           cache-dependency-path: mobile/package-lock.json
 
@@ -79,7 +86,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
