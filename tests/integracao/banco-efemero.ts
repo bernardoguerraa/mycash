@@ -46,6 +46,11 @@ const TABELAS = [
   'metas_financeiras',
   'transacoes',
   'contas_bancarias',
+  // As duas do Pluggy entram explicitamente. `pluggy_connections` referencia
+  // `usuarios` e ate sairia no cascade, mas `pluggy_webhook_events` nao tem
+  // chave estrangeira nenhuma — ficaria acumulando entre casos.
+  'pluggy_connections',
+  'pluggy_webhook_events',
   'usuarios',
 ]
 

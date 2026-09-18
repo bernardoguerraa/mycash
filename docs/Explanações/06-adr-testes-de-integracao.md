@@ -8,11 +8,12 @@
 
 ## 1. Contexto
 
-Até aqui a suíte do MyCash é toda de unidade: 197 testes contra a camada de
-domínio (`src/domain/`), com repositórios em memória e zero I/O. Isso cobre as
-engrenagens, mas não prova que elas se encaixam quando existe um Postgres real
-do outro lado — validação de tipo, `check` constraint, chave estrangeira,
-`on delete cascade` e o que a RLS deixa ou não enxergar.
+Até aqui a suíte do MyCash é toda de unidade: 222 testes (162 no web, 60 no
+mobile) contra a camada de domínio (`src/domain/`), com repositórios em
+memória e zero I/O. Isso cobre as engrenagens, mas não prova que elas se
+encaixam quando existe um Postgres real do outro lado — validação de tipo,
+`check` constraint, chave estrangeira, `on delete cascade` e o que a RLS deixa
+ou não enxergar.
 
 Duas decisões precisam ser registradas antes de escrever o primeiro teste de
 integração.
@@ -139,8 +140,10 @@ adicionados a qualquer momento sem quebrar cliente antigo:
 | Migration do schema base | ✅ `supabase/migrations/20260911_schema_base.sql` |
 | Script de conferência contra produção | ✅ `supabase/verificacao-schema.sql` |
 | Testcontainers + Postgres efêmero | ✅ `tests/integracao/banco-efemero.ts` |
-| Testes de integração | ✅ 24 casos em 10s, 4 workers paralelos |
+| Testes de integração | ✅ 35 casos em ~9s, 4 workers paralelos |
 | Job de integração no GitHub Actions | ✅ job `integracao` no `ci.yml` |
+| Relatório de cobertura | ✅ `npm run test:cov`, 100% no domínio, limite travado no CI |
+| Idempotência do sync Pluggy | ✅ `tests/integracao/pluggy-idempotencia.test.ts` |
 | Contratos Pact | ⏳ fora do milestone desta aula (é o laboratório em dupla) |
 
 A estratégia descrita acima não ficou só no papel: a primeira execução da
@@ -154,6 +157,41 @@ Testcontainers sobe um Postgres vazio, então sem schema versionado não há o
 que testar. As seis tabelas centrais existiam só no painel do Supabase desde o
 início do projeto — o teste de integração é o que finalmente forçou a dívida a
 ser paga.
+
+---
+
+## 5. O outro lado do contrato: MyCash como consumidor
+
+A Decisão 2 trata o MyCash como **provedor** — web e mobile consumindo
+`/api/*`. Mas na integração Open Finance o papel se inverte: a Pluggy é um
+provedor de terceiro, e não controlamos o deploy dela. Um campo renomeado lá
+chega aqui sem aviso.
+
+O que já existe hoje:
+
+- **`src/lib/pluggy/mapping.test.ts`** — 19 casos de unidade na camada de
+  tradução (`subtype` da Pluggy → `tipo_conta` nosso). São funções puras,
+  então rodam sem rede e sem chave de API. O que eles protegem é o
+  comportamento diante do inesperado: `subtype` desconhecido tem de virar
+  'Corrente', e não `undefined` gravado numa coluna enum.
+- **`tests/integracao/pluggy-idempotencia.test.ts`** — 11 casos contra o
+  Postgres real. O sync reprocessa as mesmas transações a cada execução
+  (webhook reentregue, botão de sincronizar, página 1 que volta inteira), e o
+  que impede a duplicata não é código TypeScript: é `unique` na coluna
+  `pluggy_tx_id` com `on conflict do update`. Um Fake em memória teria de
+  reimplementar essa semântica, e estaria testando o Fake.
+
+Esses testes revelaram um ponto que só aparece com banco real: `unique` no
+Postgres permite múltiplos `NULL`. É o que deixa lançamento manual
+(`pluggy_tx_id` nulo) conviver com transação sincronizada na mesma tabela —
+sem isso, a coluna limitaria o sistema a **um** lançamento manual no total.
+
+**O que ainda falta:** não há contrato consumer-driven com a Pluggy. Hoje o
+teste exercita a nossa tradução e a nossa persistência, mas nada verifica que
+a resposta real da Pluggy continua tendo a forma que `mapping.ts` espera. Esse
+é o gap conhecido, e é exatamente o tipo de caso que o Pact resolve.
+
+---
 
 **Ressalva:** a migration foi derivada de `src/types/database.ts` e do uso nas
 rotas, não extraída do banco de produção (não havia acesso administrativo).
