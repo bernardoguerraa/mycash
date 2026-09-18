@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, beforeEach, describe, expect, inject, it } from 'vitest'
 import type { Pool } from 'pg'
 
 import { conectarBancoDoWorker, limparTabelas } from './banco-efemero'
@@ -20,7 +20,7 @@ import { conectarBancoDoWorker, limparTabelas } from './banco-efemero'
 let db: Pool
 
 beforeAll(async () => {
-  db = await conectarBancoDoWorker(process.env.URL_BANCO_TESTE!)
+  db = await conectarBancoDoWorker(inject('urlBancoTeste'))
 })
 
 // Estado zerado antes de cada caso. Sem isto, o segundo teste herda as linhas

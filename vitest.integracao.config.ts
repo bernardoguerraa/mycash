@@ -29,6 +29,9 @@ export default defineConfig({
     // No Vitest 4 as opcoes de pool sao de primeiro nivel; `poolOptions` foi
     // removido.
     pool: 'forks',
-    maxWorkers: 4,
+    // 4 na maquina de quem desenvolve; o CI reduz para 2 pela variavel, que e
+    // o numero de nucleos do runner — mais forks so criariam disputa de CPU
+    // com o Postgres do container.
+    maxWorkers: Number(process.env.VITEST_MAX_WORKERS) || 4,
   },
 })

@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, beforeEach, describe, expect, inject, it } from 'vitest'
 import type { Pool } from 'pg'
 
 import { criarServicoDeLancamentos, type ServicoDeLancamentos } from '@/domain/lancamentos'
@@ -26,7 +26,7 @@ let idConta: number
 let idContaBloqueada: number
 
 beforeAll(async () => {
-  db = await conectarBancoDoWorker(process.env.URL_BANCO_TESTE!)
+  db = await conectarBancoDoWorker(inject('urlBancoTeste'))
 })
 
 beforeEach(async () => {

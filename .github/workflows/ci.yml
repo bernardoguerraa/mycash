@@ -85,6 +85,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Baixar a imagem num passo proprio, e nao dentro do teste. Se o
+      # download falhar (o Docker Hub limita por IP, e os runners compartilham
+      # IP), o erro aparece aqui em vez de virar um timeout confuso na suite.
+      - name: Pull PostgreSQL image
+        run: docker pull postgres:17-alpine
+
       # O runner do GitHub Actions ja traz Docker instalado e rodando, entao
       # o Testcontainers sobe o PostgreSQL sem passo extra. Nao usamos
       # `services:` de proposito: o container tem de ser provisionado pelo
@@ -92,3 +98,12 @@ jobs:
       # roda igual aqui e na maquina de quem desenvolve.
       - name: Run integration tests
         run: npm run test:integracao
+        env:
+          # Ryuk e o container que o Testcontainers usa para faxina apos a
+          # suite. No runner isso e desnecessario — a maquina inteira e
+          # descartada ao fim do job — e o sidecar e uma peca a mais que pode
+          # nao subir.
+          TESTCONTAINERS_RYUK_DISABLED: 'true'
+          # O runner tem 2 nucleos; 4 forks disputariam CPU com o proprio
+          # Postgres do container.
+          VITEST_MAX_WORKERS: '2'
