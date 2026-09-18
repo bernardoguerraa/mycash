@@ -196,3 +196,38 @@ describe('validarLancamento', () => {
     expect(() => validarLancamento(lancamento, contaAtiva)).not.toThrow()
   })
 })
+
+/**
+ * Colunas nulas vindas do banco.
+ *
+ * O relatorio de cobertura apontou estes ramos como nunca executados. Eles
+ * nao sao decoracao: o PostgREST devolve coluna nula como `null`, e registro
+ * antigo — anterior ao `not null` — chega assim. Sem estes casos, o `|| 0`
+ * existia sem nada provando que ele faz o que promete.
+ */
+describe('tolerancia a coluna nula', () => {
+  it('efeitoNoSaldo_valorNulo_naoMoveOSaldo', () => {
+    const lancamento = { idConta: 1, tipo: 'Saida' as const, valor: null as unknown as number }
+
+    // Asserido pelo efeito no saldo, e nao pelo retorno direto: uma saida de
+    // zero produz `-0`, que `toBe(0)` reprova por Object.is. O que importa e
+    // que o saldo nao se mexa.
+    expect(aplicarDelta(1000, efeitoNoSaldo(lancamento))).toBe(1000)
+  })
+
+  it('saldoConsolidado_contaComSaldoNulo_contaComoZero', () => {
+    const contas = [
+      { saldo_atual: 1000 },
+      { saldo_atual: null as unknown as number },
+      { saldo_atual: 250.5 },
+    ]
+
+    expect(saldoConsolidado(contas)).toBe(1250.5)
+  })
+
+  it('exigirContaOperavel_bloqueadaSemInstituicao_usaORotuloGenerico', () => {
+    const conta = { status_conta: 'Bloqueado' as const }
+
+    expect(() => exigirContaOperavel(conta)).toThrow(/conta selecionada esta bloqueada/i)
+  })
+})

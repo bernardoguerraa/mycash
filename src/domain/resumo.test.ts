@@ -179,3 +179,38 @@ describe('totalPrevisto', () => {
     expect(totalPrevisto(lembretes, 'ContaReceber')).toBe(900)
   })
 })
+
+/**
+ * Mesmo motivo do bloco equivalente em saldo.test.ts: o relatorio de cobertura
+ * mostrou que os `|| 0` de valor nulo nunca tinham sido exercitados.
+ */
+describe('tolerancia a coluna nula', () => {
+  it('totalPorTipo_lancamentoComValorNulo_naoQuebraASoma', () => {
+    const lista = [
+      lancamento('Entrada', 100, '2026-09-01'),
+      { tipo: 'Entrada' as const, valor: null as unknown as number, data_transacao: '2026-09-02' },
+    ]
+
+    expect(totalPorTipo(lista, 'Entrada')).toBe(100)
+  })
+
+  it('serieMensal_lancamentoComValorNulo_naoContaminaOMes', () => {
+    const lista = [
+      lancamento('Saida', 80, '2026-09-10'),
+      { tipo: 'Saida' as const, valor: null as unknown as number, data_transacao: '2026-09-11' },
+    ]
+
+    const serie = serieMensal(lista, HOJE)
+
+    expect(serie[serie.length - 1].saidas).toBe(80)
+  })
+
+  it('totalPrevisto_lembreteComValorNulo_contaComoZero', () => {
+    const lista = [
+      { tipo: 'ContaPagar' as const, valor_previsto: 300, ativo: true },
+      { tipo: 'ContaPagar' as const, valor_previsto: null as unknown as number, ativo: true },
+    ]
+
+    expect(totalPrevisto(lista, 'ContaPagar')).toBe(300)
+  })
+})

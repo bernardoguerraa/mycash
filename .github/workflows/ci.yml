@@ -41,8 +41,20 @@ jobs:
       - name: Run ESLint (espelha o lint que o Vercel executa no build)
         run: npm run lint
 
-      - name: Run tests (Vitest)
-        run: npm test
+      # `--coverage` no lugar de `npm test` cru: o mesmo comando roda a suite e
+      # aplica os limites de cobertura declarados em vitest.config.ts. Ficar
+      # abaixo do limite reprova o job, entao a cobertura e verificada a cada
+      # push em vez de ser um numero que alguem olha de vez em quando.
+      - name: Run tests with coverage (Vitest)
+        run: npm run test:cov
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobertura-dominio
+          path: coverage/
+          retention-days: 14
 
   mobile:
     name: Mobile (typecheck, lint, testes)

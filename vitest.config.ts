@@ -19,6 +19,40 @@ export default defineConfig({
   resolve: { alias },
   test: {
     globals: true,
+    /**
+     * Cobertura medida sobre `src/domain` — a camada que a suite de unidade
+     * tem como alvo. Apontar para `src/` inteiro produziria um numero baixo e
+     * sem significado: paginas e componentes do Next nao sao exercitados por
+     * teste de unidade, e diluir o denominador com eles so esconderia buraco
+     * real no dominio.
+     *
+     * `tipos.ts`, `portas.ts` e `erros.ts` ficam fora do denominador:
+     * declaracoes de tipo somem na compilacao e as classes de erro sao
+     * medidas indiretamente pelos casos que as disparam.
+     *
+     * O limite abaixo e trava, nao meta. Cobertura alta nao prova que o teste
+     * verifica alguma coisa — a Lei de Goodhart vale aqui, e quem responde por
+     * isso e o Stryker (92% de score de mutacao). O relatorio serve para achar
+     * ramo que nunca foi executado.
+     */
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html', 'lcov'],
+      reportsDirectory: './coverage',
+      include: ['src/domain/**/*.ts'],
+      exclude: [
+        'src/domain/**/*.{test,spec}.ts',
+        'src/domain/tipos.ts',
+        'src/domain/portas.ts',
+        'src/domain/erros.ts',
+      ],
+      thresholds: {
+        lines: 95,
+        functions: 95,
+        branches: 90,
+        statements: 95,
+      },
+    },
     projects: [
       {
         resolve: { alias },
