@@ -205,8 +205,15 @@ export default async function DashboardPage() {
       {/* Stat Cards */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map((stat, index) => (
+          /* role="group" + aria-label: o cartao passa a ser um no nomeado na
+             arvore de acessibilidade. Leitor de tela anuncia "Saldo Total" em
+             vez de ler uma div anonima, e o teste E2E o localiza por
+             getByRole('group', { name: 'Saldo Total' }) — sem depender de
+             classe do Tailwind, que muda a cada ajuste visual. */
           <div
             key={stat.label}
+            role="group"
+            aria-label={stat.label}
             className="card card-hover p-5 bg-gradient-to-b from-surface-3 to-surface-2 animate-fade-up"
             style={{
               animationDelay: `${index * 60}ms`,
@@ -223,7 +230,10 @@ export default async function DashboardPage() {
                 {stat.icon}
               </div>
             </div>
-            <p className="mt-3 text-2xl font-semibold font-mono-nums text-white">
+            <p
+              data-valor={stat.label}
+              className="mt-3 text-2xl font-semibold font-mono-nums text-white"
+            >
               {stat.value}
             </p>
             {stat.change && (

@@ -58,3 +58,8 @@ EstruturaDoProjeto/
 next-env.d.ts
 reports/
 .stryker-tmp/
+
+# Playwright
+/playwright-report
+/test-results
+/.playwright

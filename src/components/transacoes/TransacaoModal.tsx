@@ -182,10 +182,14 @@ export default function TransacaoModal({ contas, transacao, onClose, onSaved }: 
 
           {/* Conta */}
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-zinc-300">
+            <label
+              htmlFor="tx-conta"
+              className="mb-1.5 block text-sm font-medium text-zinc-300"
+            >
               Conta
             </label>
             <select
+              id="tx-conta"
               value={idConta}
               onChange={(e) => setIdConta(Number(e.target.value))}
               className="input-field w-full"
@@ -234,10 +238,14 @@ export default function TransacaoModal({ contas, transacao, onClose, onSaved }: 
 
           {/* Categoria */}
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-zinc-300">
+            <label
+              htmlFor="tx-categoria"
+              className="mb-1.5 block text-sm font-medium text-zinc-300"
+            >
               Categoria
             </label>
             <select
+              id="tx-categoria"
               value={useCustomCategoria ? '__custom__' : categoria}
               onChange={(e) => {
                 if (e.target.value === '__custom__') {
@@ -259,6 +267,7 @@ export default function TransacaoModal({ contas, transacao, onClose, onSaved }: 
             {useCustomCategoria && (
               <input
                 type="text"
+                aria-label="Nome da categoria"
                 value={customCategoria}
                 onChange={(e) => setCustomCategoria(e.target.value)}
                 placeholder="Nome da categoria"
@@ -272,10 +281,14 @@ export default function TransacaoModal({ contas, transacao, onClose, onSaved }: 
 
           {/* Descricao */}
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-zinc-300">
+            <label
+              htmlFor="tx-descricao"
+              className="mb-1.5 block text-sm font-medium text-zinc-300"
+            >
               Descrição
             </label>
             <input
+              id="tx-descricao"
               type="text"
               value={descricao}
               onChange={(e) => setDescricao(e.target.value)}
@@ -290,10 +303,14 @@ export default function TransacaoModal({ contas, transacao, onClose, onSaved }: 
           {/* Valor + Data row */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-zinc-300">
+              <label
+                htmlFor="tx-valor"
+                className="mb-1.5 block text-sm font-medium text-zinc-300"
+              >
                 Valor (R$)
               </label>
               <input
+                id="tx-valor"
                 type="text"
                 inputMode="decimal"
                 value={valorStr}
@@ -310,10 +327,14 @@ export default function TransacaoModal({ contas, transacao, onClose, onSaved }: 
               )}
             </div>
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-zinc-300">
+              <label
+                htmlFor="tx-data"
+                className="mb-1.5 block text-sm font-medium text-zinc-300"
+              >
                 Data
               </label>
               <input
+                id="tx-data"
                 type="date"
                 value={dataTransacao}
                 onChange={(e) => setDataTransacao(e.target.value)}

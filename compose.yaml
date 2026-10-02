@@ -1,0 +1,134 @@
+# =============================================================================
+# MyCash — topologia local declarativa
+#
+#   docker compose up --build
+#
+# Tres servicos:
+#   web      — o app Next.js (standalone, usuario nao-root)
+#   db       — PostgreSQL 17 com volume persistente
+#   migrate  — aplica as migrations em `db` e encerra (one-shot)
+#
+# Sobre a ausencia de um servico `api` separado: no MyCash a API sao as API
+# Routes do Next (`src/app/api/*`), que rodam no mesmo processo do servidor.
+# Nao existe um segundo runtime Node para empacotar. Criar um contentor `api`
+# vazio so para desenhar duas caixas seria um servico ficticio; a decisao
+# esta registrada em docs/Explanacoes/07-adr-conteinerizacao.md.
+# =============================================================================
+
+name: mycash
+
+services:
+  # ---------------------------------------------------------------------------
+  # web — aplicacao Next.js
+  # ---------------------------------------------------------------------------
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # Estas tres sao de BUILD: o compilador do Next grava o valor dentro do
+      # bundle. Passa-las em `environment:` nao teria efeito no codigo que roda
+      # no navegador. Ver o bloco de comentario no Dockerfile.
+      args:
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:-}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:-}
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+    image: mycash-web:local
+    ports:
+      - '3000:3000'
+    environment:
+      NODE_ENV: production
+      # Estas sao de RUNTIME e ficam apenas no servidor: sem o prefixo
+      # NEXT_PUBLIC_, nao entram no bundle do cliente. A service role key
+      # ignora RLS — se um dia alguem a renomear para NEXT_PUBLIC_, ela vai
+      # para o navegador de todo mundo.
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
+      PLUGGY_CLIENT_ID: ${PLUGGY_CLIENT_ID:-}
+      PLUGGY_CLIENT_SECRET: ${PLUGGY_CLIENT_SECRET:-}
+      # O servidor tambem le a URL/anon key em runtime (Server Components e
+      # rotas), entao elas aparecem nos dois lugares — e correto, nao e
+      # duplicacao por descuido.
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:-}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:-}
+    restart: unless-stopped
+    networks:
+      - mycash-net
+
+  # ---------------------------------------------------------------------------
+  # db — PostgreSQL com o schema versionado aplicado
+  #
+  # Este banco NAO e o backend do app: em producao o MyCash usa Supabase
+  # gerenciado, e o `supabase-js` fala PostgREST, nao SQL direto — um Postgres
+  # cru nao sabe responder a ele. O papel deste servico e outro, e e real:
+  # e o ambiente onde o schema versionado roda e pode ser inspecionado sem
+  # tocar em producao. Era exatamente o que faltava quando as seis tabelas
+  # centrais existiam so no painel do Supabase.
+  # ---------------------------------------------------------------------------
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-mycash}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mycash_local}
+      POSTGRES_DB: ${POSTGRES_DB:-mycash}
+    ports:
+      # Exposto para o psql e para ferramenta grafica na maquina de quem
+      # desenvolve. 5433 no host para nao colidir com um Postgres ja instalado.
+      - '5433:5432'
+    volumes:
+      # Volume nomeado, nao bind mount: e o que faz o dado sobreviver a
+      # `docker compose down`. Com bind mount para pasta do Windows, o
+      # Postgres ainda esbarra em permissao e em fsync no sistema de arquivos
+      # traduzido.
+      #
+      # Para zerar de proposito: docker compose down -v
+      - mycash-db-data:/var/lib/postgresql/data
+    healthcheck:
+      # `pg_isready` responde antes de o banco aceitar conexao de verdade na
+      # primeira subida; o `-d` com o database alvo evita o falso positivo.
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-mycash} -d ${POSTGRES_DB:-mycash}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - mycash-net
+
+  # ---------------------------------------------------------------------------
+  # migrate — aplica as migrations e encerra
+  #
+  # Container de tarefa, nao servico de longa duracao: `restart: "no"` e
+  # `exit 0` ao terminar. E o unico lugar do projeto onde a ordem das
+  # migrations esta declarada e executavel — antes disso ela vivia em
+  # comentario e na memoria de quem rodou.
+  # ---------------------------------------------------------------------------
+  migrate:
+    image: postgres:17-alpine
+    depends_on:
+      db:
+        # Sem `service_healthy` o psql correria contra um Postgres ainda
+        # inicializando e falharia com "the database system is starting up".
+        condition: service_healthy
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD:-mycash_local}
+      POSTGRES_USER: ${POSTGRES_USER:-mycash}
+      POSTGRES_DB: ${POSTGRES_DB:-mycash}
+    volumes:
+      - ./supabase/migrations:/migrations:ro
+      - ./docker/aplicar-migrations.sh:/aplicar-migrations.sh:ro
+    # O script vive em arquivo, nao inline: o Compose interpola `$` antes do
+    # shell, entao `$f` do laco virava vazio e o `$$` de corpo de funcao SQL
+    # virava `$`. Montado como volume, o conteudo chega intacto.
+    entrypoint: ['sh', '/aplicar-migrations.sh']
+    restart: 'no'
+    networks:
+      - mycash-net
+
+# Rede propria, e nao a `default`: nomeia a topologia e deixa explicito quem
+# fala com quem. Os servicos se alcancam pelo nome (`db`, `web`) via DNS
+# interno do Docker.
+networks:
+  mycash-net:
+    driver: bridge
+
+volumes:
+  mycash-db-data:

@@ -1,0 +1,63 @@
+# Contexto de build: o que o Docker NAO envia ao daemon.
+#
+# Nao e so otimizacao. O `COPY . .` do estagio builder copia tudo que estiver
+# no contexto, e cada camada de imagem e um tar que fica legivel por qualquer
+# um que tenha a imagem. Um `.env.local` que escape para ca viaja junto com o
+# segredo dentro — e `docker history` o entrega de volta.
+#
+# Regra: liste primeiro o que vaza, depois o que pesa.
+
+# --- Segredos (o motivo principal deste arquivo) ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# --- Pesados e reconstruiveis ---
+node_modules
+mobile/node_modules
+.next
+out
+build
+coverage
+.nyc_output
+reports
+
+# --- Git e metadados ---
+.git
+.gitignore
+.github
+
+# --- Artefatos de teste e desenvolvimento ---
+# A suite de integracao sobe o proprio Postgres via Testcontainers; nada dela
+# precisa entrar na imagem de producao.
+tests
+playwright-report
+test-results
+.playwright
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+stryker.config.json
+.stryker-tmp
+vitest.config.ts
+vitest.integracao.config.ts
+
+# --- O app mobile nao entra na imagem do web ---
+# Excecao: src/domain e compartilhado, mas vive fora de mobile/, entao nao e
+# afetado por esta linha.
+mobile
+
+# --- Documentacao ---
+docs
+*.md
+!README.md
+
+# --- Editor e sistema operacional ---
+.vscode
+.idea
+.DS_Store
+Thumbs.db
+npm-debug.log*
+yarn-error.log*
