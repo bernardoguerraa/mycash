@@ -14,7 +14,9 @@
     "test:mutation": "stryker run",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "test:e2e:report": "playwright show-report"
+    "test:e2e:report": "playwright show-report",
+    "e2e:semear": "node e2e/apoio/semear-usuario.mjs",
+    "e2e:limpar": "node e2e/apoio/semear-usuario.mjs --limpar"
   },
   "dependencies": {
     "@supabase/ssr": "^0.9.0",

@@ -54,16 +54,37 @@ export class PaginaDeTransacoes {
    * que o caminho da tecla ate o banco preserva o numero.
    */
   async preencher(dados: NovaTransacao) {
-    // Tipo e um radio com `className="sr-only"` dentro de um <label>: o input
-    // real e invisivel, entao clicar no rotulo e o que o usuario faz.
+    // O radio e `sr-only`: continua na arvore de acessibilidade (o esconder e
+    // por clip, nao display:none), mas tem tamanho zero na tela — e `check()`
+    // recusa com "Element is outside of the viewport", porque nao ha onde
+    // clicar. Nem `force` contorna isso.
+    //
+    // A solucao e clicar onde o usuario clica: o <label> que envolve o radio.
+    // Localizado por conter aquele radio especifico, e nao por texto, porque
+    // "Saída" tambem aparece no filtro da lista e o modo estrito recusaria
+    // dois matches.
     const rotuloTipo = dados.tipo === 'Entrada' ? 'Entrada' : 'Saída'
-    await this.page.getByText(rotuloTipo, { exact: true }).click()
+    const radio = this.page.getByRole('radio', { name: rotuloTipo })
+    await this.page.locator('label').filter({ has: radio }).click()
+    await expect(radio).toBeChecked()
 
-    await this.page.getByLabel('Categoria').selectOption({ label: dados.categoria }).catch(async () => {
+    // Selecao por `value`, nao por label: o banco guarda a categoria sem
+    // acento ("Alimentacao") e a tela renderiza com acento ("Alimentação")
+    // via rotuloCategoria. O teste fala a lingua do dado, nao a da exibicao —
+    // senao mudar o rotulo de uma categoria quebraria o teste sem nenhuma
+    // mudanca de comportamento.
+    const seletorCategoria = this.page.getByLabel('Categoria')
+    const existeNaLista = await seletorCategoria
+      .locator(`option[value="${dados.categoria}"]`)
+      .count()
+
+    if (existeNaLista > 0) {
+      await seletorCategoria.selectOption({ value: dados.categoria })
+    } else {
       // Categoria fora da lista fixa: cai no campo livre.
-      await this.page.getByLabel('Categoria').selectOption({ value: '__custom__' })
+      await seletorCategoria.selectOption({ value: '__custom__' })
       await this.page.getByLabel('Nome da categoria').fill(dados.categoria)
-    })
+    }
 
     await this.page.getByLabel('Descrição').fill(dados.descricao)
     await this.page.getByLabel('Valor (R$)').fill(dados.valor.toFixed(2).replace('.', ','))
@@ -87,12 +108,20 @@ export class PaginaDeTransacoes {
 
   // --- Lista -----------------------------------------------------------------
 
-  /** Uma linha da lista, localizada pela descricao visivel. */
+  /**
+   * A linha da tabela que contem a descricao.
+   *
+   * Localiza pela `<tr>`, e nao por `getByText` solto: o texto da descricao
+   * tambem aparece em outros nos da pagina (o seletor de categoria, por
+   * exemplo, repete rotulos), e o primeiro match podia cair num elemento
+   * invisivel. A linha da tabela e a unidade que o usuario ve.
+   */
   linha(descricao: string): Locator {
-    return this.page.getByText(descricao, { exact: false }).first()
+    return this.page.locator('tr', { hasText: descricao }).first()
   }
 
   async contemDescricao(descricao: string): Promise<boolean> {
+    await this.linha(descricao).waitFor({ state: 'visible', timeout: 15_000 }).catch(() => {})
     return this.linha(descricao).isVisible()
   }
 
@@ -105,7 +134,7 @@ export class PaginaDeTransacoes {
    * ignorar e maior, porque nao ha truncate que salve um banco compartilhado.
    */
   async excluir(descricao: string) {
-    const linha = this.page.locator('tr', { hasText: descricao }).first()
+    const linha = this.linha(descricao)
     await linha.getByRole('button').last().click()
     await this.page.getByRole('button', { name: /excluir|confirmar/i }).last().click()
     await expect(this.page.getByText(descricao, { exact: false })).toBeHidden({ timeout: 20_000 })

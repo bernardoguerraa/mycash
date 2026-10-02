@@ -222,10 +222,16 @@ export default function TransacaoModal({ contas, transacao, onClose, onSaved }: 
                       : 'border-edge-2 bg-surface-3 text-zinc-400 hover:border-edge-3'
                   }`}
                 >
+                  {/* aria-label no radio: ele e `sr-only`, entao sem nome
+                      acessivel proprio o leitor de tela anunciava "opcao" sem
+                      dizer qual. Tambem e o que permite ao teste E2E usar
+                      getByRole('radio', { name: 'Saída' }) em vez de casar
+                      texto solto, que colide com o filtro da lista. */}
                   <input
                     type="radio"
                     name="tipo"
                     value={t}
+                    aria-label={t === 'Entrada' ? 'Entrada' : 'Saída'}
                     checked={tipo === t}
                     onChange={() => setTipo(t)}
                     className="sr-only"
