@@ -85,7 +85,7 @@ async function semear() {
       // Sem isto o login falha com "Email not confirmed": o fluxo normal
       // manda e-mail de confirmacao, que um teste automatizado nao abre.
       email_confirm: true,
-      user_metadata: { nome_completo: 'Usuario E2E', full_name: 'Usuario E2E' },
+      user_metadata: { nome_completo: 'Matheus Bueno', full_name: 'Matheus Bueno' },
     })
     if (error) throw error
     usuario = data.user

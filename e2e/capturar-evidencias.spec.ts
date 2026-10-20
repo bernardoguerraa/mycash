@@ -4,7 +4,7 @@ import { mkdirSync } from 'node:fs'
 import { PaginaDoDashboard } from './pages/dashboard.page'
 import { PaginaDeLogin } from './pages/login.page'
 import { PaginaDeTransacoes } from './pages/transacoes.page'
-import { MOTIVO_SEM_CREDENCIAL, credenciais, descricaoDeTeste } from './apoio/credenciais'
+import { MOTIVO_SEM_CREDENCIAL, credenciais } from './apoio/credenciais'
 
 /**
  * Captura as evidencias visuais do relatorio parcial.
@@ -41,7 +41,10 @@ test.describe('evidencias do processo de negocio', () => {
     const login = new PaginaDeLogin(page)
     const dashboard = new PaginaDoDashboard(page)
     const transacoes = new PaginaDeTransacoes(page)
-    const descricao = descricaoDeTeste('Evidencia relatorio')
+    // Descricao realista, e nao marcada com prefixo de teste: a captura vai
+    // para o relatorio, e um identificador tecnico na tela desviaria a
+    // atencao de quem le. O teardown localiza a linha por esta mesma string.
+    const descricao = 'Supermercado Dia'
 
     // --- Etapa 1: tela de login ---
     await login.abrir()
