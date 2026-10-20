@@ -133,7 +133,7 @@
     \textbf{RESUMO}
 \end{center}
 \vspace{1cm}
-Este relatório parcial documenta a evolução do projeto MyCash, plataforma de gestão financeira pessoal com integração ao Open Finance brasileiro, durante o módulo dedicado à qualidade de software. Enquanto o módulo anterior entregou a aplicação funcionando em produção, esta etapa concentrou-se em provar que ela funciona, e em tornar reproduzível o ambiente em que ela roda. Foram construídas quatro camadas de verificação automatizada: 222 testes de unidade sobre uma camada de domínio extraída e compartilhada entre os clientes web e móvel, com 100\% de cobertura de instruções, ramos, funções e linhas, e escore de mutação de 94,07\% verificado com Stryker; 35 testes de integração executados contra um PostgreSQL efêmero provisionado por Testcontainers, incluindo a idempotência da sincronização Open Finance; e 9 testes de ponta a ponta em Playwright, cobrindo dois cenários críticos de negócio com caminho feliz e caminhos alternativos. A infraestrutura foi declarada como código por meio de um \textit{Dockerfile} multiestágio e de um manifesto \textit{Docker Compose} com volume persistente, operável por um único comando. A integração contínua executa três trabalhos paralelos no GitHub Actions a cada envio ao ramo principal. O processo de teste revelou seis defeitos reais em produção, entre eles contas bloqueadas que aceitavam lançamentos, transações do primeiro dia do mês contabilizadas no mês anterior e um gráfico que fabricava os meses anteriores a partir do mês corrente.
+Este relatório parcial documenta a evolução do projeto MyCash, plataforma de gestão financeira pessoal com integração ao Open Finance brasileiro, durante o módulo dedicado à qualidade de software. Enquanto as etapas anteriores entregaram a aplicação funcionando em produção, esta concentrou-se em provar que ela funciona, e em tornar reproduzível o ambiente em que ela roda. Foram construídas quatro camadas de verificação automatizada: 222 testes de unidade sobre uma camada de domínio extraída e compartilhada entre os clientes web e móvel, com 100\% de cobertura de instruções, ramos, funções e linhas, e escore de mutação de 94,07\% verificado com Stryker; 35 testes de integração executados contra um PostgreSQL efêmero provisionado por Testcontainers, incluindo a idempotência da sincronização Open Finance; e 9 testes de ponta a ponta em Playwright, cobrindo dois cenários críticos de negócio com caminho feliz e caminhos alternativos. A infraestrutura foi declarada como código por meio de um \textit{Dockerfile} multiestágio e de um manifesto \textit{Docker Compose} com volume persistente, operável por um único comando. A integração contínua executa três trabalhos paralelos no GitHub Actions a cada envio ao ramo principal. O processo de teste revelou seis defeitos reais em produção, entre eles contas bloqueadas que aceitavam lançamentos, transações do primeiro dia do mês contabilizadas no mês anterior e um gráfico que fabricava os meses anteriores a partir do mês corrente.
 
 \vspace{1cm}
 \noindent \textbf{Palavras-chave:} Testes Automatizados. Teste de Mutação. Testcontainers. Playwright. Infraestrutura como Código. Integração Contínua.
@@ -159,24 +159,90 @@ A solução é composta por dois artefatos de software que compartilham o mesmo 
 
 \subsection{Memorial do desenvolvimento}
 
-O projeto atravessou três fases distintas, descritas a seguir.
+O desenvolvimento estende-se de março a outubro de 2026 e está integralmente
+registrado no histórico do repositório, o que permite conferir cada marco aqui
+relatado contra o respectivo \textit{commit}. O percurso divide-se em quatro
+etapas, descritas a seguir e sintetizadas na Tabela \ref{tab:marcos}.
 
-\textbf{Fase 1: Produto em produção (módulos anteriores).} A aplicação web foi construída sobre Next.js 14 com App Router, PostgreSQL hospedado no Supabase e autenticação delegada ao Supabase Auth. Foram implementados os cinco recursos de domínio com operações completas de criação, leitura, atualização e remoção, além da integração Open Finance. A segurança dos dados foi implementada no próprio banco, por meio de \textit{Row Level Security}. Ao final desta fase, o produto estava em produção, mas a verificação automatizada limitava-se a 19 testes sobre o cliente HTTP e os repositórios.
+\textbf{Etapa 1: fundação e migração de \textit{stack} (março a maio).} O
+projeto nasceu sobre Vite com React Router, mas foi migrado para Next.js 14
+com App Router ainda na primeira semana. A motivação foi técnica e tripla:
+necessidade de renderização no servidor para dados sensíveis, especialmente
+saldos bancários; suporte nativo a \textit{middleware} para gerenciamento de
+sessão por \textit{cookie}; e presença dos \textit{Route Handlers}, que
+viabilizaram a API REST sem servidor Node dedicado. A migração deixou resíduos
+que quebraram a compilação na Vercel por diversas vezes, e sua remoção consumiu
+boa parte do primeiro dia de trabalho. Em maio consolidou-se o sistema de
+\textit{design} com \textit{tokens} de superfície e borda, e foi implementada a
+integração Open Finance por meio da Pluggy.
 
-\textbf{Fase 2: Aplicativo móvel consumindo a API (agosto de 2026).} Atendendo à sugestão registrada na avaliação parcial anterior, o aplicativo móvel foi reconstruído para consumir a API REST própria, em lugar de acessar o Supabase diretamente. Todas as telas do web foram replicadas: \textit{dashboard}, transações, contas, metas, lembretes, notificações e perfil, com tema claro e escuro, gráfico de seis meses e seletor de data nativo. As rotas da API passaram a aceitar autenticação por \textit{Bearer token}, além do \textit{cookie} de sessão já utilizado pelo navegador.
+\textbf{Etapa 2: segurança, API própria e padrões (junho e julho).} A Row Level
+Security foi habilitada em todas as tabelas de domínio, acompanhada da coluna
+\texttt{auth\_user\_id} e do \textit{trigger} que sincroniza
+\texttt{auth.users} com \texttt{public.usuarios}. Em seguida veio a API REST
+própria, com os cinco recursos de domínio, e a migração das telas para
+consumi-la em lugar de acessar o banco diretamente. Nesse movimento entraram o
+padrão Repository, o \textit{lazy update} e a disponibilização como Progressive
+Web App. Ao final de julho existiam 19 testes automatizados, restritos ao
+cliente HTTP e aos repositórios.
 
-\textbf{Fase 3: Qualidade e infraestrutura (setembro e outubro de 2026).} É a fase documentada neste relatório. A lógica de negócio foi extraída das telas para uma camada de domínio pura, sem dependência de infraestrutura, o que tornou possível testá-la sem rede e sem banco de dados. Sobre essa camada foram construídas quatro suítes de verificação (unidade, mutação, integração e ponta a ponta) e a infraestrutura de execução foi declarada como código.
+\textbf{Etapa 3: aplicativo móvel consumindo a API (agosto).} Atendendo à
+sugestão dos professores, o aplicativo foi construído
+em Expo SDK 54 para consumir a API REST própria, e não o Supabase diretamente.
+As rotas passaram a aceitar autenticação por \textit{Bearer token}, além do
+\textit{cookie} já utilizado pelo navegador. Todas as telas do web foram
+replicadas, com tema claro e escuro, gráfico de seis meses e seletor de data
+nativo. Foi também o mês de dois incidentes de produção relatados na Seção
+\ref{sec:discussao}: o saldo congelado pelo \textit{Data Cache} do Next.js e a
+tela branca causada por assimetria de versões entre aplicativo e API.
 
-A Tabela \ref{tab:evolucao} sintetiza a evolução quantitativa da verificação automatizada ao longo do projeto.
+\textbf{Etapa 4: qualidade e infraestrutura (setembro e outubro).} É a etapa
+documentada neste relatório. A lógica de negócio foi extraída das telas para
+uma camada de domínio sem dependência de infraestrutura, o que tornou possível
+testá-la sem rede e sem banco de dados, e compartilhá-la entre os dois
+clientes. Sobre ela foram construídas as quatro suítes de verificação, e a
+infraestrutura de execução passou a ser declarada como código.
+
+\begin{table}[H]
+\centering
+\caption{Marcos do desenvolvimento registrados no repositório.}
+\label{tab:marcos}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{@{}>{\RaggedRight}p{2.1cm}>{\RaggedRight\arraybackslash}X@{}}
+\toprule
+\textbf{Data} & \textbf{Marco} \\
+\midrule
+27/03/2026 & Projeto inicial e migração de Vite para Next.js 14 com App Router \\
+08/05/2026 & Sistema de \textit{design}, agrupamento de rotas autenticadas e integração Open Finance com a Pluggy \\
+19/06/2026 & Row Level Security, coluna \texttt{auth\_user\_id}, \textit{trigger} de cadastro e tema claro e escuro \\
+26/06/2026 & API REST própria para os cinco recursos de domínio \\
+03/07/2026 & Telas migradas para consumir a API; primeira configuração do Vitest \\
+09/07/2026 & Padrão Repository, \textit{lazy update} e Progressive Web App \\
+21/08/2026 & Aplicativo em Expo SDK 54; API passa a aceitar \textit{Bearer token} \\
+28/08/2026 & Todas as telas replicadas no aplicativo; correção do \textit{Data Cache} do Next.js \\
+04/09/2026 & Camada de domínio extraída, coberta por testes e compartilhada com o aplicativo; teste de mutação com Stryker \\
+11/09/2026 & Migração do \textit{schema} base, registro de decisão arquitetural e suíte de integração com Testcontainers \\
+18/09/2026 & Integração contínua estabilizada em Node 22; relatório de cobertura; testes da integração Open Finance \\
+02/10/2026 & Conteinerização com \textit{Dockerfile} multiestágio e Compose; dois cenários críticos em Playwright \\
+20/10/2026 & Correção do gráfico que fabricava dados; consolidação deste relatório \\
+\bottomrule
+\end{tabularx}
+\vspace{0.3cm}
+
+\noindent\footnotesize Fonte: Autores (2026), a partir do histórico do repositório.
+\end{table}
+
+A Tabela \ref{tab:evolucao} sintetiza a evolução quantitativa da verificação
+automatizada ao longo do projeto.
 
 \begin{table}[H]
 \centering
 \caption{Evolução da verificação automatizada.}
 \label{tab:evolucao}
 \renewcommand{\arraystretch}{1.4}
-\begin{tabularx}{\textwidth}{@{}>{\RaggedRight}p{4.2cm}>{\centering}p{2.6cm}>{\centering\arraybackslash}X@{}}
+\begin{tabularx}{\textwidth}{@{}>{\RaggedRight}p{4.2cm}>{\centering}p{3.2cm}>{\centering\arraybackslash}X@{}}
 \toprule
-\textbf{Camada de teste} & \textbf{Módulo anterior} & \textbf{Situação atual} \\
+\textbf{Camada de teste} & \textbf{Até julho de 2026} & \textbf{Situação atual} \\
 \midrule
 Unidade (web) & 19 & 162 \\
 Unidade (móvel) & 0 & 60 \\
@@ -1042,7 +1108,7 @@ A Vercel observa o ramo principal e implanta automaticamente cada alteração ap
 % ===================================================
 \section{CONSIDERAÇÕES PARCIAIS}
 
-A etapa documentada neste relatório alterou a natureza do projeto. O módulo anterior entregou uma aplicação que funcionava; esta entregou os meios de demonstrar que ela funciona, e de reproduzir o ambiente em que funciona.
+A etapa documentada neste relatório alterou a natureza do projeto. As etapas anteriores entregaram uma aplicação que funcionava; esta entregou os meios de demonstrar que ela funciona, e de reproduzir o ambiente em que funciona.
 
 O resultado mais consistente não está nos números, e sim no que o processo revelou. Seis defeitos reais foram identificados em código que se encontrava em produção e aparentava correção, entre eles contas bloqueadas que aceitavam lançamentos, transações do primeiro dia do mês contabilizadas no mês anterior e um gráfico que fabricava os meses anteriores. Nenhum deles havia sido percebido em uso normal, e nenhum teria sido encontrado sem a disciplina de escrever a verificação antes de confiar no comportamento observado.
 
