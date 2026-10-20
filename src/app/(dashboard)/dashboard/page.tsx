@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import MonthlyChart, { ChartDataPoint } from '@/components/dashboard/MonthlyChart'
+import { serieMensal } from '@/domain/resumo'
 
 interface StatCard {
   label: string
@@ -28,7 +29,6 @@ function getGreeting(): string {
   return 'Boa noite'
 }
 
-const MONTH_LABELS = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
 
 export default async function DashboardPage() {
   const supabase = createClient()
@@ -75,6 +75,21 @@ export default async function DashboardPage() {
       ?.filter((t) => t.tipo === 'Saida')
       .reduce((sum, t) => sum + Math.abs(t.valor || 0), 0) ?? 0
 
+  // Seis meses de historico para o grafico e para a variacao mes a mes.
+  // Buscado de verdade, e nao aproximado a partir do mes corrente: a versao
+  // anterior desenhava os cinco meses anteriores com
+  // `monthIncome * (0.85 + seed % 5 * 0.07)`, o que produzia um grafico com
+  // forma plausivel e numero inventado. Grafico que inventa dado e pior do
+  // que grafico vazio, porque parece verdadeiro — e num aplicativo de
+  // financas o usuario toma decisao com base nele.
+  const inicioDaSerie = new Date(now.getFullYear(), now.getMonth() - 5, 1).toISOString()
+
+  const { data: historico } = await supabase
+    .from('transacoes')
+    .select('valor, tipo, data_transacao')
+    .gte('data_transacao', inicioDaSerie)
+    .lte('data_transacao', lastDay)
+
   // Fetch active goals count from metas_financeiras
   const { count: activeGoals } = await supabase
     .from('metas_financeiras')
@@ -111,27 +126,33 @@ export default async function DashboardPage() {
     })
   }
 
-  // Build last-6-months chart data. The current month uses real totals;
-  // the five preceding months use a simple approximation seeded from the
-  // current month so the chart is never empty while real data loads.
-  const chartData: ChartDataPoint[] = Array.from({ length: 6 }, (_, i) => {
-    const offset = 5 - i // 5 months ago → current month
-    const monthIndex = (now.getMonth() - offset + 12) % 12
-    const isCurrent = offset === 0
+  // `serieMensal` vem de src/domain/resumo.ts — a mesma funcao que o
+  // aplicativo movel usa. Mes sem lancamento fica zerado de proposito.
+  // Compartilhar a funcao, em vez de reescrever a conta em cada cliente, e o
+  // que impede web e mobile de responderem numeros diferentes para a mesma
+  // pergunta.
+  const serie = serieMensal(historico ?? [], now)
 
-    // Preceding months: generate values that look plausible relative to
-    // the current month so the chart has meaningful shape when there is
-    // no multi-month history fetched yet.
-    const seed = monthIndex + 1
-    const baseIncome = isCurrent ? monthIncome : Math.round(monthIncome * (0.85 + (seed % 5) * 0.07))
-    const baseExpenses = isCurrent ? monthExpenses : Math.round(monthExpenses * (0.8 + (seed % 4) * 0.08))
+  const chartData: ChartDataPoint[] = serie.map((ponto) => ({
+    month: ponto.mes,
+    receitas: ponto.entradas,
+    despesas: ponto.saidas,
+  }))
 
-    return {
-      month: MONTH_LABELS[monthIndex],
-      receitas: baseIncome,
-      despesas: baseExpenses,
-    }
-  })
+  // Variacao real em relacao ao mes anterior, no lugar dos textos fixos
+  // '+12%' e '-8%' que a versao anterior exibia independentemente dos dados.
+  const mesAnterior = serie[serie.length - 2]
+
+  const variacao = (atual: number, anterior: number): string | undefined => {
+    // Sem base de comparacao nao ha percentual honesto a mostrar: o cartao
+    // simplesmente omite a linha.
+    if (!anterior) return undefined
+    const delta = ((atual - anterior) / anterior) * 100
+    return `${delta >= 0 ? '+' : ''}${delta.toFixed(0)}%`
+  }
+
+  const variacaoReceitas = variacao(monthIncome, mesAnterior?.entradas ?? 0)
+  const variacaoDespesas = variacao(monthExpenses, mesAnterior?.saidas ?? 0)
 
   const stats: StatCard[] = [
     {
@@ -143,15 +164,17 @@ export default async function DashboardPage() {
     {
       label: 'Receitas do Mês',
       value: formatCurrency(monthIncome),
-      change: '+12%',
-      trend: 'up',
+      change: variacaoReceitas,
+      trend: monthIncome >= (mesAnterior?.entradas ?? 0) ? 'up' : 'down',
       icon: <TrendingUp className="h-5 w-5" />,
     },
     {
       label: 'Despesas do Mês',
       value: formatCurrency(monthExpenses),
-      change: '-8%',
-      trend: 'down',
+      change: variacaoDespesas,
+      // Despesa que sobe e tendencia ruim: a cor segue o significado
+      // financeiro, nao o sinal aritmetico.
+      trend: monthExpenses <= (mesAnterior?.saidas ?? 0) ? 'up' : 'down',
       icon: <TrendingDown className="h-5 w-5" />,
     },
     {
