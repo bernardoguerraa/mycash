@@ -1,0 +1,1105 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+\usepackage[left=3cm,top=3cm,right=2cm,bottom=2cm]{geometry}
+\usepackage{setspace}
+\usepackage{longtable}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{indentfirst}
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage{float}
+\usepackage{ragged2e}
+\usepackage[hyphens]{url}
+\usepackage[hidelinks]{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit, backgrounds}
+
+% Configuração de espaçamento ABNT
+\onehalfspacing
+
+% Dá mais folga ao LaTeX pra evitar palavras/URLs estourando margem
+\setlength{\emergencystretch}{3em}
+\sloppy
+
+% Permite quebra de URLs e paths em barras, hífens e underscores
+\Urlmuskip=0mu plus 1mu
+\def\UrlBreaks{\do\/\do\-\do\_\do\.\do\?\do\=\do\&\do\#\do\%}
+
+% Configuração para blocos de código
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codebg}{rgb}{0.96,0.96,0.96}
+\definecolor{codekw}{rgb}{0.6,0.1,0.5}
+\lstset{
+    backgroundcolor=\color{codebg},
+    basicstyle=\ttfamily\footnotesize,
+    keywordstyle=\color{codekw}\bfseries,
+    commentstyle=\color{codegray}\itshape,
+    frame=single,
+    rulecolor=\color{codegray},
+    breaklines=true,
+    breakatwhitespace=true,
+    tabsize=2,
+    showstringspaces=false,
+    xleftmargin=8pt,
+    xrightmargin=8pt,
+    aboveskip=8pt,
+    belowskip=8pt,
+    keywords={const, let, var, function, async, await, return, if, else, for, while, import, export, from, class, interface, type, create, policy, table, trigger, on, using, for, all, describe, it, expect, FROM, COPY, RUN, USER, services, volumes}
+}
+
+% Cores do diagrama de arquitetura
+\definecolor{camadaUI}{RGB}{219,234,254}
+\definecolor{camadaDom}{RGB}{209,250,229}
+\definecolor{camadaAPI}{RGB}{254,243,199}
+\definecolor{camadaDados}{RGB}{254,226,226}
+\definecolor{camadaExt}{RGB}{237,233,254}
+\definecolor{bordaCinza}{RGB}{100,116,139}
+
+\begin{document}
+
+% ---------------------------------------------------
+% CAPA
+% ---------------------------------------------------
+\begin{titlepage}
+    \begin{center}
+        \includegraphics[width=3cm]{UNIFEI_logo.png} \\
+        \vspace{1cm}
+
+        \textbf{UNIVERSIDADE FEDERAL DE ITAJUBÁ - UNIFEI} \\
+        \textbf{CAMPUS ITABIRA}
+
+        \vspace{5cm}
+
+        \textbf{RELATÓRIO PARCIAL DO PROJETO MYCASH: QUALIDADE DE SOFTWARE, AUTOMAÇÃO DE TESTES E INFRAESTRUTURA COMO CÓDIGO} \\
+        \vspace{1cm}
+        \textbf{Módulo III: Verificação, Validação e Entrega Contínua}
+
+        \vspace{3.5cm}
+
+        Frederico Pires de Moraes Gomes - RA: 2023006205 \\
+        Luiz Otávio de Queiroz Lage Silva - RA: 2023009833 \\
+        Matheus Lucas Tavares Bueno - RA: 2023013120 \\
+        Rodrigo Amorim Vieira - RA: 2023010861
+
+        \vfill
+
+        \textbf{Grupo 9} \\
+        Itabira, 2026
+    \end{center}
+\end{titlepage}
+
+% ---------------------------------------------------
+% FOLHA DE ROSTO
+% ---------------------------------------------------
+\begin{titlepage}
+    \begin{center}
+        Frederico Pires de Moraes Gomes \\
+        Luiz Otávio de Queiroz Lage Silva \\
+        Matheus Lucas Tavares Bueno \\
+        Rodrigo Amorim Vieira
+
+        \vspace{5cm}
+
+        \textbf{RELATÓRIO PARCIAL DO PROJETO MYCASH: QUALIDADE DE SOFTWARE, AUTOMAÇÃO DE TESTES E INFRAESTRUTURA COMO CÓDIGO} \\
+        \vspace{1cm}
+        \textbf{Módulo III: Verificação, Validação e Entrega Contínua}
+
+        \vspace{3cm}
+
+        \begin{flushright}
+            \begin{minipage}{8cm}
+                Relatório técnico apresentado como requisito parcial para obtenção de aprovação na disciplina Análise e Desenvolvimento de Software IV (ECOi2218), na Universidade Federal de Itajubá -- campus Itabira. \\
+                \\
+                Professor: \\
+                Prof. Dr. Wendell Fioravante da Silva Diniz
+            \end{minipage}
+        \end{flushright}
+
+        \vfill
+
+        Itabira, 2026
+    \end{center}
+\end{titlepage}
+
+% ---------------------------------------------------
+% RESUMO
+% ---------------------------------------------------
+\newpage
+\begin{center}
+    \textbf{RESUMO}
+\end{center}
+\vspace{1cm}
+Este relatório parcial documenta a evolução do projeto MyCash, plataforma de gestão financeira pessoal com integração ao Open Finance brasileiro, durante o módulo dedicado à qualidade de software. Enquanto o módulo anterior entregou a aplicação funcionando em produção, esta etapa concentrou-se em provar que ela funciona, e em tornar reproduzível o ambiente em que ela roda. Foram construídas quatro camadas de verificação automatizada: 222 testes de unidade sobre uma camada de domínio extraída e compartilhada entre os clientes web e móvel, com 100\% de cobertura de instruções, ramos, funções e linhas, e escore de mutação de 94,07\% verificado com Stryker; 35 testes de integração executados contra um PostgreSQL efêmero provisionado por Testcontainers, incluindo a idempotência da sincronização Open Finance; e 9 testes de ponta a ponta em Playwright, cobrindo dois cenários críticos de negócio com caminho feliz e caminhos alternativos. A infraestrutura foi declarada como código por meio de um \textit{Dockerfile} multiestágio e de um manifesto \textit{Docker Compose} com volume persistente, operável por um único comando. A integração contínua executa três trabalhos paralelos no GitHub Actions a cada envio ao ramo principal. O processo de teste revelou seis defeitos reais em produção, entre eles contas bloqueadas que aceitavam lançamentos, transações do primeiro dia do mês contabilizadas no mês anterior e um gráfico que fabricava os meses anteriores a partir do mês corrente.
+
+\vspace{1cm}
+\noindent \textbf{Palavras-chave:} Testes Automatizados. Teste de Mutação. Testcontainers. Playwright. Infraestrutura como Código. Integração Contínua.
+
+% ---------------------------------------------------
+% SUMÁRIO
+% ---------------------------------------------------
+\newpage
+\tableofcontents
+\thispagestyle{empty}
+\newpage
+
+% ---------------------------------------------------
+% CORPO DO TEXTO
+% ---------------------------------------------------
+\setcounter{page}{4}
+
+\section{INTRODUÇÃO}
+
+O MyCash é uma plataforma de gestão financeira pessoal cujo objetivo é centralizar, em uma única interface, a visão financeira completa do usuário: contas bancárias, saldos, transações, metas de poupança e lembretes de vencimento. A sincronização automática das contas é realizada por meio do sistema brasileiro de Open Finance, utilizando a plataforma Pluggy como provedor agregador.
+
+A solução é composta por dois artefatos de software que compartilham o mesmo servidor: uma aplicação web construída em Next.js, hospedada na Vercel, e um aplicativo móvel desenvolvido em React Native com Expo, que consome a mesma API REST. O código-fonte está versionado em repositório único, com 65 \textit{commits} registrados entre março e outubro de 2026.
+
+\subsection{Memorial do desenvolvimento}
+
+O projeto atravessou três fases distintas, descritas a seguir.
+
+\textbf{Fase 1 --- Produto em produção (módulos anteriores).} A aplicação web foi construída sobre Next.js 14 com App Router, PostgreSQL hospedado no Supabase e autenticação delegada ao Supabase Auth. Foram implementados os cinco recursos de domínio com operações completas de criação, leitura, atualização e remoção, além da integração Open Finance. A segurança dos dados foi implementada no próprio banco, por meio de \textit{Row Level Security}. Ao final desta fase, o produto estava em produção, mas a verificação automatizada limitava-se a 19 testes sobre o cliente HTTP e os repositórios.
+
+\textbf{Fase 2 --- Aplicativo móvel consumindo a API (agosto de 2026).} Atendendo à sugestão registrada na avaliação parcial anterior, o aplicativo móvel foi reconstruído para consumir a API REST própria, em lugar de acessar o Supabase diretamente. Todas as telas do web foram replicadas: \textit{dashboard}, transações, contas, metas, lembretes, notificações e perfil, com tema claro e escuro, gráfico de seis meses e seletor de data nativo. As rotas da API passaram a aceitar autenticação por \textit{Bearer token}, além do \textit{cookie} de sessão já utilizado pelo navegador.
+
+\textbf{Fase 3 --- Qualidade e infraestrutura (setembro e outubro de 2026).} É a fase documentada neste relatório. A lógica de negócio foi extraída das telas para uma camada de domínio pura, sem dependência de infraestrutura, o que tornou possível testá-la sem rede e sem banco de dados. Sobre essa camada foram construídas quatro suítes de verificação --- unidade, mutação, integração e ponta a ponta --- e a infraestrutura de execução foi declarada como código.
+
+A Tabela \ref{tab:evolucao} sintetiza a evolução quantitativa da verificação automatizada ao longo do projeto.
+
+\begin{table}[H]
+\centering
+\caption{Evolução da verificação automatizada.}
+\label{tab:evolucao}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{@{}>{\RaggedRight}p{4.2cm}>{\centering}p{2.6cm}>{\centering\arraybackslash}X@{}}
+\toprule
+\textbf{Camada de teste} & \textbf{Módulo anterior} & \textbf{Situação atual} \\
+\midrule
+Unidade (web) & 19 & 162 \\
+Unidade (móvel) & 0 & 60 \\
+Integração & 0 & 35 \\
+Ponta a ponta & 0 & 9 \\
+\midrule
+\textbf{Total} & \textbf{19} & \textbf{266} \\
+\midrule
+Cobertura do domínio & não medida & 100\% \\
+Escore de mutação & não medido & 94,07\% \\
+Trabalhos de CI & 1 & 3 \\
+\bottomrule
+\end{tabularx}
+\vspace{0.3cm}
+
+\noindent\footnotesize Fonte: Autores (2026).
+\end{table}
+
+% ===================================================
+\section{DOCUMENTAÇÃO DO ARTEFATO: APLICAÇÃO WEB}
+
+O artefato escolhido para documentação detalhada é a \textbf{aplicação web}, por três razões. Primeiro, é ela que hospeda a API REST consumida também pelo aplicativo móvel, sendo portanto o provedor do contrato. Segundo, concentra a camada de domínio, a persistência e a totalidade da infraestrutura de implantação. Terceiro, a escolha permite responder diretamente à questão proposta no enunciado: se a arquitetura concebida para o site serviu, ou não, ao aplicativo --- tema tratado na Seção \ref{sec:serviu}.
+
+\subsection{Regra de negócio projetada}
+
+O domínio do MyCash organiza-se em torno de seis regras centrais, apresentadas na Tabela \ref{tab:regras}. Todas estão implementadas na camada \path{src/domain}, isolada de qualquer dependência de infraestrutura.
+
+\begin{table}[H]
+\centering
+\caption{Regras de negócio e respectiva implementação.}
+\label{tab:regras}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{@{}>{\RaggedRight}p{4.2cm}>{\RaggedRight\arraybackslash}X@{}}
+\toprule
+\textbf{Regra} & \textbf{Implementação e verificação} \\
+\midrule
+Efeito do lançamento no saldo & Entrada soma, saída subtrai, sempre pelo módulo do valor: o sinal provém do tipo, nunca do número gravado. Em \texttt{efeitoNoSaldo}. \\
+Edição ajusta apenas a diferença & Alterar valor ou tipo de uma transação aplica o delta, não recalcula o saldo inteiro. Em \texttt{deltasDaEdicao}. \\
+Conta não operável recusa lançamento & Conta de usuário bloqueado ou inativo não aceita movimentação. Em \texttt{exigirContaOperavel}. \\
+Valor sempre positivo & Valor zero ou negativo é recusado antes de qualquer persistência, com erro de domínio tipado. Em \texttt{validarLancamento}. \\
+Dinheiro arredondado em centavos & Toda operação de saldo passa por \texttt{emCentavos}, evitando acúmulo de resíduo binário de ponto flutuante. \\
+Meta não ultrapassa o objetivo & Aporte que excederia o objetivo é limitado, e a meta é marcada como concluída. Em \texttt{aportar}. \\
+\bottomrule
+\end{tabularx}
+\vspace{0.3cm}
+
+\noindent\footnotesize Fonte: Autores (2026).
+\end{table}
+
+\subsection{Cobertura do artefato: houve plena capacidade de resolver o negócio?}
+
+A resposta é afirmativa para o núcleo do produto e parcial para a integração Open Finance.
+
+\textbf{Plenamente atendido.} O ciclo completo de gestão financeira manual está implementado e verificado: cadastro e autenticação de usuário, gestão de contas bancárias, lançamento de transações com categorização, acompanhamento de metas com aportes, lembretes de contas a pagar e a receber, notificações e consolidação no \textit{dashboard}. Os cinco recursos de domínio expõem as quatro operações canônicas, e o isolamento entre usuários é garantido no banco de dados por \textit{Row Level Security}.
+
+\textbf{Requisitos não implementados ou implementados parcialmente.} Por honestidade técnica, registram-se as lacunas conhecidas na Tabela \ref{tab:lacunas}.
+
+\begin{table}[H]
+\centering
+\caption{Requisitos não implementados e respectiva justificativa.}
+\label{tab:lacunas}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{@{}>{\RaggedRight}p{4cm}>{\RaggedRight\arraybackslash}X@{}}
+\toprule
+\textbf{Requisito} & \textbf{Situação e justificativa} \\
+\midrule
+Open Finance validado de ponta a ponta & O código de sincronização está implementado e o \textit{schema} suporta a integração, porém não houve validação contra a conta \textit{sandbox} da Pluggy. O que está verificado é a tradução dos dados e a idempotência da gravação, não a forma da resposta real do provedor. \\
+Contratos dirigidos pelo consumidor & Não há contrato formalizado com ferramenta dedicada (Pact). A assimetria de versões entre web e aplicativo está documentada em registro de decisão arquitetural, com tabela de campos obrigatórios e tolerantes, mas a verificação é manual. \\
+Notificações por \textit{push} & As notificações existem como registro no banco e são exibidas nas duas interfaces, porém não há envio por \textit{push} ao dispositivo. \\
+Open Finance no aplicativo móvel & A conexão de contas via Open Finance só pode ser iniciada pela interface web; o aplicativo exibe as contas sincronizadas, mas não inicia a conexão. \\
+Testes de componente na interface & Não há testes de renderização de componentes React. A verificação da interface ocorre nas extremidades: unidade no domínio e ponta a ponta no navegador. \\
+\bottomrule
+\end{tabularx}
+\vspace{0.3cm}
+
+\noindent\footnotesize Fonte: Autores (2026).
+\end{table}
+
+% ===================================================
+\section{ARQUITETURA}
+
+\subsection{Visão macro}
+
+A arquitetura segue o princípio da inversão de dependência: o núcleo de regras de negócio não conhece banco de dados, rede ou \textit{framework}; são as camadas externas que dependem dele. A Figura \ref{fig:arquitetura} apresenta a visão macro.
+
+\begin{figure}[H]
+\centering
+\caption{Diagrama de arquitetura do MyCash.}
+\label{fig:arquitetura}
+\vspace{0.3cm}
+\resizebox{0.98\textwidth}{!}{%
+\begin{tikzpicture}[
+  font=\sffamily,
+  caixa/.style={rectangle, rounded corners=3pt, draw=bordaCinza, thick,
+                align=center, inner sep=6pt, font=\sffamily\small},
+  faixa/.style={font=\sffamily\bfseries\footnotesize, text=bordaCinza, anchor=east},
+  seta/.style={-{Stealth[length=2.5mm]}, thick, draw=bordaCinza},
+  usa/.style={-{Stealth[length=2.5mm]}, thick, draw=bordaCinza, dashed},
+]
+
+% ---------- Coluna principal (fluxo de requisicao) ----------
+\node[caixa, fill=camadaUI, minimum width=5cm] (web) at (0,0)
+  {\textbf{Aplicação Web}\\[1pt]{\scriptsize Next.js 14 \textbar{} App Router}\\{\scriptsize Server + Client Components}};
+\node[caixa, fill=camadaUI, minimum width=5cm] (mob) at (6.6,0)
+  {\textbf{Aplicativo Móvel}\\[1pt]{\scriptsize Expo SDK 54 \textbar{} React Native}\\{\scriptsize Expo Router}};
+
+\node[caixa, fill=camadaUI, minimum width=5cm] (rweb) at (0,-2.4)
+  {\textbf{Repositórios}\\[1pt]{\scriptsize vocabulário de domínio}};
+\node[caixa, fill=camadaUI, minimum width=5cm] (rmob) at (6.6,-2.4)
+  {\textbf{Repositórios}\\[1pt]{\scriptsize vocabulário de domínio}};
+
+\node[caixa, fill=camadaAPI, minimum width=11.6cm] (api) at (3.3,-5.0)
+  {\textbf{API REST} \quad \texttt{src/app/api}\\[1pt]{\scriptsize 17 rotas \textbar{} 40 operações HTTP}\\{\scriptsize cookie de sessão (web) ou Bearer token (móvel)}};
+
+\node[caixa, fill=camadaDados, minimum width=5.6cm] (pg) at (0.3,-7.8)
+  {\textbf{PostgreSQL 17}\\[1pt]{\scriptsize Supabase gerenciado}\\{\scriptsize 8 tabelas \textbar{} Row Level Security}};
+\node[caixa, fill=camadaDados, minimum width=5cm] (auth) at (6.9,-7.8)
+  {\textbf{Supabase Auth}\\[1pt]{\scriptsize GoTrue \textbar{} JWT}\\{\scriptsize trigger para \texttt{public.usuarios}}};
+
+\node[caixa, fill=camadaExt, minimum width=11.6cm] (plug) at (3.3,-10.0)
+  {\textbf{Pluggy --- Open Finance}\\[1pt]{\scriptsize contas, transações e webhooks de instituições financeiras}};
+
+% ---------- Dominio compartilhado (painel lateral) ----------
+\node[caixa, fill=camadaDom, minimum width=5.2cm, minimum height=5.4cm] (dom) at (15.2,-2.9)
+  {\textbf{CAMADA DE DOMÍNIO}\\\textbf{COMPARTILHADA}\\[4pt]
+   \texttt{src/domain}\\[5pt]
+   {\scriptsize saldo \textbar{} lançamentos}\\{\scriptsize metas \textbar{} resumo}\\{\scriptsize valores \textbar{} datas}\\{\scriptsize portas \textbar{} erros}\\[5pt]
+   {\scriptsize TypeScript puro}\\{\scriptsize zero infraestrutura}\\[3pt]
+   {\scriptsize \textbf{222 testes}}\\{\scriptsize \textbf{100\% de cobertura}}};
+
+% ---------- Faixas de camada ----------
+\node[faixa] at (-3.0,0)    {CLIENTES};
+\node[faixa] at (-3.0,-2.4) {REPOSITÓRIOS};
+\node[faixa] at (-3.0,-5.0) {API};
+\node[faixa] at (-3.0,-7.8) {PERSISTÊNCIA};
+\node[faixa] at (-3.0,-10.0){EXTERNO};
+
+% ---------- Fluxo vertical ----------
+\draw[seta] (web)  -- (rweb);
+\draw[seta] (mob)  -- (rmob);
+\draw[seta] (rweb.south) -- node[left, font=\scriptsize] {HTTP} ([xshift=-2.6cm]api.north);
+\draw[seta] (rmob.south) -- node[right, font=\scriptsize] {HTTP} ([xshift=2.6cm]api.north);
+\draw[seta] ([xshift=-2.6cm]api.south) -- (pg.north);
+\draw[seta] ([xshift=2.6cm]api.south)  -- (auth.north);
+\draw[seta] (plug.north -| pg.south) -- node[right, font=\scriptsize] {webhook} (pg.south);
+
+% ---------- Dependencias no dominio (tracejadas, apontando para dentro) ----------
+% O repositorio do web alcanca o dominio pelo vao entre as caixas de cliente
+% (x = 3,0) e por cima delas, sem cruzar nenhuma outra seta.
+\draw[usa] (rweb.north east) -- ++(0.5,0) |- (15.2,1.9)
+           -- node[right, font=\scriptsize, pos=0.6] {usa} (dom.north);
+\draw[usa] (rmob.east) -- node[above, font=\scriptsize] {usa} (dom.west |- rmob.east);
+\draw[usa] (api.east)  -- node[above, font=\scriptsize] {usa} (dom.south west |- api.east);
+
+\end{tikzpicture}%
+}
+\vspace{0.3cm}
+
+\noindent\footnotesize Fonte: Autores (2026).
+\end{figure}
+
+\subsection{Detalhamento das camadas e suas integrações}
+
+\textbf{Camada de clientes.} A aplicação web organiza cada tela do \textit{dashboard} como um Server Component, responsável pela busca inicial dos dados no servidor, delegando a interatividade a um Client Component correspondente. O aplicativo móvel, por não dispor de renderização no servidor, busca todos os dados por requisição HTTP a partir de um \textit{hook} próprio, \texttt{useRecurso}, que uniformiza estado de carregamento, erro e atualização por gesto de puxar.
+
+\textbf{Camada de repositórios.} Encapsula o cliente HTTP e expõe métodos com vocabulário de domínio. O componente invoca \texttt{transacoesRepository.criar(\{idConta, tipo, valor\})}, sem conhecimento do \textit{schema} do banco ou do verbo HTTP empregado. É nesta camada que ocorre a tradução entre a notação da interface, em \textit{camelCase}, e a do banco, em \textit{snake\_case}.
+
+\textbf{Camada de domínio.} É a contribuição arquitetural desta fase. Reúne, em 643 linhas de TypeScript puro, toda a lógica de negócio anteriormente dispersa entre telas e rotas. Não importa Supabase, não executa \texttt{fetch} e não conhece React. A dependência é invertida por meio de duas interfaces declaradas em \path{src/domain/portas.ts}: \texttt{ContasPort} e \texttt{TransacoesPort}. Em produção, quem as implementa é o adaptador que fala com o PostgREST; nos testes, um repositório em memória. É isso que permite exercitar a regra de negócio sem rede, sem banco e sem contêiner.
+
+\begin{lstlisting}[caption={Portas do domínio --- a dependência apontando para dentro.}]
+export interface ContasPort {
+  porId(idConta: number): Promise<ContaDoDominio | null>
+  ajustarSaldo(idConta: number, delta: number): Promise<void>
+}
+
+export interface TransacoesPort {
+  porId(idTransacao: number): Promise<TransacaoDoDominio | null>
+  inserir(dados: Omit<TransacaoDoDominio, 'id_transacao'>): Promise<TransacaoDoDominio>
+  atualizar(idTransacao: number, dados: Partial<TransacaoDoDominio>): Promise<void>
+  remover(idTransacao: number): Promise<void>
+}
+\end{lstlisting}
+
+As interfaces são deliberadamente estreitas: declaram o que o domínio usa, e não tudo o que a tabela sabe fazer. Porta larga obrigaria o duplo de teste a implementar métodos que ninguém chama.
+
+\textbf{Camada de API.} Dezessete arquivos de rota expõem 40 operações HTTP. A autenticação aceita dois mecanismos: \textit{cookie} de sessão, usado pelo navegador, e cabeçalho \texttt{Authorization: Bearer}, adotado quando o aplicativo móvel passou a consumir a mesma API. O formato de resposta é padronizado com \textit{wrapper} \texttt{\{data\}} em caso de sucesso e \texttt{\{error\}} em caso de falha.
+
+\textbf{Camada de persistência.} PostgreSQL 17 hospedado no Supabase, com oito tabelas e \textit{Row Level Security} habilitada em todas as tabelas de domínio. O acesso ocorre via PostgREST, por meio da biblioteca \texttt{@supabase/ssr}. Não há ORM: as consultas são tipadas pelo arquivo \path{src/types/database.ts}.
+
+\subsection{A arquitetura serviu ao aplicativo móvel?}
+\label{sec:serviu}
+
+A resposta é afirmativa, mas essa conclusão só se tornou verdadeira após uma correção estrutural realizada nesta fase.
+
+\textbf{O problema identificado.} Quando o aplicativo móvel foi construído, as regras de negócio foram reescritas no diretório \path{mobile/}. Havia, portanto, duas implementações da mesma lógica, mantidas manualmente em paralelo. A extração da camada de domínio revelou que elas haviam divergido em quatro pontos concretos, apresentados na Tabela \ref{tab:divergencias}.
+
+\begin{table}[H]
+\centering
+\caption{Divergências encontradas entre as implementações web e móvel.}
+\label{tab:divergencias}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{@{}>{\RaggedRight}p{3.6cm}>{\RaggedRight\arraybackslash}X@{}}
+\toprule
+\textbf{Comportamento} & \textbf{Divergência observada} \\
+\midrule
+Aporte em meta concluída & O web permitia; o aplicativo recusava. \\
+Arredondamento & Uma implementação arredondava em centavos; a outra acumulava resíduo de ponto flutuante. \\
+Conversão de texto para valor & A entrada \texttt{"12abc"} resultava em 12 em uma implementação e em \texttt{NaN} na outra. \\
+Conta bloqueada & Nenhuma das duas verificava o estado da conta, embora a coluna \texttt{status\_conta} existisse desde o início do projeto. \\
+\bottomrule
+\end{tabularx}
+\vspace{0.3cm}
+
+\noindent\footnotesize Fonte: Autores (2026).
+\end{table}
+
+\textbf{A solução adotada.} O diretório \path{src/domain} foi tornado portável: seus tipos são declarados localmente, em \path{src/domain/tipos.ts}, em vez de importados de \path{@/types/database}. Assim, a pasta não depende do \textit{alias} de caminho do Next e pode ser consumida pelo aplicativo móvel. No lado do Expo, bastou acrescentar a pasta aos \texttt{watchFolders} do empacotador Metro e declarar o \textit{alias} \texttt{@dominio} no \path{tsconfig.json}. As duas aplicações passaram a importar as mesmas funções.
+
+\textbf{Vantagens observadas.} A regra de negócio deixou de existir em duas cópias que divergem com o tempo. Um teste escrito uma única vez passou a proteger os dois clientes. A correção do gráfico do \textit{dashboard} web, descrita na Seção \ref{sec:discussao}, consistiu simplesmente em passar a usar a função \texttt{serieMensal} que o aplicativo móvel já utilizava.
+
+\textbf{Desvantagens e desafios.} O compartilhamento impõe custos reais, registrados a seguir.
+
+\begin{itemize}
+    \item \textbf{Árvores de dependência incompatíveis.} O Next exige React 18.3.1 e o Expo SDK 54 exige React 19.1.0. As duas aplicações mantêm \path{node_modules} separadas, o que obriga a integração contínua a instalar dependências duas vezes, em trabalhos distintos.
+    \item \textbf{Fragilidade do empacotador.} O Metro não resolve caminhos fora da raiz do projeto por padrão. Uma primeira configuração, que utilizava \texttt{disableHierarchicalLookup}, quebrou a resolução do pacote \texttt{expo-asset}; a solução final restringiu-se a declarar \texttt{watchFolders}.
+    \item \textbf{Acoplamento entre clientes.} Alterar uma função do domínio afeta web e aplicativo ao mesmo tempo. É um acoplamento desejado --- é precisamente o objetivo --- mas exige que a suíte de testes seja confiável, pois ela passa a ser a única proteção contra regressão simultânea nos dois produtos.
+\end{itemize}
+
+% ===================================================
+\section{NÍVEL DE PROCESSO DOCUMENTADO: REGISTRO DE LANÇAMENTO}
+
+O processo escolhido para documentação detalhada é o \textbf{registro de um lançamento financeiro e sua consolidação no saldo}. Trata-se do caminho transacional principal do produto: é por meio dele que o usuário alimenta o sistema, e é dele que derivam todos os números apresentados no \textit{dashboard}.
+
+As capturas apresentadas a seguir foram geradas automaticamente pelo roteiro \path{e2e/capturar-evidencias.spec.ts}, que percorre o processo com o mesmo Playwright e os mesmos Page Objects utilizados pela suíte de testes. A geração automatizada garante que as evidências não divirjam do comportamento verificado --- se a tela muda, o roteiro e os testes quebram juntos.
+
+\subsection{Etapa 1 --- Autenticação}
+
+O acesso ao sistema exige sessão válida. Toda rota de dados encontra-se atrás da autenticação, e o isolamento entre usuários é aplicado no banco de dados pelas \textit{policies} de \textit{Row Level Security}.
+
+\begin{figure}[H]
+\centering
+\caption{Tela de autenticação.}
+\includegraphics[width=0.85\textwidth]{figuras/01-login.png}
+\vspace{0.2cm}
+
+\noindent\footnotesize Fonte: Autores (2026).
+\end{figure}
+
+\subsection{Etapa 2 --- Caminho alternativo: credencial inválida}
+
+Submetida uma credencial inexistente, o sistema exibe mensagem de erro e permanece na tela de autenticação. A permanência é tão importante quanto a mensagem: redirecionar ao \textit{dashboard} com sessão inválida constituiria falha de autorização.
+
+\begin{figure}[H]
+\centering
+\caption{Caminho alternativo --- rejeição de credencial inválida.}
+\includegraphics[width=0.85\textwidth]{figuras/02-login-erro.png}
+\vspace{0.2cm}
+
+\noindent\footnotesize Fonte: Autores (2026).
+\end{figure}
+
+\subsection{Etapa 3 --- Dashboard consolidado}
+
+Autenticado, o usuário acessa o \textit{dashboard}, que apresenta o saldo consolidado de todas as contas, as receitas e despesas do mês com variação percentual real em relação ao mês anterior, a quantidade de metas em andamento, o histórico de seis meses, os próximos lembretes e as transações recentes.
+
+\begin{figure}[H]
+\centering
+\caption{Dashboard com o saldo consolidado em R\$ 9.932,97.}
+\includegraphics[width=\textwidth]{figuras/03-dashboard.png}
+\vspace{0.2cm}
+
+\noindent\footnotesize Fonte: Autores (2026).
+\end{figure}
+
+\subsection{Etapa 4 --- Listagem de transações}
+
+A tela de transações oferece filtros por período, tipo, categoria e busca textual. O filtro de período é aplicado no banco de dados, por meio de parâmetros enviados à API; os demais são aplicados localmente, por serem baratos e mudarem a cada tecla digitada.
+
+\begin{figure}[H]
+\centering
+\caption{Listagem de transações com filtros.}
+\includegraphics[width=\textwidth]{figuras/04-transacoes-lista.png}
+\vspace{0.2cm}
+
+\noindent\footnotesize Fonte: Autores (2026).
+\end{figure}
+
+\subsection{Etapa 5 --- Formulário de lançamento}
+
+O formulário exige conta, tipo, categoria, descrição, valor e data. As validações executadas antes do envio pertencem à camada de domínio: valor positivo obrigatório e conta em estado operável.
+
+\begin{figure}[H]
+\centering
+\caption{Formulário de lançamento preenchido com uma saída de R\$ 137,42.}
+\includegraphics[width=0.85\textwidth]{figuras/05-modal-lancamento.png}
+\vspace{0.2cm}
+
+\noindent\footnotesize Fonte: Autores (2026).
+\end{figure}
+
+\subsection{Etapa 6 --- Persistência}
+
+Confirmado o lançamento, a transação é persistida e passa a constar na listagem.
+
+\begin{figure}[H]
+\centering
+\caption{Transação persistida e exibida na listagem.}
+\includegraphics[width=\textwidth]{figuras/06-transacao-criada.png}
+\vspace{0.2cm}
+
+\noindent\footnotesize Fonte: Autores (2026).
+\end{figure}
+
+\subsection{Etapa 7 --- Consolidação no saldo}
+
+Esta é a etapa crítica do processo. O saldo consolidado deve refletir o lançamento após recarregamento completo da página --- e não apenas no estado local da interface. O saldo passou de R\$ 9.932,97 para R\$ 9.795,55, diferença de exatamente R\$ 137,42.
+
+\begin{figure}[H]
+\centering
+\caption{Saldo consolidado após o lançamento: R\$ 9.795,55.}
+\includegraphics[width=\textwidth]{figuras/07-saldo-atualizado.png}
+\vspace{0.2cm}
+
+\noindent\footnotesize Fonte: Autores (2026).
+\end{figure}
+
+A exigência de recarregamento não é arbitrária. Em agosto de 2026, o \textit{dashboard} apresentou saldo congelado em produção enquanto o banco de dados já registrava o valor correto. A causa foi o \textit{Data Cache} do Next.js, que armazenava em cache as chamadas \texttt{fetch} realizadas internamente pela biblioteca do Supabase. Como cada URL do PostgREST constitui uma chave de cache distinta, parte da tela atualizava e parte permanecia congelada. Um teste que observasse apenas o estado imediatamente posterior à mutação não detectaria o defeito.
+
+\subsection{Demais telas do domínio}
+
+\begin{figure}[H]
+\centering
+\caption{Gestão de contas bancárias.}
+\includegraphics[width=0.92\textwidth]{figuras/08-contas.png}
+\vspace{0.2cm}
+
+\noindent\footnotesize Fonte: Autores (2026).
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\caption{Metas financeiras com progresso e prazo.}
+\includegraphics[width=0.92\textwidth]{figuras/09-metas.png}
+\vspace{0.2cm}
+
+\noindent\footnotesize Fonte: Autores (2026).
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\caption{Lembretes de contas a pagar e a receber.}
+\includegraphics[width=0.92\textwidth]{figuras/10-lembretes.png}
+\vspace{0.2cm}
+
+\noindent\footnotesize Fonte: Autores (2026).
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\caption{Tema claro, alternável a partir da barra lateral.}
+\includegraphics[width=0.92\textwidth]{figuras/12-tema-claro.png}
+\vspace{0.2cm}
+
+\noindent\footnotesize Fonte: Autores (2026).
+\end{figure}
+
+\subsection{Discussão}
+\label{sec:discussao}
+
+Esta seção registra as principais dificuldades enfrentadas e os defeitos revelados pelo processo de verificação. Todos os casos relatados ocorreram efetivamente durante o desenvolvimento.
+
+\textbf{Defeito 1 --- Conta bloqueada aceitava lançamentos.} A coluna \texttt{status\_conta} existia no \textit{schema} desde o início do projeto, mas nenhum ponto do sistema a consultava. Era possível lançar normalmente em conta de usuário bloqueado. O defeito só se tornou visível quando a regra foi escrita explicitamente como função de domínio e submetida a teste. Bloquear uma conta que continua recebendo movimentação não bloqueia coisa alguma.
+
+\textbf{Defeito 2 --- Transações do dia 1 contabilizadas no mês anterior.} O agrupamento mensal utilizava \texttt{new Date(string)} diretamente. Para a entrada \texttt{"2026-09-01"}, o JavaScript interpreta a data como UTC à meia-noite; no fuso de São Paulo, isso corresponde a 31 de agosto às 21 horas. Toda transação do primeiro dia do mês caía no agrupamento do mês anterior. A correção introduziu a função \texttt{paraDataLocal}, que decompõe a \textit{string} em ano, mês e dia antes de construir a data.
+
+\textbf{Defeito 3 --- Gráfico que fabricava dados.} O gráfico de seis meses do \textit{dashboard} web desenhava os cinco meses anteriores a partir do mês corrente, por meio da expressão \texttt{monthIncome * (0.85 + seed \% 5 * 0.07)}. O resultado apresentava forma plausível e valores inteiramente inventados. Os cartões de receitas e despesas, pelo mesmo mecanismo, exibiam as \textit{strings} fixas \texttt{"+12\%"} e \texttt{"-8\%"} independentemente dos dados. Em um aplicativo de finanças, gráfico que inventa dado é pior do que gráfico vazio, pois parece verdadeiro. A correção consistiu em consumir a função \texttt{serieMensal} da camada de domínio --- a mesma que o aplicativo móvel já utilizava --- e calcular a variação real contra o mês anterior.
+
+\textbf{Defeito 4 --- Tema aplicado apenas parcialmente.} A função que montava os estilos não começava com o prefixo \texttt{use}. O React Compiler, por consequência, tratou-a como função comum e memorizou seu resultado, congelando a primeira paleta carregada. A correção foi renomeá-la para \texttt{useEstilos}, respeitando a convenção de nomenclatura de \textit{hooks}.
+
+\textbf{Defeito 5 --- Tela branca por assimetria de versões.} Ao adicionar o campo \texttt{serieMensal} à resposta de \texttt{GET /api/dashboard}, o aplicativo móvel quebrou com \texttt{TypeError: Cannot read property 'length' of undefined}. O pacote do aplicativo já esperava o campo novo, enquanto a Vercel ainda servia a versão anterior da rota. A correção tornou o aplicativo um leitor tolerante, e o episódio originou o registro de decisão arquitetural sobre contratos multicanal.
+
+\textbf{Defeito 6 --- Rótulos sem associação acessível.} A escrita dos testes de ponta a ponta revelou que os cartões do \textit{dashboard} eram elementos \texttt{div} anônimos e que os elementos \texttt{label} do formulário de lançamento não possuíam o atributo \texttt{htmlFor}. Visualmente pareciam rótulos, mas não o eram: um leitor de tela anunciava "caixa de edição" sem informar de qual campo. A correção acrescentou \texttt{role="group"} com \texttt{aria-label} aos cartões e associou cada rótulo ao respectivo campo.
+
+\textbf{Entrave 1 --- O \textit{schema} nunca versionado.} As seis tabelas centrais existiam apenas no painel do Supabase, sem migração correspondente no repositório. A dívida só se tornou intransponível quando os testes de integração passaram a provisionar um PostgreSQL vazio: sem \textit{schema} versionado, não havia o que testar. A migração foi escrita a partir dos tipos TypeScript e do uso observado nas rotas, com os pontos inferidos explicitamente marcados no arquivo.
+
+\textbf{Entrave 2 --- Diagnósticos equivocados antes da causa real.} Dois incidentes consumiram tempo considerável por hipóteses incorretas. No caso do saldo congelado, foram investigados cache de CDN e comportamento do cliente HTTP antes de se identificar o \textit{Data Cache} do Next.js. No caso da falha da integração contínua, foram investigados propagação de variáveis de ambiente e limite de requisições do Docker Hub antes de o registro de execução revelar a causa: o ambiente de CI utilizava Node 20, enquanto a máquina de desenvolvimento utilizava Node 22, e a biblioteca \texttt{undici} do Testcontainers depende de uma API disponível apenas a partir da versão 22. A lição registrada é que o registro de execução completo deve ser consultado antes de qualquer hipótese.
+
+\textbf{Entrave 3 --- O próprio teste confirmando seu fundamento.} A primeira execução da suíte de integração falhou em 5 dos 12 casos, com violação de restrição de unicidade. A rotina de limpeza entre casos havia sido escrita, mas não conectada ao gatilho de preparação. O sintoma foi exatamente aquele que o registro de decisão arquitetural previa: teste herdando o estado deixado pelo anterior.
+
+% ===================================================
+\section{RELATÓRIO DE TESTES}
+
+\subsection{Ferramentas utilizadas}
+
+As ferramentas adotadas em cada camada de verificação são apresentadas na Tabela \ref{tab:ferramentas}.
+
+\begin{table}[H]
+\centering
+\caption{Ferramentas de verificação adotadas.}
+\label{tab:ferramentas}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{@{}>{\bfseries\RaggedRight}p{3.4cm}>{\RaggedRight}p{2.6cm}>{\RaggedRight\arraybackslash}X@{}}
+\toprule
+\normalfont\textbf{Ferramenta} & \textbf{Versão} & \textbf{Função} \\
+\midrule
+Vitest & 4.1.9 & Execução das suítes de unidade e integração. \\
+@vitest/coverage-v8 & 4.1.9 & Relatório de cobertura, com limites verificados na CI. \\
+Stryker Mutator & 10.0 & Teste de mutação sobre a camada de domínio. \\
+Testcontainers & 12.1 & Provisionamento de PostgreSQL efêmero para a integração. \\
+Playwright & 1.56 & Testes de ponta a ponta em navegador real. \\
+Docker Compose & v2 & Topologia local declarativa. \\
+GitHub Actions & --- & Integração contínua com três trabalhos paralelos. \\
+\bottomrule
+\end{tabularx}
+\vspace{0.3cm}
+
+\noindent\footnotesize Fonte: Autores (2026).
+\end{table}
+
+A estratégia segue a pirâmide de testes: muitos testes rápidos na base, poucos testes caros no topo. A suíte de unidade completa executa em aproximadamente 6 segundos sem qualquer acesso à rede; a de integração, em 7,5 segundos com um contêiner PostgreSQL; a de ponta a ponta, em 70 segundos com navegador real.
+
+\subsection{Testes de unidade}
+
+\subsubsection{Quantidade e distribuição}
+
+A suíte de unidade totaliza \textbf{222 casos}, distribuídos conforme a Tabela \ref{tab:unidade}.
+
+\begin{table}[H]
+\centering
+\caption{Distribuição dos testes de unidade.}
+\label{tab:unidade}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{@{}>{\ttfamily\RaggedRight}p{6.2cm}>{\centering}p{2cm}>{\RaggedRight\arraybackslash}X@{}}
+\toprule
+\normalfont\textbf{Arquivo} & \textbf{Casos} & \textbf{Alvo} \\
+\midrule
+src/domain/saldo.test.ts & 26 & Efeito no saldo, deltas, validação \\
+src/domain/metas.test.ts & 25 & Progresso, aporte, prazo \\
+src/domain/resumo.test.ts & 25 & Totais, série mensal, vencimentos \\
+src/domain/lancamentos.test.ts & 21 & Caso de uso com duplos \\
+src/domain/valores.test.ts & 18 & Conversão e arredondamento \\
+src/domain/datas.test.ts & 15 & Fuso horário e diferenças \\
+src/lib/pluggy/mapping.test.ts & 19 & Tradução Open Finance \\
+src/lib/api/repositories.test.ts & 11 & Regras dos repositórios \\
+src/lib/api/client.test.ts & 8 & Cliente HTTP e erros \\
+mobile/constants/mycash.test.ts & 25 & Formatação e rótulos \\
+mobile/lib/repositories.test.ts & 22 & Repositórios do aplicativo \\
+mobile/lib/api.test.ts & 13 & Cliente HTTP do aplicativo \\
+\midrule
+\normalfont\textbf{Total} & \textbf{222} & \\
+\bottomrule
+\end{tabularx}
+\vspace{0.3cm}
+
+\noindent\footnotesize Fonte: Autores (2026).
+\end{table}
+
+\subsubsection{Cobertura}
+
+O resultado consolidado consta da Tabela \ref{tab:cobertura}. A cobertura é medida exclusivamente sobre \path{src/domain}, a camada que a suíte de unidade tem como alvo. Medir \path{src/} integralmente diluiria o denominador com páginas e componentes do Next, que teste de unidade não exercita, produzindo um número baixo e sem significado que esconderia lacunas reais no domínio.
+
+\begin{table}[H]
+\centering
+\caption{Relatório de cobertura da camada de domínio.}
+\label{tab:cobertura}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{@{}>{\RaggedRight}X>{\centering}p{3cm}>{\centering\arraybackslash}p{3cm}@{}}
+\toprule
+\textbf{Métrica} & \textbf{Cobertura} & \textbf{Absoluto} \\
+\midrule
+Instruções (\textit{statements}) & 100\% & 112 / 112 \\
+Ramos (\textit{branches}) & 100\% & 73 / 73 \\
+Funções & 100\% & 38 / 38 \\
+Linhas & 100\% & 100 / 100 \\
+\bottomrule
+\end{tabularx}
+\vspace{0.3cm}
+
+\noindent\footnotesize Fonte: Autores (2026).
+\end{table}
+
+Os limites de cobertura estão declarados em \path{vitest.config.ts} e verificados a cada envio: um resultado abaixo do limite reprova o trabalho de integração contínua. Trata-se de uma trava, não de uma meta --- a distinção é relevante e retomada na Seção \ref{sec:mutacao}.
+
+O relatório cumpriu sua função concreta. A primeira execução apontou 91,78\% de cobertura de ramos, identificando seis ramos jamais executados --- todos guardas contra valor nulo proveniente do PostgREST. Seis casos adicionais foram escritos, fechando os seis ramos.
+
+\subsubsection{Cenários alternativos}
+
+A suíte não se limita ao caminho feliz. Dos 222 casos, aproximadamente 40\% exercitam condições de erro, valores de fronteira ou entradas malformadas. A Tabela \ref{tab:alternativos} apresenta exemplos representativos.
+
+\begin{table}[H]
+\centering
+\caption{Exemplos de cenários alternativos cobertos.}
+\label{tab:alternativos}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{@{}>{\RaggedRight}p{4.6cm}>{\RaggedRight\arraybackslash}X@{}}
+\toprule
+\textbf{Cenário} & \textbf{Comportamento esperado} \\
+\midrule
+Valor zero ou negativo & Lança \texttt{ValorInvalidoError} antes de qualquer persistência. \\
+Conta bloqueada ou inativa & Lança \texttt{ContaBloqueadaError}, com mensagem nomeando a instituição. \\
+Entrada \texttt{"12abc"} & Resulta em \texttt{NaN}, não em 12. \\
+Transação no dia 1 do mês & Agrupada no mês correto, apesar do fuso horário. \\
+Coluna nula vinda do banco & Tratada como zero, sem quebrar a soma. \\
+Aporte acima do objetivo & Limitado ao objetivo; meta marcada como concluída. \\
+Prazo de meta invertido & Recusado com \texttt{DataInvalidaError}. \\
+Exclusão repetida & Não debita o valor duas vezes. \\
+\textit{Subtype} desconhecido da Pluggy & Convertido para \texttt{"Corrente"}, nunca \texttt{undefined}. \\
+\bottomrule
+\end{tabularx}
+\vspace{0.3cm}
+
+\noindent\footnotesize Fonte: Autores (2026).
+\end{table}
+
+\subsubsection{Teste de mutação}
+\label{sec:mutacao}
+
+Cobertura de 100\% indica que todas as linhas foram executadas, mas não que alguma asserção verificou o resultado. Um teste que invoque a função e nada afirme produz cobertura idêntica à de um teste rigoroso. É a Lei de Goodhart aplicada à métrica: quando a cobertura vira meta, ela deixa de ser boa medida.
+
+O teste de mutação responde a essa limitação. O Stryker introduz alterações deliberadas no código --- troca \texttt{>} por \texttt{>=}, inverte condições, substitui valores por constantes --- e verifica se algum teste falha. Mutante que sobrevive indica comportamento não verificado. O resultado por arquivo consta da Tabela \ref{tab:mutacao}.
+
+\begin{table}[H]
+\centering
+\caption{Escore de mutação por arquivo do domínio.}
+\label{tab:mutacao}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{@{}>{\ttfamily\RaggedRight}X>{\centering}p{2.4cm}>{\centering}p{2cm}>{\centering\arraybackslash}p{2.4cm}@{}}
+\toprule
+\normalfont\textbf{Arquivo} & \textbf{Escore} & \textbf{Mortos} & \textbf{Sobreviventes} \\
+\midrule
+saldo.ts & 96,15\% & 50 & 2 \\
+valores.ts & 96,43\% & 27 & 1 \\
+datas.ts & 94,74\% & 18 & 1 \\
+resumo.ts & 93,33\% & 70 & 5 \\
+lancamentos.ts & 93,10\% & 27 & 2 \\
+metas.ts & 92,00\% & 46 & 4 \\
+\midrule
+\normalfont\textbf{Total} & \textbf{94,07\%} & \textbf{238} & \textbf{15} \\
+\bottomrule
+\end{tabularx}
+\vspace{0.3cm}
+
+\noindent\footnotesize Fonte: Autores (2026).
+\end{table}
+
+Dos 253 mutantes gerados, 238 foram eliminados e 15 sobreviveram, sem erros nem esgotamentos de tempo. O escore partiu de 89,84\%, atingiu 92,09\% após a primeira rodada de correções e alcançou 94,07\% após a inclusão dos testes de guarda contra valor nulo.
+
+A análise dos sobreviventes também produziu conhecimento. Um deles apontava uma verificação explícita de \texttt{NaN} na função de série mensal: o mutante sobrevivia porque a verificação era código inalcançável --- data inválida já produzia chave inexistente no mapa, e o próprio mapa descartava o lançamento. O código redundante foi removido.
+
+\subsection{Testes de integração}
+
+A suíte de integração totaliza \textbf{35 casos}, executados contra um PostgreSQL 17 real provisionado por Testcontainers. O contêiner sobe uma vez por execução, no \texttt{globalSetup}, e é descartado ao final.
+
+\subsubsection{Estratégia de isolamento de estado}
+
+A estratégia adotada combina \textbf{banco por trabalhador} e \textbf{truncamento entre casos}, decisão registrada em documento de decisão arquitetural. As alternativas consideradas constam da Tabela \ref{tab:isolamento}.
+
+\begin{table}[H]
+\centering
+\caption{Estratégias de isolamento consideradas.}
+\label{tab:isolamento}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{@{}>{\bfseries\RaggedRight}p{3.4cm}>{\RaggedRight\arraybackslash}X@{}}
+\toprule
+\normalfont\textbf{Estratégia} & \textbf{Avaliação} \\
+\midrule
+Reversão por transação & Mais barata, porém exigiria que o código de produção recebesse a conexão da transação. As rotas instanciam o próprio cliente Supabase; adaptar significaria alterar toda a camada de acesso para servir ao teste. Descartada por acoplamento, não por desempenho. \\
+Truncamento por teste & Resolve a ordem de execução, mas não o paralelismo. \\
+Banco por trabalhador & Resolve o paralelismo, mas não isola casos dentro do mesmo trabalhador. \\
+\textbf{Adotada: as duas últimas combinadas} & Um contêiner, um banco por trabalhador do Vitest criado a partir de um modelo com o \textit{schema} já aplicado, e truncamento com reinício de sequências entre casos. \\
+\bottomrule
+\end{tabularx}
+\vspace{0.3cm}
+
+\noindent\footnotesize Fonte: Autores (2026).
+\end{table}
+
+\subsubsection{Escopo coberto}
+
+\textbf{Banco de dados (12 casos).} Validam a própria migração: criação das seis tabelas centrais e dos seis tipos enumerados, ordem correta de aplicação das três migrações, restrições \texttt{CHECK}, chaves estrangeiras, unicidade de \textit{e-mail}, cascatas de remoção e ausência de resíduo binário em colunas \texttt{numeric(14,2)}.
+
+\textbf{API própria e caso de uso (12 casos).} Exercitam o caso de uso de lançamento com adaptadores PostgreSQL reais, e não com duplos. É a fronteira que a unidade não alcança: o controlador \texttt{pg} devolve colunas \texttt{numeric} como \textit{string}, e não como número --- comportamento que duplo algum revelaria.
+
+\textbf{API externa, Open Finance (11 casos).} Verificam a idempotência da sincronização. O processo reprocessa as mesmas transações a cada execução --- webhook reentregue, acionamento manual, página que retorna integralmente. O que impede a duplicação não é código TypeScript, e sim a restrição \texttt{UNIQUE} sobre \texttt{pluggy\_tx\_id} combinada com \texttt{ON CONFLICT DO UPDATE}.
+
+\begin{lstlisting}[caption={Verificação de idempotência contra o banco real.}]
+it('sync_mesmaTransacaoDuasVezes_naoDuplicaALinha', async () => {
+  await sincronizarTransacao({ pluggyTxId: 'tx-abc', valor: 150 })
+  await sincronizarTransacao({ pluggyTxId: 'tx-abc', valor: 150 })
+
+  expect(await contarTransacoes()).toBe(1)
+})
+\end{lstlisting}
+
+Esta suíte revelou uma propriedade que somente um banco real evidencia: a restrição \texttt{UNIQUE} do PostgreSQL admite múltiplos valores nulos. É precisamente isso que permite a convivência, na mesma tabela, entre lançamentos manuais, cujo \texttt{pluggy\_tx\_id} é nulo, e transações sincronizadas. Sem essa característica, a coluna limitaria o sistema a um único lançamento manual.
+
+\textbf{Observação quanto ao escopo.} O que não está verificado é a forma da resposta real da Pluggy. Os testes exercitam a tradução e a persistência próprias; nada garante que o provedor mantenha o formato que a camada de tradução espera. Trata-se do caso clássico de contrato dirigido pelo consumidor, e é a lacuna conhecida registrada na Tabela \ref{tab:lacunas}.
+
+\subsection{Testes de ponta a ponta}
+
+A suíte de ponta a ponta totaliza \textbf{9 casos} em Playwright, organizados segundo o padrão Page Object Model. Os localizadores utilizam papel semântico ARIA e texto visível, nunca classes CSS ou expressões XPath --- as classes são utilitárias do Tailwind, mudam ao primeiro ajuste visual e não descrevem função alguma.
+
+Os testes executam contra a imagem de produção servida pelo contêiner Docker, e não contra o servidor de desenvolvimento. Os dados de partida são criados por chamada à API administrativa do Supabase, prática denominada \textit{API Data Seeding}: o estado inicial provém de chamada determinística, e não de jornada pela interface nem de registro fixo que alguém possa ter removido.
+
+\subsubsection{Cenário crítico 1 --- Portal de autenticação}
+
+Enquadra-se no critério de portais de autenticação e integração: mecanismo de entrada cuja indisponibilidade bloqueia integralmente o acesso. No MyCash não há caminho alternativo --- toda rota de dados está atrás da sessão, e a \textit{Row Level Security} filtra por usuário. Os seis casos que compõem o cenário constam da Tabela \ref{tab:e2e1}.
+
+\begin{table}[H]
+\centering
+\caption{Cenário crítico 1 --- casos e respectivos caminhos.}
+\label{tab:e2e1}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{@{}>{\RaggedRight}p{5.6cm}>{\centering}p{2.4cm}>{\RaggedRight\arraybackslash}X@{}}
+\toprule
+\textbf{Caso} & \textbf{Caminho} & \textbf{Verificação} \\
+\midrule
+Formulário acessível & Feliz & Campos localizáveis por rótulo e papel. \\
+Senha não visível na tela & Feliz & Atributo \texttt{type="password"} preservado. \\
+\textit{E-mail} malformado & Alternativo & Bloqueado pela validação do navegador. \\
+Credencial inválida & Alternativo & Erro exibido; permanece em \texttt{/login}. \\
+Rota protegida sem sessão & Alternativo & Redirecionado para \texttt{/login}. \\
+Recuperação de senha & Feliz & Conduz ao fluxo de recuperação. \\
+\bottomrule
+\end{tabularx}
+\vspace{0.3cm}
+
+\noindent\footnotesize Fonte: Autores (2026).
+\end{table}
+
+Destaca-se o caso de rota protegida sem sessão: é ele que efetivamente fecha o portão. Caso o \textit{middleware} falhe, a tela passaria a ser renderizada e o vazamento apareceria aqui --- nenhuma camada inferior enxerga \textit{middleware}.
+
+\subsubsection{Cenário crítico 2 --- Caminho transacional}
+
+Ocupa o lugar do caminho crítico de receita. O MyCash não gera receita, mas o equivalente funcional é direto: um aplicativo de finanças cujo saldo não corresponde à realidade não cumpre função alguma. Os três casos constam da Tabela \ref{tab:e2e2}.
+
+\begin{table}[H]
+\centering
+\caption{Cenário crítico 2 --- casos e respectivos caminhos.}
+\label{tab:e2e2}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{@{}>{\RaggedRight}p{5.6cm}>{\centering}p{2.4cm}>{\RaggedRight\arraybackslash}X@{}}
+\toprule
+\textbf{Caso} & \textbf{Caminho} & \textbf{Verificação} \\
+\midrule
+Saída reduz o saldo consolidado & Feliz & Saldo e despesas do mês após recarregamento. \\
+Entrada aumenta o saldo consolidado & Feliz & Saldo e receitas do mês após recarregamento. \\
+Criação seguida de exclusão & Alternativo & Saldo retorna ao valor inicial. \\
+\bottomrule
+\end{tabularx}
+\vspace{0.3cm}
+
+\noindent\footnotesize Fonte: Autores (2026).
+\end{table}
+
+A escolha deste cenário não é teórica: o fluxo apresentou falha em produção por duas vezes, descritas na Seção \ref{sec:discussao} como Defeitos 3 e 5, e em ambas as ocasiões a totalidade da suíte permanecia aprovada. O domínio estava correto, com 222 testes de unidade passando; o PostgreSQL estava correto, com 35 testes de integração passando. O defeito residia entre o navegador e a API --- faixa que somente esta camada alcança.
+
+\subsubsection{Artefatos de diagnóstico}
+
+Em caso de falha, o Playwright retém \textit{trace} compactado, vídeo da execução e captura de tela. O \textit{trace} preserva DOM, tráfego de rede, console e captura por passo, e é inspecionado por meio do comando \texttt{npx playwright show-trace}. A retenção ocorre apenas em falha: gravar sempre consumiria disco sem contrapartida.
+
+\subsection{Deliberações sobre o que não entra em cada camada}
+
+A pirâmide impõe disciplina quanto ao que \textit{não} pertence a cada nível. A Tabela \ref{tab:naoentra} registra as decisões tomadas.
+
+\begin{table}[H]
+\centering
+\caption{Verificações deliberadamente mantidas fora da camada de ponta a ponta.}
+\label{tab:naoentra}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{@{}>{\RaggedRight}p{6cm}>{\RaggedRight\arraybackslash}X@{}}
+\toprule
+\textbf{Verificação} & \textbf{Camada responsável} \\
+\midrule
+Valor zero ou negativo recusado & Unidade (\texttt{ValorInvalidoError}) \\
+Conta bloqueada recusa lançamento & Unidade e integração \\
+Arredondamento em centavos & Integração (\texttt{numeric(14,2)}) \\
+Idempotência da sincronização & Integração (\texttt{UNIQUE} e \texttt{ON CONFLICT}) \\
+Cascatas de remoção & Integração \\
+\bottomrule
+\end{tabularx}
+\vspace{0.3cm}
+
+\noindent\footnotesize Fonte: Autores (2026).
+\end{table}
+
+Cada um desses casos, se replicado na camada de ponta a ponta, custaria segundos de navegador para comprovar o que já está comprovado em milissegundos.
+
+% ===================================================
+\section{ESTRATÉGIA DE IMPLEMENTAÇÃO}
+
+\subsection{Nuvem ou \textit{on-premises}}
+
+A implantação é integralmente \textbf{em nuvem}, segundo o modelo de plataforma como serviço. Não há servidor físico ou virtual sob administração da equipe. A Tabela \ref{tab:nuvem} descreve a distribuição dos componentes.
+
+\begin{table}[H]
+\centering
+\caption{Componentes de implantação e respectivos provedores.}
+\label{tab:nuvem}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{@{}>{\bfseries\RaggedRight}p{3.2cm}>{\RaggedRight}p{3cm}>{\RaggedRight\arraybackslash}X@{}}
+\toprule
+\normalfont\textbf{Componente} & \textbf{Provedor} & \textbf{Justificativa} \\
+\midrule
+Aplicação web & Vercel & Implantação contínua a partir do ramo principal; funções sem estado; ambiente de pré-visualização por \textit{pull request}. \\
+Banco de dados & Supabase (AWS, \texttt{sa-east-1}) & PostgreSQL gerenciado com \textit{Row Level Security}, API REST automática e autenticação integrada. \\
+Autenticação & Supabase Auth & Confirmação por \textit{e-mail}, recuperação de senha e renovação de sessão sem código próprio. \\
+Open Finance & Pluggy & Agregador homologado junto ao Banco Central. \\
+Aplicativo móvel & Expo & Distribuição por \textit{bundle} e atualização sem nova submissão às lojas. \\
+\bottomrule
+\end{tabularx}
+\vspace{0.3cm}
+
+\noindent\footnotesize Fonte: Autores (2026).
+\end{table}
+
+\textbf{Justificativa da escolha.} Para equipe de quatro estudantes em projeto acadêmico, administrar servidor próprio consumiria tempo de desenvolvimento sem agregar aprendizado proporcional. A dependência de provedor é real e foi assumida conscientemente; a contenção adotada é que a lógica de negócio reside em uma camada que nada conhece sobre Supabase, o que torna uma eventual troca de provedor uma alteração de adaptador, e não uma reescrita.
+
+\subsection{Infraestrutura como código}
+
+Ainda que a produção seja gerenciada, o ambiente local foi declarado como código. A motivação é a eliminação da deriva de configuração: ambiente montado manualmente diverge progressivamente da especificação, e cada máquina de desenvolvimento torna-se um caso particular.
+
+\subsubsection{Imagem de produção}
+
+O \path{Dockerfile} emprega três estágios. Compilar e executar possuem necessidades opostas: compilar requer cadeia de ferramentas C/C++ e a árvore completa de dependências; executar requer apenas o ambiente de execução Node e o servidor gerado. Reunir ambos em uma única imagem significaria embarcar compilador em produção. A Tabela \ref{tab:estagios} descreve a finalidade de cada estágio.
+
+\begin{table}[H]
+\centering
+\caption{Estágios da imagem de produção.}
+\label{tab:estagios}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{@{}>{\bfseries\ttfamily\RaggedRight}p{2.4cm}>{\RaggedRight\arraybackslash}X@{}}
+\toprule
+\normalfont\textbf{Estágio} & \textbf{Conteúdo e finalidade} \\
+\midrule
+deps & Instala \texttt{python3}, \texttt{make} e \texttt{g++} para dependências com extensão nativa, e executa \texttt{npm ci}. Recebe apenas os manifestos, de modo que a camada seja reaproveitada enquanto as dependências não mudarem. \\
+builder & Recebe as dependências prontas e executa \texttt{npm run build}, gerando a saída \textit{standalone}. \\
+runner & Não herda compilador nem árvore de desenvolvimento. Recebe somente \path{.next/standalone} e \path{.next/static}, e executa sob usuário \texttt{nextjs} de identificador 1001. \\
+\bottomrule
+\end{tabularx}
+\vspace{0.3cm}
+
+\noindent\footnotesize Fonte: Autores (2026).
+\end{table}
+
+A imagem final resultante ocupa \textbf{356 MB}. A execução sob usuário sem privilégios é medida de contenção: o Docker executa como \texttt{root} por padrão, e uma falha de execução remota de código na aplicação se converteria em \texttt{root} dentro do contêiner.
+
+\begin{lstlisting}[caption={Trecho do estágio final da imagem.}]
+FROM node:22.14.0-bookworm-slim AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV HOSTNAME="0.0.0.0"
+
+RUN addgroup --system --gid 1001 nodejs \
+    && adduser --system --uid 1001 --ingroup nodejs nextjs
+
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+USER nextjs
+EXPOSE 3000
+CMD ["node", "server.js"]
+\end{lstlisting}
+
+A versão da imagem base está fixada com número de correção --- \texttt{22.14.0}, e não \texttt{22} --- porque rótulo móvel reintroduz exatamente a deriva que a infraestrutura imutável existe para eliminar: a mesma linha produziria imagens distintas em datas distintas.
+
+\subsubsection{Topologia local}
+
+O manifesto \path{compose.yaml} declara os três serviços apresentados na Tabela \ref{tab:compose}, operáveis por meio de um único comando: \texttt{docker compose up --build}.
+
+\begin{table}[H]
+\centering
+\caption{Serviços declarados no manifesto Compose.}
+\label{tab:compose}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{@{}>{\bfseries\ttfamily\RaggedRight}p{2.2cm}>{\RaggedRight\arraybackslash}X@{}}
+\toprule
+\normalfont\textbf{Serviço} & \textbf{Função} \\
+\midrule
+web & Aplicação Next.js em modo \textit{standalone}, sob usuário sem privilégios, com sonda de integridade em \texttt{/api/health}. \\
+db & PostgreSQL 17 com volume nomeado \texttt{mycash-db-data} e sonda de integridade via \texttt{pg\_isready}. \\
+migrate & Contêiner de tarefa que aplica as três migrações na ordem correta e encerra. Depende de \texttt{db} com condição \texttt{service\_healthy}. \\
+\bottomrule
+\end{tabularx}
+\vspace{0.3cm}
+
+\noindent\footnotesize Fonte: Autores (2026).
+\end{table}
+
+\textbf{Observação sobre a ausência de um serviço de API separado.} No MyCash, a API corresponde às rotas do próprio Next, executadas no mesmo processo do servidor. Não existe um segundo ambiente de execução Node a ser empacotado. Declarar um contêiner adicional apenas para compor um diagrama com duas caixas resultaria em serviço fictício, e a decisão foi registrada em vez de dissimulada.
+
+\textbf{Sobre o serviço de banco de dados.} O PostgreSQL local não constitui o \textit{backend} da aplicação --- em produção, o MyCash utiliza Supabase gerenciado, e a biblioteca cliente comunica-se por PostgREST, não por SQL direto. O papel deste serviço é outro, e igualmente concreto: constitui o ambiente onde o \textit{schema} versionado é aplicado e pode ser inspecionado sem qualquer contato com produção. É precisamente o que faltava quando as seis tabelas centrais existiam somente no painel do provedor.
+
+\textbf{Persistência do volume.} O uso de volume nomeado, em lugar de montagem de diretório do sistema hospedeiro, é o que assegura a sobrevivência dos dados ao comando \texttt{docker compose down}. A verificação foi realizada: um registro gravado permaneceu disponível após a destruição e recriação dos contêineres.
+
+\subsubsection{Configuração e segredos}
+
+O arquivo \path{.env.example} documenta a distinção mais relevante da configuração no Next.js, apresentada na Tabela \ref{tab:env}.
+
+\begin{table}[H]
+\centering
+\caption{Variáveis de compilação e variáveis de execução.}
+\label{tab:env}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{@{}>{\bfseries\ttfamily\RaggedRight}p{3cm}>{\RaggedRight\arraybackslash}X@{}}
+\toprule
+\normalfont\textbf{Prefixo} & \textbf{Semântica} \\
+\midrule
+NEXT\_PUBLIC\_ & Variável de \textbf{compilação}. O compilador substitui cada ocorrência pelo valor literal no interior do pacote JavaScript. Após a compilação, o valor encontra-se no arquivo que o navegador transfere, acessível a qualquer pessoa. \\
+sem prefixo & Variável de \textbf{execução}. Permanece restrita ao processo Node do servidor e jamais é enviada ao navegador. \\
+\bottomrule
+\end{tabularx}
+\vspace{0.3cm}
+
+\noindent\footnotesize Fonte: Autores (2026).
+\end{table}
+
+Decorre daí a regra adotada: nenhum segredo recebe o prefixo \texttt{NEXT\_PUBLIC\_}. A chave \texttt{service\_role} do Supabase ignora a \textit{Row Level Security}; prefixá-la equivaleria a publicar na internet acesso irrestrito ao banco de todos os usuários. A \textit{anon key}, em contraste, é pública por concepção --- quem protege os dados são as \textit{policies}, não o sigilo da chave.
+
+\subsection{Integração contínua com GitHub Actions}
+
+O fluxo de trabalho \path{.github/workflows/ci.yml} é acionado a cada envio e a cada \textit{pull request} dirigidos ao ramo principal, executando os três trabalhos em paralelo descritos na Tabela \ref{tab:ci}.
+
+\begin{table}[H]
+\centering
+\caption{Trabalhos da integração contínua.}
+\label{tab:ci}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{@{}>{\bfseries\RaggedRight}p{2.6cm}>{\RaggedRight\arraybackslash}X@{}}
+\toprule
+\normalfont\textbf{Trabalho} & \textbf{Etapas} \\
+\midrule
+web & Verificação de tipos (\texttt{tsc --noEmit}), análise estática (\texttt{next lint}), testes com cobertura (\texttt{npm run test:cov}) e publicação do relatório de cobertura como artefato. \\
+mobile & Verificação de tipos, análise estática e testes do aplicativo, com árvore de dependências própria. \\
+integracao & Transferência prévia da imagem \texttt{postgres:17-alpine} e execução da suíte de integração com Testcontainers. \\
+\bottomrule
+\end{tabularx}
+\vspace{0.3cm}
+
+\noindent\footnotesize Fonte: Autores (2026).
+\end{table}
+
+\textbf{Decisões de configuração registradas.} A separação entre web e móvel decorre de árvores de dependências incompatíveis. A separação do trabalho de integração decorre do custo: ele provisiona um contêiner PostgreSQL, e não faria sentido reter o retorno da análise estática à espera dessa execução. A transferência da imagem ocorre em etapa própria para que eventual falha de obtenção se manifeste explicitamente, em lugar de converter-se em esgotamento de tempo na suíte. O contêiner auxiliar de limpeza do Testcontainers é desabilitado no ambiente de integração, onde a máquina é descartada integralmente ao término. O paralelismo é reduzido a dois trabalhadores, correspondendo ao número de núcleos do executor.
+
+\textbf{Correção registrada.} Os três trabalhos utilizam Node 22. Com Node 20, o trabalho de integração falhava com \texttt{TypeError: webidl.util.markAsUncloneable is not a function}: a biblioteca \texttt{undici}, dependência do Testcontainers, emprega uma API disponível somente a partir da versão 22. O sintoma era enganoso --- o Vitest encerrava durante o carregamento da configuração global e reportava "No test files found", como se o problema residisse no padrão de inclusão de arquivos.
+
+\textbf{Rotina complementar.} Um segundo fluxo de trabalho, \path{supabase-keepalive.yml}, executa diariamente uma consulta real ao PostgREST, impedindo a suspensão automática do projeto por inatividade, característica do plano gratuito da plataforma.
+
+\subsection{Entrega contínua}
+
+A Vercel observa o ramo principal e implanta automaticamente cada alteração aprovada pela integração contínua. Cada \textit{pull request} recebe ambiente de pré-visualização com URL própria. A configuração \texttt{output: 'standalone'} é ignorada pela Vercel, que realiza o próprio empacotamento, de modo que a imagem Docker e a implantação em produção coexistem sem conflito.
+
+% ===================================================
+\section{CONSIDERAÇÕES PARCIAIS}
+
+A etapa documentada neste relatório alterou a natureza do projeto. O módulo anterior entregou uma aplicação que funcionava; esta entregou os meios de demonstrar que ela funciona, e de reproduzir o ambiente em que funciona.
+
+O resultado mais consistente não está nos números, e sim no que o processo revelou. Seis defeitos reais foram identificados em código que se encontrava em produção e aparentava correção --- entre eles contas bloqueadas que aceitavam lançamentos, transações do primeiro dia do mês contabilizadas no mês anterior e um gráfico que fabricava os meses anteriores. Nenhum deles havia sido percebido em uso normal, e nenhum teria sido encontrado sem a disciplina de escrever a verificação antes de confiar no comportamento observado.
+
+Três aprendizados merecem registro. Primeiro, a extração da camada de domínio não foi motivada por elegância arquitetural, e sim pela constatação concreta de que a mesma regra, escrita duas vezes, havia divergido em quatro pontos. Segundo, cobertura de 100\% não significa código verificado: foi o teste de mutação que revelou asserções ausentes e código inalcançável. Terceiro, cada camada da pirâmide encontra defeitos que as demais não alcançam, e os dois incidentes de produção só seriam detectáveis pela camada de ponta a ponta, construída por último.
+
+\subsection{Próximos passos}
+
+\begin{itemize}
+    \item Formalizar contratos dirigidos pelo consumidor, com três participantes distintos: aplicação web, aplicativo Android e aplicativo iOS;
+    \item Validar a integração Open Finance contra a conta \textit{sandbox} da Pluggy, cobrindo a lacuna remanescente de contrato com o provedor;
+    \item Automatizar a execução da suíte de ponta a ponta na integração contínua, com particionamento caso o tempo total ultrapasse o orçamento estabelecido;
+    \item Incorporar observabilidade em produção para captura de erros em ambiente real;
+    \item Concluir a migração dos ativos de hospedagem para contas sob gestão da equipe atual.
+\end{itemize}
+
+O código-fonte encontra-se publicamente disponível em \url{https://github.com/bernardoguerraa/mycash} e o produto em produção pode ser acessado em \url{https://mycash-nu.vercel.app}.
+
+% ---------------------------------------------------
+% REFERÊNCIAS
+% ---------------------------------------------------
+\newpage
+\renewcommand{\refname}{\centering REFERÊNCIAS}
+\begin{thebibliography}{9}
+
+\bibitem{abnt6023}
+ASSOCIAÇÃO BRASILEIRA DE NORMAS TÉCNICAS. \textbf{NBR 6023}: informação e documentação: referências: elaboração. Rio de Janeiro: ABNT, 2018.
+
+\bibitem{abnt10719}
+ASSOCIAÇÃO BRASILEIRA DE NORMAS TÉCNICAS. \textbf{NBR 10719}: informação e documentação: relatório técnico e/ou científico: apresentação. Rio de Janeiro: ABNT, 2015.
+
+\bibitem{beck2002}
+BECK, K. \textbf{Test Driven Development: By Example}. Boston: Addison-Wesley, 2002.
+
+\bibitem{fowler2013}
+FOWLER, M. \textbf{Immutable Server}. Bliki, 2013. Disponível em: \url{https://martinfowler.com/bliki/ImmutableServer.html}. Acesso em: outubro 2026.
+
+\bibitem{fowler2012}
+FOWLER, M. \textbf{Snowflake Server}. Bliki, 2012. Disponível em: \url{https://martinfowler.com/bliki/SnowflakeServer.html}. Acesso em: outubro 2026.
+
+\bibitem{khorikov2020}
+KHORIKOV, V. \textbf{Unit Testing: Principles, Practices, and Patterns}. Shelter Island: Manning, 2020.
+
+\bibitem{meszaros2007}
+MESZAROS, G. \textbf{xUnit Test Patterns: Refactoring Test Code}. Boston: Addison-Wesley, 2007.
+
+\bibitem{morris2020}
+MORRIS, K. \textbf{Infrastructure as Code}: Dynamic Systems for the Cloud Age. 2. ed. Sebastopol: O'Reilly Media, 2020.
+
+\bibitem{playwright}
+MICROSOFT. \textbf{Playwright Documentation}. Disponível em: \url{https://playwright.dev/docs/intro}. Acesso em: outubro 2026.
+
+\bibitem{stryker}
+STRYKER MUTATOR. \textbf{Mutation Testing Documentation}. Disponível em: \url{https://stryker-mutator.io/docs/}. Acesso em: outubro 2026.
+
+\bibitem{testcontainers}
+TESTCONTAINERS. \textbf{Testcontainers for Node.js}. Disponível em: \url{https://node.testcontainers.org/}. Acesso em: outubro 2026.
+
+\bibitem{wiggins2011}
+WIGGINS, A. \textbf{The Twelve-Factor App}. 2011. Disponível em: \url{https://12factor.net/}. Acesso em: outubro 2026.
+
+\bibitem{winters2020}
+WINTERS, T.; MANSHRECK, T.; WRIGHT, H. \textbf{Software Engineering at Google}: Lessons Learned from Programming Over Time. Sebastopol: O'Reilly Media, 2020.
+
+\end{thebibliography}
+
+\end{document}
