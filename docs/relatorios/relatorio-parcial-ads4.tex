@@ -30,7 +30,9 @@
 
 % Permite quebra de URLs e paths em barras, hífens e underscores
 \Urlmuskip=0mu plus 1mu
-\def\UrlBreaks{\do\/\do\-\do\_\do\.\do\?\do\=\do\&\do\#\do\%}
+% Quebra de URL apenas em barra, hifen e interrogacao: sem o ponto na
+% lista, o nome do dominio deixa de ser partido ao meio.
+\def\UrlBreaks{\do\/\do\-\do\?\do\=\do\&}
 
 % Configuração para blocos de código
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
@@ -618,6 +620,47 @@ A exigência de recarregamento não é arbitrária. Em agosto de 2026, o \textit
 \noindent\footnotesize Fonte: Autores (2026).
 \end{figure}
 
+\subsection{Evidências do aplicativo móvel}
+
+As capturas anteriores provêm da aplicação web. O aplicativo móvel consome a
+mesma API REST e compartilha a mesma camada de domínio, de modo que as duas
+interfaces respondem necessariamente os mesmos números para a mesma pergunta.
+As Figuras \ref{fig:mobile-dashboard} e \ref{fig:mobile-transacoes} foram obtidas em emulador Android (Pixel 7, API 35) por
+meio de \texttt{adb screencap}, e não em renderização web: trata-se do
+aplicativo efetivamente executando sobre React Native.
+
+Cada figura apresenta a mesma tela nos dois temas, lado a lado. A alternância
+é feita pelo botão no canto superior direito, que troca de lua para sol
+conforme o tema ativo. Vale notar que não há duplicação de paleta entre as
+plataformas: o tema é definido por um conjunto de valores que a interface
+consulta, e a troca não recarrega dados nem refaz requisição à API.
+
+\begin{figure}[H]
+\centering
+\caption{Aplicativo móvel: painel principal nos temas claro e escuro.}
+\label{fig:mobile-dashboard}
+\includegraphics[width=0.95\textwidth]{figuras/13-mobile-dashboard-temas.png}
+\vspace{0.2cm}
+
+\noindent\footnotesize Fonte: Autores (2026). Capturas obtidas em emulador Android, Pixel 7, API 35.
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\caption{Aplicativo móvel: tela de transações nos temas claro e escuro.}
+\label{fig:mobile-transacoes}
+\includegraphics[width=0.95\textwidth]{figuras/14-mobile-transacoes-temas.png}
+\vspace{0.2cm}
+
+\noindent\footnotesize Fonte: Autores (2026). Capturas obtidas em emulador Android, Pixel 7, API 35.
+\end{figure}
+
+A Figura \ref{fig:mobile-transacoes} evidencia também a paridade funcional com
+a web: filtros por tipo, por categoria e por período, ordenação, busca textual
+e ações de edição e exclusão por lançamento. O filtro de período é aplicado no
+banco de dados, por meio de parâmetros enviados à API; os demais são aplicados
+no aparelho, por serem baratos e mudarem a cada toque.
+
 \subsection{Discussão}
 \label{sec:discussao}
 
@@ -1099,6 +1142,8 @@ integracao & Transferência prévia da imagem \texttt{postgres:17-alpine} e exec
 
 \textbf{Correção registrada.} Os três trabalhos utilizam Node 22. Com Node 20, o trabalho de integração falhava com \texttt{TypeError: webidl.util.markAsUncloneable is not a function}: a biblioteca \texttt{undici}, dependência do Testcontainers, emprega uma API disponível somente a partir da versão 22. O sintoma era enganoso: o Vitest encerrava durante o carregamento da configuração global e reportava "No test files found", como se o problema residisse no padrão de inclusão de arquivos.
 
+\textbf{Histórico de execução.} O fluxo encontra-se ativo desde a sua criação e acumula 172 execuções registradas no GitHub Actions até a data deste relatório, com as mais recentes concluídas com sucesso nos três trabalhos. Não se trata, portanto, de configuração declarada e nunca exercitada: cada envio ao ramo principal dispara a verificação completa.
+
 \textbf{Rotina complementar.} Um segundo fluxo de trabalho, \path{supabase-keepalive.yml}, executa diariamente uma consulta real ao PostgREST, impedindo a suspensão automática do projeto por inatividade, característica do plano gratuito da plataforma.
 
 \subsection{Entrega contínua}
@@ -1124,7 +1169,14 @@ Três aprendizados merecem registro. Primeiro, a extração da camada de domíni
     \item Concluir a migração dos ativos de hospedagem para contas sob gestão da equipe atual.
 \end{itemize}
 
-O código-fonte encontra-se publicamente disponível em \url{https://github.com/bernardoguerraa/mycash} e o produto em produção pode ser acessado em \url{https://mycash-nu.vercel.app}.
+O código-fonte e o produto em produção encontram-se publicamente disponíveis nos endereços a seguir.
+
+\begin{center}
+\begin{tabular}{@{}rl@{}}
+Repositório: & \href{https://github.com/bernardoguerraa/mycash}{\texttt{github.com/bernardoguerraa/mycash}} \\
+Aplicação: & \href{https://mycash-nu.vercel.app}{\texttt{mycash-nu.vercel.app}} \\
+\end{tabular}
+\end{center}
 
 % ---------------------------------------------------
 % REFERÊNCIAS
